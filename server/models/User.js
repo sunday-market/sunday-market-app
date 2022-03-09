@@ -4,67 +4,63 @@ const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 
 const UserSchema = new mongoose.Schema({
-    username: {
-        type: String,
-        required: [true, "Please provide a username"],
-        unique: true,
-    },
-    password: {
-        type: String,
-        required: [true, "Please provide a password"],
-        minlength: 8,
-        select: false,
-    },
-    email: {
-        type: String,
-        required: [true, "Please provide a email"],
-        unique: true,
-        match: [
-            /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[0-9]{1,3}\.[0-9]{1,3}\.[0-9{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)[a-zA-Z]{2,}))$/,
-            "Please provide a valid email",
-        ],
-    },
-    fullname: {
-        type: String,
-        required: [true, "Please provide a name"],
-    },
-    address_line1: {
-        type: String,
-    },
-    address_line2: {
-        type: String,
-    },
-    address_line3: {
-        type: String,
-    },
-    phone: {
-        type: String,
-        minlength: 6,
-        maxlength: 14,
-        // match: [
-        //     // /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
-        //     "Please enter a valid phone/mobile number"
-        // ],
-    },
-    verification_code: {
-        type: String,
-    },
-    verified: {
-        type: Boolean,
-        default: false,
-        required: true,
-    },
-    account_ban: {
-        type: Boolean,
-        required: true,
-        default: false,
-    },
-    reset_token: {
-        type: String,
-    },
-    reset_expriry: {
-        type: Date,
-    },
+  username: {
+    type: String,
+    required: [true, "Please provide a username"],
+    unique: true,
+  },
+  password: {
+    type: String,
+    required: [true, "Please provide a password"],
+    minlength: 8,
+    select: false,
+  },
+  email: {
+    type: String,
+    required: [true, "Please provide a email"],
+    unique: true,
+    match: [
+      /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[0-9]{1,3}\.[0-9]{1,3}\.[0-9{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)[a-zA-Z]{2,}))$/,
+      "Please provide a valid email",
+    ],
+  },
+  fullname: {
+    type: String,
+    required: [true, "Please provide a name"],
+  },
+  address_line1: {
+    type: String,
+  },
+  address_line2: {
+    type: String,
+  },
+  address_line3: {
+    type: String,
+  },
+  phone: {
+    type: String,
+    minlength: 6,
+    maxlength: 14,
+  },
+  verification_code: {
+    type: String,
+  },
+  verified: {
+    type: Boolean,
+    default: false,
+    required: true,
+  },
+  account_ban: {
+    type: Boolean,
+    required: true,
+    default: false,
+  },
+  reset_token: {
+    type: String,
+  },
+  reset_expriry: {
+    type: Date,
+  },
 });
 
 UserSchema.set("timestamps", true); // Add createdAt and updatedAt timestamps
@@ -109,4 +105,4 @@ UserSchema.methods.getVerified = function () {
 
 const User = mongoose.model("User", UserSchema);
 
-module.exports = User;
+module.exports = [UserSchema, User];
