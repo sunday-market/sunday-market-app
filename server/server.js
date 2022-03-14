@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 const express = require("express");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
+const path = require("path");
 
 // This is a test
 dotenv.config();
@@ -12,6 +13,9 @@ connectDB();
 // create app and server
 const app = express();
 app.use(express.json());
+
+// public image location directory
+app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 const port = process.env.PORT || 5000;
 

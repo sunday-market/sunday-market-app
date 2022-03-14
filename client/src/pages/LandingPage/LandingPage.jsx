@@ -44,8 +44,10 @@ export default function LandingPage() {
     }
   }, []);
 
+  const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   return (
     <>
+      <Box component="img" src={PF + "logo192.png"} sx={{ width: 100 }} />
       <Box
         sx={{
           flexGrow: 1,
