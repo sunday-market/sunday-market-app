@@ -1,57 +1,88 @@
-import React from "react";
-import { Box, Grid } from "@mui/material";
-import SwipeableViews from "react-swipeable-views";
-import { useTheme } from "@mui/material/styles";
+import { Box, Typography } from "@mui/material";
 import "./landingPage.css";
+import Carousel from "../../components/Carousel";
+import ItemCard from "../../components/ItemCard";
+import Grid from "@mui/material/Grid";
 
 const CardArray = [
   {
-    textId: "1",
-    text: "Card 1",
+    textId: "Card 1",
+    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
   },
   {
-    textId: "2",
-    text: "Card 2",
+    textId: "Card 2",
+    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
   },
   {
-    textId: "3",
-    text: "Card 3",
+    textId: "Card 3",
+    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
   },
   {
-    textId: "4",
-    text: "Card 4",
+    textId: "Card 4",
+    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
   },
   {
-    textId: "5",
-    text: "Card 5",
+    textId: "Card 5",
+    text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
   },
 ];
 
-const LandingPage = () => {
-  const theme = useTheme();
+export default function LandingPage() {
   return (
-    <Box
-      sx={{
-        padding: "1% 2%",
-        maxwidth: "100%",
-        bgcolor: "#f5f5f5",
-      }}
-    >
-      <div>Landing Page</div>
-      <Grid>
-        <Box sx={{ bgcolor: "blue", width: 800, height: 800 }}>
-          <SwipeableViews
-            axis={theme.direction === "rtl" ? "x-reverse" : "x"}
-            enableMouseEvents
+    <>
+      <Box
+        sx={{
+          flexGrow: 1,
+          margin: 0,
+          padding: "1% 2%",
+          maxwidth: "100%",
+          maxHeight: "100%",
+          bgcolor: "#f5f5f5",
+        }}
+      >
+        <Box sx={{ flexGrow: 1 }}>
+          <Grid
+            container
+            spacing={{ xs: 1, md: 1 }}
+            columns={{ xs: 4, sm: 8, md: 12 }}
           >
-            {CardArray.map((c) => (
-              <div key={c.textId}>{c.text}</div>
+            <Grid item sx={{ bgcolor: "grey", width: "100%", margin: "auto" }}>
+              <Carousel Cards={CardArray} />
+            </Grid>
+            <Typography
+              sx={{
+                width: "100%",
+                margin: "auto",
+                marginBottom: 0,
+                p: 3,
+                pl: 15,
+                pb: 0,
+                textAlign: "left",
+                fontSize: 36,
+                fontWeight: "bold",
+              }}
+            >
+              Recently Added
+            </Typography>
+            {Array.from(Array(4)).map((_, index) => (
+              <Grid
+                item
+                xs={12}
+                md={3}
+                key={index}
+                sx={{
+                  margin: "auto",
+                  textAlign: "center",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
+                <ItemCard />
+              </Grid>
             ))}
-          </SwipeableViews>
+          </Grid>
         </Box>
-      </Grid>
-    </Box>
+      </Box>
+    </>
   );
-};
-
-export default LandingPage;
+}
