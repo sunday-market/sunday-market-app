@@ -30,7 +30,7 @@ const CardArray = [
 export default function LandingPage() {
   return (
     <>
-     <Box
+      <Box
         sx={{
           flexGrow: 1,
           margin: 0,
@@ -40,39 +40,39 @@ export default function LandingPage() {
           bgcolor: "#f5f5f5",
         }}
       >
-          <Carousel  />
-          <Typography
-                sx={{
-                  width: "100%",
-                  margin: "auto",
-                  marginBottom: 0,
-                  p: 3,
-                  pl: 15,
-                  pb: 0,
-                  textAlign: "left",
-                  fontSize: 36,
-                  fontWeight: "bold",
-                }}
-              >
-                Recently Added
-              </Typography>
+        <Carousel Cards={CardArray} />
+        <Typography
+          sx={{
+            width: "100%",
+            margin: "auto",
+            marginBottom: 0,
+            p: 3,
+            pl: 15,
+            pb: 0,
+            textAlign: "left",
+            fontSize: 36,
+            fontWeight: "bold",
+          }}
+        >
+          Recently Added
+        </Typography>
 
-      <Box sx={{ display: "flex", flexWrap:"wrap" }}>
-        {Array.from(Array(4)).map((_, index) => (
-          <Box
-            item
-            key={index}
-            sx={{
-              margin: "auto",
-              textAlign: "center",
-              alignItems: "center",
-              justifyContent: "center",              
-            }}
-          >
-            <ItemCard />
-          </Box>
-        ))}
-      </Box>
+        <Box sx={{ display: "flex", flexWrap: "wrap" }}>
+          {Array.from(Array(4)).map((_, index) => (
+            <Box
+              item
+              key={index}
+              sx={{
+                margin: "auto",
+                textAlign: "center",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <ItemCard />
+            </Box>
+          ))}
+        </Box>
       </Box>
     </>
   );
