@@ -4,7 +4,15 @@ import { Link, useNavigate } from "react-router-dom";
 
 import "./loginPage.css";
 
-import { Typography, Box, Button, TextField, Grid, Alert } from "@mui/material";
+import {
+  Typography,
+  Box,
+  Button,
+  TextField,
+  Grid,
+  Alert,
+  Paper,
+} from "@mui/material";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
@@ -19,8 +27,9 @@ const LoginPage = () => {
     }
   }, [navigate]);
 
-  const loginHandler = async () => {
-    console.log("Called the loginHandler...");
+  const loginHandler = async (e) => {
+    e.preventDefault();
+
     // Set headers for Axios request
     const config = {
       headers: {
@@ -54,66 +63,68 @@ const LoginPage = () => {
   };
 
   return (
-    <Grid
-      container
-      direction="column"
-      justify="center"
-      alignItems="center"
-      bgcolor="#f5f5f5"
-      textAlign="center"
-      padding={5}
-      sx={{ borderRadius: "16px" }}
-    >
-      <Typography variant="h4">Login</Typography>
+    <>
+      <Box p={{ xs: 1, sm: 4, md: 10, lg: 20 }}>
+        <Paper variant="outlined" align="center" sx={{ padding: "1em" }}>
+          <Typography variant="h4">Login</Typography>
 
-      <Typography variant="body1" sx={{ mb: 4 }}>
-        New to Sunday Markets?{" "}
-        <Link to="/register">Sign up for the first time</Link>
-      </Typography>
+          <Typography variant="body1" sx={{ mb: 3 }}>
+            New to Sunday Markets? <Link to="/register">Sign up</Link>
+          </Typography>
 
-      <Grid container direction={"column"} spacing={2}>
-        <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
+          <form onSubmit={loginHandler}>
+            <Grid container direction="column" spacing={2} padding={2}>
+              {/* Error Alert Message */}
+              <Grid item>
+                {error && <Alert severity="error">{error}</Alert>}
+              </Grid>
 
-        <Grid item>
-          <TextField
-            variant="outlined"
-            label="Email"
-            size="small"
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="name@example.com"
-            sx={{ width: "30ch" }}/>
-        </Grid>
-        <Grid item>
-          <TextField
-            variant="outlined"
-            label="Password"
-            size="small"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder="********"
-            sx={{ width: "30ch" }}/>
+              {/* Email */}
+              <Grid item>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  label="Email"
+                  size="small"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="Email"
+                  sx={{ background: "white" }}
+                />
+              </Grid>
 
-        </Grid>
-      </Grid>
+              {/* Password */}
+              <Grid item>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  label="Password"
+                  size="small"
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="********"
+                  sx={{ background: "white" }}
+                />
+              </Grid>
 
-      <Typography variant="body2">
-        <Link to="/forgotpassword">Forgot password?</Link>
-      </Typography>
+              <Grid item>
+                <Button type="submit" size="large" variant="contained">
+                  Login
+                </Button>
+              </Grid>
 
-      <Box textAlign="center" padding={5}>
-        <Button
-          size="large"
-          onClick={loginHandler}
-          variant="contained"
-          textAlign="center"
-        >
-          Login
-        </Button>
+              <Grid item>
+                <Typography variant="body2">
+                  <Link to="/forgotpassword">Forgot password?</Link>
+                </Typography>
+              </Grid>
+            </Grid>
+          </form>
+        </Paper>
       </Box>
-    </Grid>
+    </>
   );
 };
 

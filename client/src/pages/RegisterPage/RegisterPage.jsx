@@ -29,13 +29,6 @@ const RegisterPage = () => {
     }
   }, [navigate]);
 
-  useEffect(() => {
-    if(!fullName && !username && !email && !password) {
-
-    }
-  }, [fullName, username, email, password])
-
-
   const registerHandler = async (e) => {
     e.preventDefault();
 
@@ -70,10 +63,10 @@ const RegisterPage = () => {
       console.log(data.token);
       localStorage.setItem("authToken", data.token);
 
-      navigate("/");
+      navigate("/registerconfirmation");
     } catch (error) {
-      console.log(error.response);
-      setError(error.response);
+
+      setError(error.response.data.error);
 
       setTimeout(() => {
         setError("");
@@ -82,7 +75,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <Box p={{ xs: 1, sm: 4, md: 8 }}>
+    <Box p={{ xs: 1, sm: 4, md: 8, lg: 20 }}>
       <Paper variant="outlined" align="center" sx={{ padding: "1em" }}>
         <Typography variant="h4">
           Create a Free Sunday Market Account
