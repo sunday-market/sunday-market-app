@@ -62,7 +62,7 @@ export default function Carousel({ Cards }) {
           enableMouseEvents
         >
           {Cards.map((step, index) => (
-            <div key={step.label}>
+            <div key={step.label ? step.label : index}>
               {Math.abs(activeStep - index) <= 2 ? (
                 <Box
                   sx={{
@@ -75,7 +75,7 @@ export default function Carousel({ Cards }) {
                     pt: 2,
                   }}
                 >
-                  {/* this is wher  */}
+                  {/* this is where the filling goes will need to change text after  */}
                   {step.text}
                 </Box>
               ) : null}
