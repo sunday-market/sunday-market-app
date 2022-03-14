@@ -11,7 +11,7 @@ import {
   Alert,
 } from "@mui/material";
 
-import registerImage from "./register.svg";
+import registerImage from "../../assets/register.svg";
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState("");
