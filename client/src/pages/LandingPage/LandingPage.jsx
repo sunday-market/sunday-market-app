@@ -30,7 +30,7 @@ const CardArray = [
 export default function LandingPage() {
   return (
     <>
-      <Box
+     <Box
         sx={{
           flexGrow: 1,
           margin: 0,
@@ -40,48 +40,39 @@ export default function LandingPage() {
           bgcolor: "#f5f5f5",
         }}
       >
-        <Box sx={{ flexGrow: 1 }}>
-          <Grid
-            container
-            spacing={{ xs: 1, md: 1 }}
-            columns={{ xs: 4, sm: 8, md: 12 }}
-          >
-            <Grid item sx={{ bgcolor: "grey", width: "100%", margin: "auto" }}>
-              <Carousel Cards={CardArray} />
-            </Grid>
-            <Typography
-              sx={{
-                width: "100%",
-                margin: "auto",
-                marginBottom: 0,
-                p: 3,
-                pl: 15,
-                pb: 0,
-                textAlign: "left",
-                fontSize: 36,
-                fontWeight: "bold",
-              }}
-            >
-              Recently Added
-            </Typography>
-            {Array.from(Array(4)).map((_, index) => (
-              <Grid
-                item
-                xs={12}
-                md={3}
-                key={index}
+          <Carousel  />
+          <Typography
                 sx={{
+                  width: "100%",
                   margin: "auto",
-                  textAlign: "center",
-                  alignItems: "center",
-                  justifyContent: "center",
+                  marginBottom: 0,
+                  p: 3,
+                  pl: 15,
+                  pb: 0,
+                  textAlign: "left",
+                  fontSize: 36,
+                  fontWeight: "bold",
                 }}
               >
-                <ItemCard />
-              </Grid>
-            ))}
-          </Grid>
-        </Box>
+                Recently Added
+              </Typography>
+
+      <Box sx={{ display: "flex", flexWrap:"wrap" }}>
+        {Array.from(Array(4)).map((_, index) => (
+          <Box
+            item
+            key={index}
+            sx={{
+              margin: "auto",
+              textAlign: "center",
+              alignItems: "center",
+              justifyContent: "center",              
+            }}
+          >
+            <ItemCard />
+          </Box>
+        ))}
+      </Box>
       </Box>
     </>
   );
