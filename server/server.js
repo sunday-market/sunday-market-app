@@ -1,8 +1,7 @@
 const dotenv = require("dotenv");
-
 const express = require("express");
-const http = require("http");
 const connectDB = require("./config/db");
+const errorHandler = require("./middleware/error");
 
 // This is a test
 dotenv.config();
@@ -14,13 +13,14 @@ connectDB();
 const app = express();
 app.use(express.json());
 
-const server = http.createServer(app);
 const port = process.env.PORT || 5000;
 
 app.use("/api/auth", require("./routes/auth"));
 
+app.use(errorHandler);
+
 // Start Listening to Server
-server.listen(port, () => {
+const server = app.listen(port, () => {
   console.log(`Server listening on port ${port}`);
 });
 
@@ -29,4 +29,3 @@ process.on("unhandledRejection", (err, promise) => {
   console.log(`Server Error ${err}`);
   server.close(() => process.exit(1));
 });
-

@@ -15,6 +15,10 @@ const MessageSchema = new mongoose.Schema(
       required: true,
       default: false,
     },
+    send_user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+    },
   },
   { timestamps: true }
 );
