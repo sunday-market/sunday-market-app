@@ -36,7 +36,6 @@ import { useUser } from "../hooks/useUser";
 export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const userData = useUser();
-
   // Acounts dropdown
   const [anchorAcc, setAnchorAcc] = useState(null);
   const openAcc = Boolean(anchorAcc);
