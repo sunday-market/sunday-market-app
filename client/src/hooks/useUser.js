@@ -3,7 +3,7 @@ import jwt from "jwt-decode";
 import axios from "axios";
 
 export const useUser = () => {
-  const [user, setUser] = useState(null);
+  const [user, setUser] = useState("undefined");
 
   useEffect(() => {
     if (localStorage.getItem("authToken")) {
@@ -24,6 +24,7 @@ export const useUser = () => {
           setUser(currentUser.data.data);
         } catch (error) {
           console.log(error);
+
           setTimeout(() => {}, 5000);
         }
       };
