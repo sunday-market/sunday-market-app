@@ -104,7 +104,7 @@ export default function Navbar() {
             item
             justifyContent={"center"}
             alignContent={"center"}
-            sx={{ margin: "auto" }}
+            sx={{ margin: "auto", marginRight: "1%" }}
           >
             <IconButton sx={{ pl: 3 }}>
               <FilterAltRoundedIcon
@@ -126,7 +126,7 @@ export default function Navbar() {
             item
             justifyContent={"center"}
             alignContent={"center"}
-            sx={{ margin: "auto" }}
+            sx={{ margin: "auto", marginLeft: "1%", marginRight: "3%" }}
           >
             <IconButton sx={{ pl: 3 }}>
               <AccountCircleRoundedIcon
@@ -153,9 +153,10 @@ export default function Navbar() {
               margin: 0,
               bgcolor: "#0288d1",
               borderRadius: 2,
+              maxHeight: 60,
             }}
           >
-            <IconButton sx={{ pl: 3, pr: 3, pt: 2, pb: 2 }}>
+            <IconButton sx={{ margin: 1 }}>
               <Typography
                 sx={{
                   fontSize: "16px",
