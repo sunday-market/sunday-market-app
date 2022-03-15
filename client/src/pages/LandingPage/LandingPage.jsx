@@ -3,7 +3,7 @@ import "./landingPage.css";
 import Carousel from "../../components/Carousel";
 import ItemCard from "../../components/ItemCard";
 import CategoryAvatars from "../../components/CategoryAvatars";
-import { useIsMobleScreen } from "../../hooks/useIsMobleScreen";
+import { useIsMobileScreen } from "../../hooks/useIsMobileScreen";
 
 export default function LandingPage() {
   const CardArray = [
@@ -29,7 +29,7 @@ export default function LandingPage() {
     },
   ];
   // this will adjust the screen size accordinly
-  const windowSize = useIsMobleScreen();
+  const windowSize = useIsMobileScreen();
 
   return (
     <>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 
-export const useIsMobleScreen = () => {
+export const useIsMobileScreen = () => {
   // this will adjust the screen size accordinly
   const [isNotMobile, setIsNotMobile] = useState(true);
 
