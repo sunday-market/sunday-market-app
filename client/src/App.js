@@ -1,14 +1,16 @@
 import PrivateRoute from "./Routing/PrivateRoute";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
-import RegisterConfirmationPage from "./pages/RegisterConfirmationPage/RegisterConfirmationPage"
+import RegisterConfirmationPage from "./pages/RegisterConfirmationPage/RegisterConfirmationPage";
 import LoginPage from "./pages/LoginPage/LoginPage";
-import AccountsPage from "./pages/AccountsPage/AccountsPage"
+import AccountsPage from "./pages/AccountsPage/AccountsPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
     <Router>
+      <Navbar />
       <Routes>
         <Route path="/" element={<LandingPage />} />
 
@@ -18,7 +20,10 @@ function App() {
 
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
-        <Route path="/registerconfirmation" element={<RegisterConfirmationPage />} />
+        <Route
+          path="/registerconfirmation"
+          element={<RegisterConfirmationPage />}
+        />
       </Routes>
     </Router>
   );

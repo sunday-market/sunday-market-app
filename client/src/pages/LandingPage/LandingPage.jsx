@@ -46,11 +46,10 @@ export default function LandingPage() {
         {windowSize && <Carousel Cards={CardArray} />}
         <Typography
           sx={{
-            width: "100%",
             margin: "auto",
             marginBottom: 0,
-            p: 3,
-            pl: 15,
+            pt: 3,
+            pl: "9%",
             pb: 0,
             textAlign: "left",
             fontSize: 36,
