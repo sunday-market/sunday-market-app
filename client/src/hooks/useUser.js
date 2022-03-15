@@ -3,7 +3,7 @@ import jwt from "jwt-decode";
 import axios from "axios";
 
 export const useUser = () => {
-  const [user, setUser] = useState("undefined");
+  const [user, setUser] = useState(null);
 
   useEffect(() => {
     if (localStorage.getItem("authToken")) {

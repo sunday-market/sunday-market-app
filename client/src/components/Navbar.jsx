@@ -24,7 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import { NavLink } from "react-router-dom";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useUser } from "../hooks/useUser";
 
 // IMPORTANT
@@ -36,6 +36,16 @@ import { useUser } from "../hooks/useUser";
 export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const userData = useUser();
+  
+  const [userToken, setUserToken] = useState(null);
+
+  useEffect(() => {
+    function handleLoggedInStatus() {
+      setUserToken(localStorage.getItem("authToken"));
+    }
+    handleLoggedInStatus();
+  });
+
   // Acounts dropdown
   const [anchorAcc, setAnchorAcc] = useState(null);
   const openAcc = Boolean(anchorAcc);
@@ -47,8 +57,9 @@ export default function Navbar() {
   };
 
   // handle logout
-  const handleLogout = () => {
+  const HandleLogout = () => {
     localStorage.removeItem("authToken");
+    setUserToken(null);
   };
 
   // this will adjust the screen size accordinly
@@ -244,7 +255,7 @@ export default function Navbar() {
         }}
       />
       {/* Account menu */}
-      {userData ? (
+      {userToken ? (
         <Menu
           anchorEl={anchorAcc}
           id="account-menu"
@@ -308,7 +319,7 @@ export default function Navbar() {
             My Products
           </MenuItem>
           <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
-          <MenuItem sx={{ color: "white" }} onClick={handleLogout}>
+          <MenuItem sx={{ color: "white" }} onClick={HandleLogout}>
             <LogoutRoundedIcon sx={{ pr: 1.5 }} />
             Logout
           </MenuItem>
@@ -352,13 +363,17 @@ export default function Navbar() {
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           <MenuItem sx={{ color: "white" }}>
-            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
-            Sign Up
+            <NavLink to="/register">
+              <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
+              Sign Up
+            </NavLink>
           </MenuItem>
           <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
           <MenuItem sx={{ color: "white" }}>
-            <LoginRoundedIcon sx={{ pr: 1.5 }} />
-            Login
+            <NavLink to="/login">
+              <LoginRoundedIcon sx={{ pr: 1.5 }} />
+              Login
+            </NavLink>
           </MenuItem>
         </Menu>
       )}
