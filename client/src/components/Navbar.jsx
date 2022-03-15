@@ -36,7 +36,7 @@ import { useUser } from "../hooks/useUser";
 export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const userData = useUser();
-  
+
   const [userToken, setUserToken] = useState(null);
 
   useEffect(() => {
@@ -294,8 +294,10 @@ export default function Navbar() {
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
           <MenuItem sx={{ color: "white" }}>
-            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
-            My Account
+            <NavLink to="/account" sx={{ color: "white" }}>
+              <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
+              My Account
+            </NavLink>
           </MenuItem>
           <MenuItem sx={{ color: "white" }}>
             <MailIcon sx={{ pr: 1.5 }} />
