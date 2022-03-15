@@ -47,6 +47,10 @@ const LoginPage = () => {
         },
         config
       );
+      
+      // TODO: Check if user is verified and THEN issue the token
+      // If the user is not verified, display verification message. 
+      // Resend Verification Code
 
       localStorage.setItem("authToken", data.token);
 

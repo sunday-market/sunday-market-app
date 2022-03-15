@@ -9,7 +9,7 @@ import {
   TextField,
   Button,
   Alert,
-  InputLabel
+  InputLabel,
 } from "@mui/material";
 
 import registerImage from "../../assets/register.svg";
@@ -61,12 +61,15 @@ const RegisterPage = () => {
         config
       );
 
-      console.log(data.token);
-      localStorage.setItem("authToken", data.token);
+      // --------------------------------------------
+      // Removed token to ensure that only a logged in user
+      // can access the site pages.  Registered users
+      // will not get a token until they login.
+      // ---------------------------------------------
+      // localStorage.setItem("authToken", data.token);
 
-      navigate("/registerconfirmation");
+      navigate("/accountverify");
     } catch (error) {
-
       setError(error.response.data.error);
 
       setTimeout(() => {
@@ -127,7 +130,7 @@ const RegisterPage = () => {
 
                 {/* Email */}
                 <Grid item align={"left"}>
-                <InputLabel required>Email Address</InputLabel>
+                  <InputLabel required>Email Address</InputLabel>
                   <TextField
                     variant="outlined"
                     fullWidth
@@ -192,7 +195,7 @@ const RegisterPage = () => {
             xs={0}
             sm={0}
             md={6}
-            display={{ xs: "none", md: "block"  }}
+            display={{ xs: "none", md: "block" }}
             alignItems="center"
           >
             <img height="150px" src={registerImage} alt="Login" />

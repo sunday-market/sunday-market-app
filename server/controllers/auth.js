@@ -134,6 +134,36 @@ exports.forgotPassword = async (req, res, next) => {
   }
 };
 
+exports.changePassword = async (req, res, next) => {
+  const { userId, existingPassword, newPassword } = req.body;
+
+  try {
+    const user = await User.findOne({ _id: userId }).select("+password");
+
+    if (!user) {
+      return next(new ErrorResponse("User Not found", 404));
+    }
+
+    // Check existing password matches current password
+    const isMatch = await user.matchPasswords(existingPassword);
+
+    if (!isMatch) {
+      return next(new ErrorResponse("Password is incorrect", 401));
+    }
+
+    // Update password with new password (Encryption occurs in user model presave)
+    user.password = newPassword;
+    await user.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Password Successfully Changed",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.resetPassword = async (req, res, next) => {
   const resetPasswordToken = crypto
     .createHash("sha256")
@@ -208,9 +238,8 @@ exports.updateUserCredentials = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      message: `User ${ userId } Credentials Updated`
-    })
-
+      message: `User ${userId} Credentials Updated`,
+    });
   } catch (error) {
     next(error);
   }

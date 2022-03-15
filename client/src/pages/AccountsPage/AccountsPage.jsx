@@ -14,6 +14,7 @@ import {
   Alert,
   Paper,
   InputLabel,
+  Modal,
 } from "@mui/material";
 
 const AccountsPage = () => {
@@ -43,7 +44,26 @@ const AccountsPage = () => {
 
   const [changePasswordError, setChangePasswordError] = useState("");
 
+  const [success, setSuccess] = useState("");
+  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState("");
   const [error, setError] = useState("");
+
+  // Delete Account Modal State
+  const [openDeleteModal, setOpenDeleteModal] = useState(false);
+  const handleOpenDeleteModal = () => setOpenDeleteModal(true);
+  const handleCloseDeleteModal = () => setOpenDeleteModal(false);
+
+  const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+  };
 
   const navigate = useNavigate();
 
@@ -132,7 +152,6 @@ const AccountsPage = () => {
 
     try {
       const decodedJWT = await jwt(localStorage.getItem("authToken"));
-      //TODO: Find out why the email is not updating!!
 
       //Update User account in database
       await axios.put(
@@ -148,7 +167,11 @@ const AccountsPage = () => {
         config
       );
 
-      //TODO:  Add Success Alert
+      // Success Alert
+      setSuccess("Account details successfully updated");
+      setTimeout(() => {
+        setSuccess("");
+      }, 5000);
     } catch (error) {
       setAccountDetailsError(error.response.data.error);
       setTimeout(() => {
@@ -160,15 +183,23 @@ const AccountsPage = () => {
   };
 
   const changePasswordHandler = async () => {
-    // Check password input is valid
-    if (!email) {
+    if (!currentPassword) {
       setTimeout(() => {
         setChangePasswordError("");
       }, 5000);
-      return setChangePasswordError("Email address must be provided");
+      return setChangePasswordError(
+        "Please enter your current (existing) password"
+      );
     }
 
-    // Check passwords match
+    if (!newPassword) {
+      setTimeout(() => {
+        setChangePasswordError("");
+      }, 5000);
+      return setChangePasswordError("Please enter your new password");
+    }
+
+    // Check new passwords match
     if (newPassword !== confirmPassword) {
       setNewPassword("");
       setConfirmPassword("");
@@ -179,27 +210,61 @@ const AccountsPage = () => {
     }
 
     try {
-      // TODO: Check existing pasword is correct
-      // TODO: Update Password Credentials in Database
+      const decodedJWT = await jwt(localStorage.getItem("authToken"));
+
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      // Update Password Credentials in Database
+      const changePassword = await axios.put(
+        "/api/auth/changepassword",
+        {
+          userId: decodedJWT.id,
+          existingPassword: currentPassword,
+          newPassword,
+        },
+        config
+      );
+
+      // Display Success Message
+      setPasswordChangeSuccess(
+        "Password Changed.  You will be redirected to login shortly"
+      );
+
+      // Redirect user to login after 3 seconds
+      setTimeout(() => {
+        setPasswordChangeSuccess("");
+        localStorage.removeItem("authToken");
+        navigate("/login");
+      }, 3000);
     } catch (error) {
       setChangePasswordError(error.response.data.error);
       setTimeout(() => {
         setChangePasswordError("");
       }, 5000);
     }
-
-    // Remove auth Token
-    localStorage.removeItem("authToken");
-
-    // Redirect to login screen
-    navigate("/login");
   };
 
-  const deleteAccountHandler = () => {
-    alert("Delete account?");
-    //TODO: Create Delete Account Modal
+  const deleteAccountHandler = async () => {
+    // Delete account in database if user selects yes
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
 
-    //TODO: Delete account in database if user selects yes
+    const decodedJWT = await jwt(localStorage.getItem("authToken"));
+    await axios.delete(`/api/user/${decodedJWT.id}`, config);
+
+    // Remove auth token
+    localStorage.removeItem("authToken");
+
+    // redirect to account deleted page
+    navigate("/accountdeleted");
   };
 
   return (
@@ -256,7 +321,7 @@ const AccountsPage = () => {
             <Grid item>
               <InputLabel required>Email Address</InputLabel>
               <TextField
-                disabled={!accountDetailsEdit}
+                disabled
                 variant="outlined"
                 fullWidth
                 size="small"
@@ -327,6 +392,12 @@ const AccountsPage = () => {
                 sx={{ background: "white" }}
               />
             </Grid>
+
+            {/* Update Successful Message  */}
+            <Grid item>
+              {success && <Alert severity="success">{success}</Alert>}
+            </Grid>
+
             {/* Login Details Errors  */}
             <Grid item>
               {accountDetailsError && (
@@ -422,6 +493,13 @@ const AccountsPage = () => {
                 />
               </Grid>
 
+              {/* Update Successful Message  */}
+              <Grid item>
+                {passwordChangeSuccess && (
+                  <Alert severity="success">{passwordChangeSuccess}</Alert>
+                )}
+              </Grid>
+
               {/* Change Password Errors  */}
               <Grid item>
                 {changePasswordError && (
@@ -458,7 +536,7 @@ const AccountsPage = () => {
                 variant="outlined"
                 startIcon={<Delete />}
                 color="error"
-                onClick={deleteAccountHandler}
+                onClick={handleOpenDeleteModal}
               >
                 Delete Account
               </Button>
@@ -467,6 +545,41 @@ const AccountsPage = () => {
               </Typography>
             </Grid>
           </Grid>
+
+          <Modal
+            open={openDeleteModal}
+            onClose={handleCloseDeleteModal}
+            aria-labelledby="modal-modal-title"
+            aria-describedby="modal-modal-description"
+          >
+            <Box sx={modalStyle}>
+              <Typography id="modal-modal-title" variant="h6" component="h2">
+                Delete Account?
+              </Typography>
+              <Typography id="modal-modal-description" sx={{ mt: 2, mb: 2 }}>
+                Are you sure you want to delete your account? If you delete your
+                account you will no longer have access to your products and
+                services.
+                <b>Deleting accounts cannot be undone.</b>
+              </Typography>
+              <Button
+                size="large"
+                variant="contained"
+                sx={{ mr: 1 }}
+                onClick={handleCloseDeleteModal}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="large"
+                variant="outlined"
+                color="error"
+                onClick={deleteAccountHandler}
+              >
+                Confirm Delete
+              </Button>
+            </Box>
+          </Modal>
         </Paper>
       </Box>
     </>

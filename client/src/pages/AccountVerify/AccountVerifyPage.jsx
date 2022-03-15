@@ -5,7 +5,8 @@ import {useNavigate} from "react-router-dom"
 
 import successImage from "../../assets/success.svg"
 
-const RegisterConfirmationPage = () => {
+
+const AccountVerifyPage = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -45,4 +46,4 @@ const RegisterConfirmationPage = () => {
   )
 }
 
-export default RegisterConfirmationPage
+export default AccountVerifyPage
