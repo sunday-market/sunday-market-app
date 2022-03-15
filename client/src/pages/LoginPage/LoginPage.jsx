@@ -12,6 +12,7 @@ import {
   Grid,
   Alert,
   Paper,
+  InputLabel
 } from "@mui/material";
 
 const LoginPage = () => {
@@ -49,13 +50,12 @@ const LoginPage = () => {
         config
       );
 
-      console.log(data);
       localStorage.setItem("authToken", data.token);
 
       navigate("/");
     } catch (error) {
       setError(error.response.data.error);
-      console.log(`ERROR: ${error.response.data}`);
+
       setTimeout(() => {
         setError("");
       }, 5000);
@@ -64,7 +64,7 @@ const LoginPage = () => {
 
   return (
     <>
-      <Box p={{ xs: 1, sm: 4, md: 10, lg: 20 }}>
+      <Box px={{ xs: 1, sm: 4, md: 8, lg: 20 }} py={4}>
         <Paper variant="outlined" align="center" sx={{ padding: "1em" }}>
           <Typography variant="h4">Login</Typography>
 
@@ -80,26 +80,26 @@ const LoginPage = () => {
               </Grid>
 
               {/* Email */}
-              <Grid item>
+              <Grid item align={"left"}>
+                <InputLabel required>Email</InputLabel>
                 <TextField
                   variant="outlined"
                   fullWidth
-                  label="Email"
                   size="small"
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  placeholder="Email"
+                  placeholder="your.name@domain.com"
                   sx={{ background: "white" }}
                 />
               </Grid>
 
               {/* Password */}
-              <Grid item>
+              <Grid item align={"left"}>
+                <InputLabel required>Password</InputLabel>
                 <TextField
                   variant="outlined"
                   fullWidth
-                  label="Password"
                   size="small"
                   type="password"
                   value={password}

@@ -3,6 +3,7 @@ import LandingPage from "./pages/LandingPage/LandingPage";
 import RegisterPage from "./pages/RegisterPage/RegisterPage";
 import RegisterConfirmationPage from "./pages/RegisterConfirmationPage/RegisterConfirmationPage"
 import LoginPage from "./pages/LoginPage/LoginPage";
+import AccountsPage from "./pages/AccountsPage/AccountsPage"
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 function App() {
@@ -12,7 +13,7 @@ function App() {
         <Route path="/" element={<LandingPage />} />
 
         <Route element={<PrivateRoute />}>
-          {/* <Route path="/" element={<LandingPage />} /> */}
+          <Route path="/account" element={<AccountsPage />} />
         </Route>
 
         <Route path="/login" element={<LoginPage />} />

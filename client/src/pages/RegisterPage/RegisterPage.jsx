@@ -9,6 +9,7 @@ import {
   TextField,
   Button,
   Alert,
+  InputLabel
 } from "@mui/material";
 
 import registerImage from "../../assets/register.svg";
@@ -75,7 +76,7 @@ const RegisterPage = () => {
   };
 
   return (
-    <Box p={{ xs: 1, sm: 4, md: 8, lg: 20 }}>
+    <Box px={{ xs: 1, sm: 4, md: 8, lg: 20 }} py={4}>
       <Paper variant="outlined" align="center" sx={{ padding: "1em" }}>
         <Typography variant="h4">
           Create a Free Sunday Market Account
@@ -86,7 +87,7 @@ const RegisterPage = () => {
 
         <Grid container direction="row" alignItems="center">
           {/* Register Form */}
-          <Grid item xs={12} sm={6} sx={{ background: "#eceff1" }}>
+          <Grid item xs={12} md={6} sx={{ background: "#eceff1" }}>
             <form onSubmit={registerHandler}>
               <Grid container direction="column" spacing={2} padding="1em">
                 {/* Error Alert Message */}
@@ -95,61 +96,61 @@ const RegisterPage = () => {
                 </Grid>
 
                 {/* Full Name */}
-                <Grid item>
+                <Grid item align={"left"}>
+                  <InputLabel required>Full Name</InputLabel>
                   <TextField
                     variant="outlined"
                     fullWidth
-                    label="Full Name"
                     size="small"
                     type="text"
                     value={fullName}
                     onChange={(e) => setFullName(e.target.value)}
-                    placeholder="Full Name"
+                    placeholder="Your full name"
                     sx={{ background: "white" }}
                   />
                 </Grid>
 
                 {/* Username */}
-                <Grid item>
+                <Grid item align={"left"}>
+                  <InputLabel required>Username</InputLabel>
                   <TextField
                     variant="outlined"
                     fullWidth
-                    label="Username"
                     size="small"
                     type="text"
-                    value={username}
+                    value={username.toLowerCase()}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Username"
+                    placeholder="username"
                     sx={{ background: "white" }}
                   />
                 </Grid>
 
                 {/* Email */}
-                <Grid item>
+                <Grid item align={"left"}>
+                <InputLabel required>Email Address</InputLabel>
                   <TextField
                     variant="outlined"
                     fullWidth
-                    label="Email"
                     size="small"
                     type="email"
-                    value={email}
+                    value={email.toLowerCase()}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Email"
+                    placeholder="your.name@domain.com"
                     sx={{ background: "white" }}
                   />
                 </Grid>
 
                 {/* Password */}
-                <Grid item>
+                <Grid item align={"left"}>
+                  <InputLabel required>Password</InputLabel>
                   <TextField
                     variant="outlined"
                     fullWidth
-                    label="Password"
                     size="small"
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="********"
+                    placeholder="Create a Password"
                     sx={{ background: "white" }}
                   />
                 </Grid>
@@ -159,12 +160,11 @@ const RegisterPage = () => {
                   <TextField
                     variant="outlined"
                     fullWidth
-                    label="Confirm Password"
                     size="small"
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    placeholder="********"
+                    placeholder="Confirm Password"
                     sx={{ background: "white" }}
                   />
                 </Grid>
@@ -190,8 +190,9 @@ const RegisterPage = () => {
           <Grid
             item
             xs={0}
-            sm={6}
-            display={{ xs: "none", sm: "block" }}
+            sm={0}
+            md={6}
+            display={{ xs: "none", md: "block"  }}
             alignItems="center"
           >
             <img height="150px" src={registerImage} alt="Login" />
