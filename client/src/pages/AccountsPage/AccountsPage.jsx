@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-// import axios from "axios";
+import jwt from "jwt-decode";
+import axios from "axios";
 
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
 
@@ -34,14 +35,13 @@ const AccountsPage = () => {
   const [accountDetailsEdit, setAccountDetailsEdit] = useState(false);
   const [accountDetailsError, setAccountDetailsError] = useState("");
 
-  const [email, setEmail] = useState("bob@bob.com");
+  const [email, setEmail] = useState("");
   const [emailTemp, setEmailTemp] = useState("");
-  const [password, setPassword] = useState("123");
-  const [passwordTemp, setPasswordTemp] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [currentPassword, setCurrentPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [loginDetailsEdit, setLoginDetailsEdit] = useState(false);
-  const [loginDetailsError, setLoginDetailsError] = useState("");
+  const [changePasswordError, setChangePasswordError] = useState("");
 
   const [error, setError] = useState("");
 
@@ -49,28 +49,45 @@ const AccountsPage = () => {
 
   useEffect(() => {
     if (localStorage.getItem("authToken")) {
-      navigate("/account");
+      const fetchCurrentUser = async () => {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
+        try {
+          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const currentUser = await axios.get(
+            `/api/user/${decodedJWT.id}`,
+            config
+          );
+
+          const user = currentUser.data.data;
+
+          setUsername(user.username || "");
+          setFullName(user.fullname || "");
+          setEmail(user.email || "");
+          setAddressLine1(user.addressLine1 || "");
+          setAddressLine2(user.addressLine2 || "");
+          setAddressLine3(user.addressLine3 || "");
+          setPhone(user.phone || "");
+        } catch (error) {
+          setError(error.response.data.error);
+
+          setTimeout(() => {
+            setError("");
+          }, 5000);
+        }
       };
-
-      try {
-        //TODO: Add Account API and get details of Account Holder based on the Token
-      } catch (error) {
-        setError(error.response.data.error);
-
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-      }
+      fetchCurrentUser();
     }
-  }, [navigate]);
+  }, []);
 
   const editAccountDetailsHandler = () => {
     setFullNameTemp(fullName);
+    setEmailTemp(email);
     setAddressLine1Temp(addressLine1);
     setAddressLine2Temp(addressLine2);
     setAddressLine3Temp(addressLine3);
@@ -81,6 +98,7 @@ const AccountsPage = () => {
 
   const cancelAccountDetailsHandler = () => {
     setFullName(fullNameTemp);
+    setEmail(emailTemp);
     setAddressLine1(addressLine1Temp);
     setAddressLine2(addressLine2Temp);
     setAddressLine3(addressLine3Temp);
@@ -89,76 +107,84 @@ const AccountsPage = () => {
     setAccountDetailsEdit(!accountDetailsEdit);
   };
 
-  const saveAccountDetailsHandler = () => {
-
+  const saveAccountDetailsHandler = async () => {
     setTimeout(() => {
       setAccountDetailsError("");
     }, 5000);
 
     // Check input is valid
-    if(!fullName) return setAccountDetailsError("Full Name is required");
+    if (!fullName) return setAccountDetailsError("Full Name is required");
+    if (!email) return setAccountDetailsError("Email is required");
 
     //Clear Temporary Storage
     setFullNameTemp("");
+    setEmailTemp("");
     setAddressLine1Temp("");
     setAddressLine2Temp("");
     setAddressLine3Temp("");
     setPhoneTemp("");
 
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
     try {
-      //TODO: Update User account in database
+      const decodedJWT = await jwt(localStorage.getItem("authToken"));
+      //TODO: Find out why the email is not updating!!
+
+      //Update User account in database
+      await axios.put(
+        `/api/user/${decodedJWT.id}`,
+        {
+          fullname: fullName,
+          email: email,
+          address_line1: addressLine1,
+          address_line2: addressLine2,
+          address_line3: addressLine3,
+          phone,
+        },
+        config
+      );
+
+      //TODO:  Add Success Alert
     } catch (error) {
       setAccountDetailsError(error.response.data.error);
       setTimeout(() => {
         setAccountDetailsError("");
       }, 5000);
     }
-    
+
     setAccountDetailsEdit(!accountDetailsEdit);
   };
 
-  const editLoginDetailsHandler = () => {
-    setEmailTemp(email);
-    setPasswordTemp(password);
-    setLoginDetailsEdit(!loginDetailsEdit);
-  };
-
-  const cancelLoginDetailsHandler = () => {
-    setEmail(emailTemp);
-    setPassword(passwordTemp);
-  
-    // Clear temporary storage
-    setEmailTemp("");
-    setPasswordTemp("");
-
-    setLoginDetailsEdit(!loginDetailsEdit);
-  };
-
-  const saveLoginDetailsHandler = () => {
-    // Check input is valid
-    if (!password || !email) {
+  const changePasswordHandler = async () => {
+    // Check password input is valid
+    if (!email) {
       setTimeout(() => {
-        setLoginDetailsError("");
+        setChangePasswordError("");
       }, 5000);
-      return setLoginDetailsError("Please complete all fields");
+      return setChangePasswordError("Email address must be provided");
     }
 
     // Check passwords match
-    if (password !== confirmPassword) {
-      setPassword("");
+    if (newPassword !== confirmPassword) {
+      setNewPassword("");
       setConfirmPassword("");
       setTimeout(() => {
-        setLoginDetailsError("");
+        setChangePasswordError("");
       }, 5000);
-      return setLoginDetailsError("Passwords do not match");
+      return setChangePasswordError("Passwords do not match");
     }
 
     try {
-      // TODO: Update credentials in Database
+      // TODO: Check existing pasword is correct
+      // TODO: Update Password Credentials in Database
     } catch (error) {
-      setLoginDetailsError(error.response.data.error);
+      setChangePasswordError(error.response.data.error);
       setTimeout(() => {
-        setLoginDetailsError("");
+        setChangePasswordError("");
       }, 5000);
     }
 
@@ -197,6 +223,7 @@ const AccountsPage = () => {
               sx={{ background: "#f5f5f5" }}
             >
               <InputLabel>Username</InputLabel>
+
               <TextField
                 disabled={true}
                 variant="outlined"
@@ -207,11 +234,6 @@ const AccountsPage = () => {
                 placeholder="Username"
                 sx={{ background: "white" }}
               />
-              <Typography variant="body2">
-                Your username is how other users can identify you. It is
-                displayed to users when you send messages and interact with
-                Sunday Markets. Your username cannot be changed.
-              </Typography>
             </Grid>
 
             {/* Full Name */}
@@ -226,6 +248,22 @@ const AccountsPage = () => {
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
                 placeholder="Joe Bloggs"
+                sx={{ background: "white" }}
+              />
+            </Grid>
+
+            {/* Email */}
+            <Grid item>
+              <InputLabel required>Email Address</InputLabel>
+              <TextField
+                disabled={!accountDetailsEdit}
+                variant="outlined"
+                fullWidth
+                size="small"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email"
                 sx={{ background: "white" }}
               />
             </Grid>
@@ -304,124 +342,101 @@ const AccountsPage = () => {
                   startIcon={<Edit />}
                   onClick={editAccountDetailsHandler}
                 >
-                  Update
+                  Edit
                 </Button>
               ) : (
-                <Button
-                  variant="outlined"
-                  startIcon={<Cancel />}
-                  onClick={cancelAccountDetailsHandler}
-                >
-                  Cancel
-                </Button>
+                <>
+                  <Button
+                    variant="outlined"
+                    startIcon={<Cancel />}
+                    onClick={cancelAccountDetailsHandler}
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    disabled={!accountDetailsEdit}
+                    color="success"
+                    variant="contained"
+                    startIcon={<Save />}
+                    onClick={saveAccountDetailsHandler}
+                  >
+                    Save
+                  </Button>
+                </>
               )}
-
-              <Button
-                disabled={!accountDetailsEdit}
-                color="success"
-                variant="contained"
-                startIcon={<Save />}
-                onClick={saveAccountDetailsHandler}
-              >
-                Save
-              </Button>
             </Grid>
           </Grid>
 
-          {/* Login Details  */}
-          <Grid container direction="column" spacing={2} marginBottom={8}>
-            <Grid item>
-              <Typography variant="h4">Login Details</Typography>
-            </Grid>
-            {/* Email */}
-            <Grid item>
-              <InputLabel required>Email Address</InputLabel>
-              <TextField
-                disabled={!loginDetailsEdit}
-                variant="outlined"
-                fullWidth
-                size="small"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email"
-                sx={{ background: "white" }}
-              />
-            </Grid>
-
-            {/* Password */}
-            <Grid item>
-              <InputLabel required>Password</InputLabel>
-              <TextField
-                disabled={!loginDetailsEdit}
-                variant="outlined"
-                fullWidth
-                size="small"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="********"
-                sx={{ background: "white" }}
-              />
-            </Grid>
-
-            {/* Confirm Password */}
-            {loginDetailsEdit && (
+          {/* Change Password  */}
+          <form>
+            <Grid container direction="column" spacing={2} marginBottom={8}>
               <Grid item>
-                <InputLabel required>Confirm your Password</InputLabel>
+                <Typography variant="h5">Change Password</Typography>
+                <Typography variant="body2" mb={1}>
+                  To create a new password, enter your exisiting password and
+                  type the new password in the below text fields. Please note
+                  that changing your password will log you out.
+                </Typography>
+              </Grid>
+
+              <Grid item>
+                <InputLabel>Enter Current Password</InputLabel>
                 <TextField
-                  disabled={!loginDetailsEdit}
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  type="password"
+                  value={currentPassword}
+                  onChange={(e) => setCurrentPassword(e.target.value)}
+                  autoComplete="current-password"
+                  sx={{ background: "white" }}
+                />
+              </Grid>
+
+              <Grid item>
+                <InputLabel>New Password</InputLabel>
+                <TextField
+                  variant="outlined"
+                  fullWidth
+                  size="small"
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                  autoComplete="new-password"
+                  sx={{ background: "white" }}
+                />
+              </Grid>
+
+              {/* Confirm Password  */}
+              <Grid item>
+                <InputLabel>Confirm your Password</InputLabel>
+                <TextField
                   variant="outlined"
                   fullWidth
                   size="small"
                   type="password"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="********"
+                  autoComplete="new-password"
                   sx={{ background: "white" }}
                 />
               </Grid>
-            )}
 
-            {/* Login Details Errors  */}
-            <Grid item>
-              {loginDetailsError && (
-                <Alert severity="error">{loginDetailsError}</Alert>
-              )}
-            </Grid>
+              {/* Change Password Errors  */}
+              <Grid item>
+                {changePasswordError && (
+                  <Alert severity="error">{changePasswordError}</Alert>
+                )}
+              </Grid>
 
-            {/* Update Login Details Button */}
-            <Grid item textAlign={"right"}>
-              {!loginDetailsEdit ? (
-                <Button
-                  variant="contained"
-                  startIcon={<Edit />}
-                  onClick={editLoginDetailsHandler}
-                >
-                  Update
+              {/* Change Password Button */}
+              <Grid item textAlign={"center"}>
+                <Button variant="contained" onClick={changePasswordHandler}>
+                  Change Password
                 </Button>
-              ) : (
-                <Button
-                  variant="outlined"
-                  startIcon={<Cancel />}
-                  onClick={cancelLoginDetailsHandler}
-                >
-                  Cancel
-                </Button>
-              )}
-
-              <Button
-                disabled={!loginDetailsEdit}
-                color="success"
-                variant="contained"
-                startIcon={<Save />}
-                onClick={saveLoginDetailsHandler}
-              >
-                Save
-              </Button>
+              </Grid>
             </Grid>
-          </Grid>
-
+          </form>
           {/* Delete Account  */}
           <Grid
             container
@@ -432,11 +447,10 @@ const AccountsPage = () => {
             sx={{ background: "#f5f5f5" }}
           >
             <Grid item>
-              <Typography variant="body1">
-                Want to delete your account? Deleting your account will remove
-                all stalls and products and cannot be undone. If you would only
-                like to temporary hide a stall, you can do this in the My Stalls
-                page.
+              <Typography variant="body2">
+                <b>Want to delete your account?</b> You will loose access to all
+                your stalls and products. If you would like to take a break, you
+                can hide a stall from the My Stalls page.
               </Typography>
             </Grid>
             <Grid item padding={3} textAlign={"center"}>
@@ -448,6 +462,9 @@ const AccountsPage = () => {
               >
                 Delete Account
               </Button>
+              <Typography variant="body2" color="error" align="center" mt={2}>
+                Please be sure as we are not able to restore deleted accounts.
+              </Typography>
             </Grid>
           </Grid>
         </Paper>
