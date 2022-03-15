@@ -104,5 +104,4 @@ UserSchema.methods.getVerified = function () {
 };
 
 const User = mongoose.model("User", UserSchema);
-
-module.exports = { User, UserSchema };
+module.exports = {User, UserSchema};

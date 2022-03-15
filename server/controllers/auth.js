@@ -1,4 +1,5 @@
 const crypto = require("crypto");
+const bcrypt = require("bcrypt");
 const { User } = require("../models/User.js");
 const ErrorResponse = require("../utils/errorResponse");
 const sendEmail = require("../utils/sendEmail");
@@ -184,6 +185,32 @@ exports.verifyUser = async (req, res, next) => {
       success: true,
       data: "User email is verified",
     });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.updateUserCredentials = async (req, res, next) => {
+  const { userId } = req.params;
+  const data = req.body;
+
+  const salt = await bcrypt.genSalt(10);
+  const encryptedPassword = await bcrypt.hash(data.password, salt);
+
+  try {
+    await User.updateOne(
+      { _id: userId },
+      {
+        email: data.email,
+        password: encryptedPassword,
+      }
+    );
+
+    res.status(200).json({
+      success: true,
+      message: `User ${ userId } Credentials Updated`
+    })
+
   } catch (error) {
     next(error);
   }

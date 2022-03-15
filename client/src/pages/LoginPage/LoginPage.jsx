@@ -37,8 +37,6 @@ const LoginPage = () => {
         "Content-Type": "application/json",
       },
     };
-    console.log(`Email: ${email}`);
-    console.log(`Password: ${password}`);
 
     try {
       const { data } = await axios.post(

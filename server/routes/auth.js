@@ -6,7 +6,8 @@ const {
   login,
   forgotPassword,
   resetPassword,
-  verifyUser
+  verifyUser,
+  updateUserCredentials
 } = require("../controllers/auth");
 
 router.route("/register").post(register);
@@ -14,5 +15,7 @@ router.route("/login").post(login);
 router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:resetToken").put(resetPassword);
 router.route("/verify/:verifyToken").put(verifyUser);
+
+router.route("/user/:userId").put(updateUserCredentials);
 
 module.exports = router;
