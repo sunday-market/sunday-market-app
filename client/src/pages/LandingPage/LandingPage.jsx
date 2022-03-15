@@ -30,7 +30,6 @@ export default function LandingPage() {
   ];
   // this will adjust the screen size accordinly
   const windowSize = useIsMobileScreen();
-
   return (
     <>
       <Box

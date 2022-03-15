@@ -1,37 +1,59 @@
+import Inventory2TwoToneIcon from "@mui/icons-material/Inventory2TwoTone";
+import ReceiptLongTwoToneIcon from "@mui/icons-material/ReceiptLongTwoTone";
+import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
+import LoginRoundedIcon from "@mui/icons-material/LoginRounded";
+import ReceiptIcon from "@mui/icons-material/Receipt";
+import StorefrontTwoToneIcon from "@mui/icons-material/StorefrontTwoTone";
 import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import ProductionQuantityLimitsOutlinedIcon from "@mui/icons-material/ProductionQuantityLimitsOutlined"; // This is for when a timer on the cart is going to run out
 import ShoppingCartTwoToneIcon from "@mui/icons-material/ShoppingCartTwoTone";
+import PersonIcon from "@mui/icons-material/Person";
 import FilterAltRoundedIcon from "@mui/icons-material/FilterAltRounded";
+import { useIsMobileScreen } from "../hooks/useIsMobileScreen";
+import MailIcon from "@mui/icons-material/Mail";
 import {
   Box,
+  Divider,
   Grid,
   IconButton,
   InputAdornment,
+  Menu,
+  MenuItem,
   TextField,
   Typography,
 } from "@mui/material";
 import { NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import { useUser } from "../hooks/useUser";
+
+// IMPORTANT
+// Navbar still needs to adjust for smaller screens
+// possible solution to scale the whole navbar
+// issue occurs at 440px or less
+// IMPORTANT
 
 export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
+  const userData = useUser();
+
+  // Acounts dropdown
+  const [anchorAcc, setAnchorAcc] = useState(null);
+  const openAcc = Boolean(anchorAcc);
+  const handleAccClick = (event) => {
+    setAnchorAcc(event.currentTarget);
+  };
+  const handleAccClose = () => {
+    setAnchorAcc(null);
+  };
+
+  // handle logout
+  const handleLogout = () => {
+    localStorage.removeItem("authToken");
+  };
 
   // this will adjust the screen size accordinly
-  const [isNotMobile, setIsNotMobile] = useState(true);
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      function handleWindowResize() {
-        setIsNotMobile(window.screen.width > 700);
-      }
-      // add window resize event
-      window.addEventListener("resize", handleWindowResize);
-
-      // call handle
-      handleWindowResize();
-    }
-  }, []);
+  const windowSize = useIsMobileScreen(700);
 
   return (
     <>
@@ -77,7 +99,7 @@ export default function Navbar() {
             </NavLink>
           </Grid>
           {/* Search bar desktop */}
-          {isNotMobile && (
+          {windowSize && (
             <Grid
               item
               alignContent={"center"}
@@ -128,7 +150,13 @@ export default function Navbar() {
             alignContent={"center"}
             sx={{ margin: "auto", marginLeft: "1%", marginRight: "3%" }}
           >
-            <IconButton sx={{ pl: 3 }}>
+            <IconButton
+              sx={{ pl: 3 }}
+              onClick={handleAccClick}
+              aria-controls={openAcc ? "account-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openAcc ? "true" : undefined}
+            >
               <AccountCircleRoundedIcon
                 sx={{
                   transform: "scale(2)",
@@ -177,7 +205,7 @@ export default function Navbar() {
             </IconButton>
           </Grid>
           <Box width={"100%"} />
-          {!isNotMobile && (
+          {!windowSize && (
             <Grid
               item
               alignContent={"center"}
@@ -216,6 +244,125 @@ export default function Navbar() {
           bgcolor: "#0288d1",
         }}
       />
+      {/* Account menu */}
+      {userData ? (
+        <Menu
+          anchorEl={anchorAcc}
+          id="account-menu"
+          open={openAcc}
+          onClose={handleAccClose}
+          onClick={handleAccClose}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              overflow: "visible",
+              // filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              mt: 1.5,
+              bgcolor: "#03a9f4",
+              boxShadow: 5,
+              "& .MuiAvatar-root": {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              "&:before": {
+                content: '""',
+                display: "block",
+                position: "absolute",
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: "#03a9f4",
+                transform: "translateY(-50%) rotate(45deg)",
+                zIndex: 0,
+              },
+            },
+          }}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        >
+          <MenuItem sx={{ color: "white" }}>
+            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
+            My Account
+          </MenuItem>
+          <MenuItem sx={{ color: "white" }}>
+            <MailIcon sx={{ pr: 1.5 }} />
+            Messages
+          </MenuItem>
+          <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+          <MenuItem sx={{ color: "white" }}>
+            <ReceiptIcon sx={{ pr: 1.5 }} />
+            Orders Recieved
+          </MenuItem>
+          <MenuItem sx={{ color: "white" }}>
+            <ReceiptLongTwoToneIcon sx={{ pr: 1.5 }} />
+            My Orders
+          </MenuItem>
+          <MenuItem sx={{ color: "white" }}>
+            <StorefrontTwoToneIcon sx={{ pr: 1.5 }} />
+            My Stalls
+          </MenuItem>
+          <MenuItem sx={{ color: "white" }}>
+            <Inventory2TwoToneIcon sx={{ pr: 1.5 }} />
+            My Products
+          </MenuItem>
+          <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+          <MenuItem sx={{ color: "white" }} onClick={handleLogout}>
+            <LogoutRoundedIcon sx={{ pr: 1.5 }} />
+            Logout
+          </MenuItem>
+        </Menu>
+      ) : (
+        <Menu
+          anchorEl={anchorAcc}
+          id="account-menu"
+          open={openAcc}
+          onClose={handleAccClose}
+          onClick={handleAccClose}
+          PaperProps={{
+            elevation: 0,
+            sx: {
+              overflow: "visible",
+              // filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              mt: 1.5,
+              bgcolor: "#03a9f4",
+              boxShadow: 5,
+              "& .MuiAvatar-root": {
+                width: 32,
+                height: 32,
+                ml: -0.5,
+                mr: 1,
+              },
+              "&:before": {
+                content: '""',
+                display: "block",
+                position: "absolute",
+                top: 0,
+                right: 14,
+                width: 10,
+                height: 10,
+                bgcolor: "#03a9f4",
+                transform: "translateY(-50%) rotate(45deg)",
+                zIndex: 0,
+              },
+            },
+          }}
+          transformOrigin={{ horizontal: "right", vertical: "top" }}
+          anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        >
+          <MenuItem sx={{ color: "white" }}>
+            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
+            Sign Up
+          </MenuItem>
+          <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+          <MenuItem sx={{ color: "white" }}>
+            <LoginRoundedIcon sx={{ pr: 1.5 }} />
+            Login
+          </MenuItem>
+        </Menu>
+      )}
     </>
   );
 }
