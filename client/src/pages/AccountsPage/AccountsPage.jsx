@@ -219,7 +219,7 @@ const AccountsPage = () => {
       };
 
       // Update Password Credentials in Database
-      const changePassword = await axios.put(
+      await axios.put(
         "/api/auth/changepassword",
         {
           userId: decodedJWT.id,
