@@ -1,9 +1,9 @@
 import { Box, Typography } from "@mui/material";
-import { useEffect, useState } from "react";
 import "./landingPage.css";
 import Carousel from "../../components/Carousel";
 import ItemCard from "../../components/ItemCard";
 import CategoryAvatars from "../../components/CategoryAvatars";
+import { useIsMobleScreen } from "../../hooks/useIsMobleScreen";
 
 export default function LandingPage() {
   const CardArray = [
@@ -29,25 +29,10 @@ export default function LandingPage() {
     },
   ];
   // this will adjust the screen size accordinly
-  const [isNotMobile, setIsNotMobile] = useState(true);
+  const windowSize = useIsMobleScreen();
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      function handleWindowResize() {
-        setIsNotMobile(window.screen.width > 600);
-      }
-      // add window resize event
-      window.addEventListener("resize", handleWindowResize);
-
-      // call handle
-      handleWindowResize();
-    }
-  }, []);
-
-  const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   return (
     <>
-      <Box component="img" src={PF + "logo192.png"} sx={{ width: 100 }} />
       <Box
         sx={{
           flexGrow: 1,
@@ -58,7 +43,7 @@ export default function LandingPage() {
           bgcolor: "#f5f5f5",
         }}
       >
-        {isNotMobile && <Carousel Cards={CardArray} />}
+        {windowSize && <Carousel Cards={CardArray} />}
         <Typography
           sx={{
             width: "100%",
@@ -93,7 +78,7 @@ export default function LandingPage() {
           ))}
         </Box>
         {/* Category Avatars */}
-        {isNotMobile && (
+        {windowSize && (
           <Box sx={{ display: "flex", flexWrap: "wrap" }}>
             {Array.from(Array(12)).map((_, index) => (
               <Box
