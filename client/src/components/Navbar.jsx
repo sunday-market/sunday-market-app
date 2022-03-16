@@ -45,6 +45,15 @@ export default function Navbar() {
     }
     handleLoggedInStatus();
   });
+  // Category dropdown
+  const [anchorCategory, setAnchorCategory] = useState(null);
+  const openCategory = Boolean(anchorCategory);
+  const handleCategoryClick = (event) => {
+    setAnchorCategory(event.currentTarget);
+  };
+  const handleCategoryClose = () => {
+    setAnchorCategory(null);
+  };
 
   // Acounts dropdown
   const [anchorAcc, setAnchorAcc] = useState(null);
@@ -161,7 +170,13 @@ export default function Navbar() {
             alignContent={"center"}
             sx={{ margin: "auto", marginRight: "1%" }}
           >
-            <IconButton sx={{ pl: 3 }}>
+            <IconButton
+              sx={{ pl: 3 }}
+              onClick={handleCategoryClick}
+              aria-controls={openCategory ? "category-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openCategory ? "true" : undefined}
+            >
               <FilterAltRoundedIcon
                 sx={{
                   transform: "scale(2)",
@@ -396,6 +411,50 @@ export default function Navbar() {
           </MenuItem>
         </Menu>
       )}
+      <Menu
+        anchorEl={anchorCategory}
+        id="category-menu"
+        open={openCategory}
+        onClose={handleCategoryClose}
+        onClick={handleCategoryClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: "visible",
+            // filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            mt: 1.5,
+            bgcolor: "#03a9f4",
+            boxShadow: 5,
+            "& .MuiAvatar-root": {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: "#03a9f4",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {Array.from(Array(5)).map((_, index) => (
+          <MenuItem sx={{ color: "white" }}>
+            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
+            Category
+          </MenuItem>
+        ))}
+      </Menu>
     </>
   );
 }
