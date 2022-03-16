@@ -1,3 +1,4 @@
+import RefreshRoundedIcon from "@mui/icons-material/RefreshRounded";
 import Inventory2TwoToneIcon from "@mui/icons-material/Inventory2TwoTone";
 import ReceiptLongTwoToneIcon from "@mui/icons-material/ReceiptLongTwoTone";
 import LogoutRoundedIcon from "@mui/icons-material/LogoutRounded";
@@ -14,6 +15,7 @@ import { useIsMobileScreen } from "../hooks/useIsMobileScreen";
 import MailIcon from "@mui/icons-material/Mail";
 import {
   Box,
+  Button,
   Divider,
   Grid,
   IconButton,
@@ -38,13 +40,23 @@ export default function Navbar() {
   const userData = useUser();
 
   const [userToken, setUserToken] = useState(null);
-
   useEffect(() => {
     function handleLoggedInStatus() {
       setUserToken(localStorage.getItem("authToken"));
     }
     handleLoggedInStatus();
   });
+
+  // Shopping dropdown
+  const [anchorShopping, setAnchorShopping] = useState(null);
+  const openShopping = Boolean(anchorShopping);
+  const handleShoppingClick = (event) => {
+    setAnchorShopping(event.currentTarget);
+  };
+  const handleShoppingClose = () => {
+    setAnchorShopping(null);
+  };
+
   // Category dropdown
   const [anchorCategory, setAnchorCategory] = useState(null);
   const openCategory = Boolean(anchorCategory);
@@ -232,7 +244,13 @@ export default function Navbar() {
               maxHeight: 60,
             }}
           >
-            <IconButton sx={{ margin: 1 }}>
+            <IconButton
+              sx={{ margin: 1 }}
+              onClick={handleShoppingClick}
+              aria-controls={openAcc ? "shopping-menu" : undefined}
+              aria-haspopup="true"
+              aria-expanded={openAcc ? "true" : undefined}
+            >
               <Typography
                 sx={{
                   fontSize: "16px",
@@ -454,6 +472,150 @@ export default function Navbar() {
             Category
           </MenuItem>
         ))}
+      </Menu>
+      <Menu
+        anchorEl={anchorShopping}
+        id="shopping-menu"
+        open={openShopping}
+        onClose={handleShoppingClose}
+        onClick={handleShoppingClose}
+        PaperProps={{
+          elevation: 0,
+          sx: {
+            overflow: "visible",
+
+            mt: 1.5,
+            bgcolor: "#03a9f4",
+            boxShadow: 5,
+            "& .MuiAvatar-root": {
+              width: 32,
+              height: 32,
+              ml: -0.5,
+              mr: 1,
+            },
+            "&:before": {
+              content: '""',
+              display: "block",
+              position: "absolute",
+              top: 0,
+              right: 14,
+              width: 10,
+              height: 10,
+              bgcolor: "#03a9f4",
+              transform: "translateY(-50%) rotate(45deg)",
+              zIndex: 0,
+            },
+          },
+        }}
+        transformOrigin={{ horizontal: "right", vertical: "top" }}
+        anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+      >
+        {Array.from(Array(5)).map((_, index) => (
+          <Box
+            container
+            direction={"row"}
+            justifyContent="center"
+            alignContent={"center"}
+            width={"100%"}
+          >
+            <MenuItem sx={{ color: "white" }} width={"100%"}>
+              <Box
+                component={"img"}
+                sx={{ maxHeight: 60, maxWidth: 80 }}
+                alt={"This product image of the shopping cart"}
+                src={
+                  "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
+                }
+              />
+              <Typography paddingLeft={2} sx={{ width: "100%" }}>
+                Shopping cart details..
+              </Typography>
+              <Typography paddingLeft={2}>QTY</Typography>
+              <Typography paddingLeft={2}>$00.00</Typography>
+            </MenuItem>
+          </Box>
+        ))}
+        <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+        <Box
+          container
+          direction={"row"}
+          justifyContent="center"
+          alignContent={"center"}
+          sx={{
+            width: "100%",
+          }}
+        >
+          <Typography
+            sx={{
+              color: "white",
+              margin: "auto",
+              textAlign: "center",
+            }}
+          >
+            Time Remaining:
+          </Typography>
+          <Box
+            justifyContent="center"
+            alignContent={"center"}
+            sx={{
+              display: "flex",
+              flexDirection: "row",
+              width: "100%",
+            }}
+          >
+            <IconButton sx={{ margin: "auto", marginRight: 0 }}>
+              <RefreshRoundedIcon />
+            </IconButton>
+            <Typography
+              sx={{
+                pl: 1,
+                color: "white",
+                margin: "auto",
+                marginLeft: 0,
+              }}
+            >
+              00.00.00s
+            </Typography>
+          </Box>
+        </Box>
+
+        <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+        <Box
+          justifyContent="center"
+          alignContent={"center"}
+          sx={{
+            display: "flex",
+            flexDirection: "row",
+            width: "100%",
+          }}
+        >
+          <Button
+            variant="outlined"
+            sx={{
+              bgcolor: "white",
+              borderRadius: 4,
+              margin: 2,
+              marginBottom: 0.5,
+              border: 1,
+              boxShadow: 2,
+            }}
+          >
+            Clear
+          </Button>
+          <Box width={"10%"} />
+          <Button
+            variant="contained"
+            sx={{
+              borderRadius: 4,
+              margin: 2,
+              marginBottom: 0.5,
+              border: 0,
+              boxShadow: 2,
+            }}
+          >
+            Place Order
+          </Button>
+        </Box>
       </Menu>
     </>
   );
