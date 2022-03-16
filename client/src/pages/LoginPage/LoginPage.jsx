@@ -12,12 +12,15 @@ import {
   Grid,
   Alert,
   Paper,
-  InputLabel
+  InputLabel,
 } from "@mui/material";
 
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [verifiedError, setVerifiedError] = useState(false);
+  const [verificationSuccess, setVerificationSuccess] = useState("");
+  const [verificationError, setVerificationError] = useState("");
   const [error, setError] = useState("");
 
   const navigate = useNavigate();
@@ -27,6 +30,38 @@ const LoginPage = () => {
       navigate("/");
     }
   }, [navigate]);
+
+  const resendVerification = async () => {
+    if (!email) {
+      setTimeout(() => {
+        setVerificationError("");
+      }, 5000);
+      return setVerificationError("Please provide an email address");
+    }
+
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      };
+
+      await axios.post(
+        "/api/auth/resetverificationtoken",
+        {
+          email,
+        },
+        config
+      );
+
+      setVerifiedError(false);
+      setVerificationSuccess(
+        "Verification email sent.  Please check your email."
+      );
+    } catch (error) {
+      setError(error.response.data.error);
+    }
+  };
 
   const loginHandler = async (e) => {
     e.preventDefault();
@@ -47,16 +82,16 @@ const LoginPage = () => {
         },
         config
       );
-      
-      // TODO: Check if user is verified and THEN issue the token
-      // If the user is not verified, display verification message. 
-      // Resend Verification Code
 
       localStorage.setItem("authToken", data.token);
 
       navigate("/");
     } catch (error) {
-      setError(error.response.data.error);
+      if (error.response.data.error === "User is not verified") {
+        setVerifiedError(true);
+      } else {
+        setError(error.response.data.error);
+      }
 
       setTimeout(() => {
         setError("");
@@ -76,9 +111,33 @@ const LoginPage = () => {
 
           <form onSubmit={loginHandler}>
             <Grid container direction="column" spacing={2} padding={2}>
-              {/* Error Alert Message */}
               <Grid item>
+                {/* Error Alert Message */}
                 {error && <Alert severity="error">{error}</Alert>}
+
+                {/* Verification Success Alert Message */}
+                {verificationSuccess && (
+                  <Alert severity="success">{verificationSuccess}</Alert>
+                )}
+
+                {/* Display Alert Message if user has not validated  */}
+                {verifiedError && (
+                  <Alert severity="warning" align>
+                    <Typography variant="body2" mb={2}>
+                      You have not verified your email address. Please check
+                      your email for the verification link. If you did not get
+                      an email check your spam/junk folder.
+                    </Typography>
+
+                    <Button variant="contained" onClick={resendVerification}>
+                      Resend Verification
+                    </Button>
+                  </Alert>
+                )}
+
+                {verificationError && (
+                  <Alert severity="error">{verificationError}</Alert>
+                )}
               </Grid>
 
               {/* Email */}

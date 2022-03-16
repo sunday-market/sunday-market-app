@@ -8,7 +8,8 @@ const {
   resetPassword,
   changePassword,
   verifyUser,
-  updateUserCredentials
+  updateUserCredentials,
+  resetToken,
 } = require("../controllers/auth");
 
 router.route("/register").post(register);
@@ -17,6 +18,7 @@ router.route("/forgotpassword").post(forgotPassword);
 router.route("/resetpassword/:resetToken").put(resetPassword);
 router.route("/changepassword").put(changePassword);
 router.route("/verify/:verifyToken").put(verifyUser);
+router.route("/resetverificationtoken").post(resetToken);
 
 router.route("/user/:userId").put(updateUserCredentials);
 

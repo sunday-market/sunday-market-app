@@ -1,16 +1,13 @@
-import {useEffect} from "react";
-import {Link, useNavigate} from "react-router-dom"
+import { useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
 import { Box, Paper, Typography, Button } from "@mui/material";
 
-
-
 const AccountDeletedPage = () => {
-
   const navigate = useNavigate();
 
-  useEffect(()=> {
-    if(localStorage.getItem("authToken")){
-      navigate("/")
+  useEffect(() => {
+    if (localStorage.getItem("authToken")) {
+      navigate("/");
     }
   }, [navigate]);
 
@@ -24,10 +21,13 @@ const AccountDeletedPage = () => {
           Your account has been deleted. Sorry to see you go!
         </Typography>
         <Typography variant="body1" mb={3}>
-          If you would like to rejoin <b>Sunday Markets</b> you can easily <Link to="/register">Register</Link> again.
+          If you would like to rejoin <b>Sunday Markets</b> you can easily{" "}
+          <Link to="/register">Register</Link> again.
         </Typography>
 
-        <Button variant="contained" onClick={()=> navigate("/")}>Continue</Button>
+        <Button variant="contained" onClick={() => navigate("/")}>
+          Continue
+        </Button>
       </Paper>
     </Box>
   );

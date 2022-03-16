@@ -195,6 +195,47 @@ exports.resetPassword = async (req, res, next) => {
   }
 };
 
+exports.resetToken = async (req, res, next) => {
+  // Generate new token
+  const verifyToken = crypto.randomBytes(20).toString("hex");
+
+  try {
+    // Save new token in user document
+    const user = await User.findOne({ email: req.body.email });
+
+    if (!user) {
+      return next(new ErrorResponse("Email could not be sent", 404));
+    }
+
+    user.verification_code = verifyToken;
+    user.save();
+
+    // Send Email with Token
+    const verifyUrl = `http://localhost:3000/verify/${verifyToken}`;
+
+    const message = `
+      <h1>Welcome to Sunday Markets</h1>
+      <p>Thank you for registering.  Please confirm your email address by clicking the link below</p>
+      <a href=${verifyUrl} clicktracking=off>${verifyUrl}</a>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Verify your account",
+      text: message,
+    });
+
+    res.status(200).json({
+      success: true,
+      data: "Verification Email Sent",
+    });
+
+    sendToken(user, 201, res);
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.verifyUser = async (req, res, next) => {
   const { verifyToken } = req.params;
 
