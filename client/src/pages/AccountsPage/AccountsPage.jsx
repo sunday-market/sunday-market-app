@@ -277,7 +277,7 @@ const AccountsPage = () => {
           {/* Account Details  */}
           <Grid container direction="column" spacing={2} marginBottom={8}>
             <Grid item>
-              <Typography variant="h4">Account Details</Typography>
+              <Typography variant="h5">Account Details</Typography>
             </Grid>
 
             {/* Username */}

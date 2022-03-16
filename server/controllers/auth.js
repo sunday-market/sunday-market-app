@@ -123,7 +123,7 @@ exports.forgotPassword = async (req, res, next) => {
       });
     } catch (error) {
       user.resetPasswordToken = undefined;
-      user.resetPasswordExpire = undefined;
+      user.resetPasswordExpiry = undefined;
 
       await user.save();
 

@@ -6,6 +6,8 @@ import AccountsPage from "./pages/AccountsPage/AccountsPage";
 import AccountDeletedPage from "./pages/AccountDeletedPage/AccountDeletedPage";
 import AccountVerifyPage from "./pages/AccountVerify/AccountVerifyPage";
 import AccountConfirmTokenPage from "./pages/AccountConfirmToken/AccountConfirmTokenPage";
+import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
+
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
 import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
@@ -30,6 +32,8 @@ function App() {
         />
         <Route path="/accountverify" element={<AccountVerifyPage />} />
         <Route path="/accountdeleted" element={<AccountDeletedPage />} />
+        <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+      
       </Routes>
     </Router>
   );
