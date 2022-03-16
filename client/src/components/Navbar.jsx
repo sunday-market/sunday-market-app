@@ -76,6 +76,16 @@ export default function Navbar() {
   const navigateToLogin = () => {
     navigate("/login");
   };
+
+  // Search submit
+  const onSearchSubmit = (e) => {
+    console.log(e.key);
+    if (e.key === "Enter") {
+      console.log(`Search submit`);
+      console.log(e.target.value);
+    }
+  };
+
   return (
     <>
       {/* Top menu bar */}
@@ -138,6 +148,8 @@ export default function Navbar() {
                     </InputAdornment>
                   ),
                 }}
+                placeholder="Search..."
+                onKeyDown={onSearchSubmit}
               ></TextField>
             </Grid>
           )}
