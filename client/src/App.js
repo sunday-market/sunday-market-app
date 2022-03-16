@@ -10,7 +10,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage/ForgotPasswordPage";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
-import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
+import MyStallsPage from "./components/MyStalls";
 
 function App() {
   return (
