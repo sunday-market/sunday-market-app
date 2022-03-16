@@ -23,7 +23,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import { NavLink } from "react-router-dom";
+import { useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useUser } from "../hooks/useUser";
 
@@ -65,6 +65,17 @@ export default function Navbar() {
   // this will adjust the screen size accordinly
   const windowSize = useIsMobileScreen(700);
 
+  // navigate to click handler functions
+  const navigate = useNavigate();
+  const navigateToAccount = () => {
+    navigate("/account");
+  };
+  const navigateToRegister = () => {
+    navigate("/register");
+  };
+  const navigateToLogin = () => {
+    navigate("/login");
+  };
   return (
     <>
       {/* Top menu bar */}
@@ -293,11 +304,9 @@ export default function Navbar() {
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
-          <MenuItem sx={{ color: "white" }}>
-            <NavLink to="/account" sx={{ color: "white" }}>
-              <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
-              My Account
-            </NavLink>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToAccount}>
+            <PersonIcon sx={{ pr: 1.5, scale: 2, margin: 0 }} />
+            My Account
           </MenuItem>
           <MenuItem sx={{ color: "white" }}>
             <MailIcon sx={{ pr: 1.5 }} />
@@ -364,18 +373,14 @@ export default function Navbar() {
           transformOrigin={{ horizontal: "right", vertical: "top" }}
           anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
         >
-          <MenuItem sx={{ color: "white" }}>
-            <NavLink to="/register">
-              <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
-              Sign Up
-            </NavLink>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToRegister}>
+            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
+            Sign Up
           </MenuItem>
           <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
-          <MenuItem sx={{ color: "white" }}>
-            <NavLink to="/login">
-              <LoginRoundedIcon sx={{ pr: 1.5 }} />
-              Login
-            </NavLink>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToLogin}>
+            <LoginRoundedIcon sx={{ pr: 1.5 }} />
+            Login
           </MenuItem>
         </Menu>
       )}
