@@ -98,6 +98,10 @@ export default function Navbar() {
     navigate("/login");
   };
 
+  const navigateToMyStalls = () => {
+    navigate("/mystalls");
+  };
+
   // Search submit
   const onSearchSubmit = (e) => {
     console.log(e.key);
@@ -366,7 +370,7 @@ export default function Navbar() {
             <ReceiptLongTwoToneIcon sx={{ pr: 1.5 }} />
             My Orders
           </MenuItem>
-          <MenuItem sx={{ color: "white" }}>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToMyStalls}>
             <StorefrontTwoToneIcon sx={{ pr: 1.5 }} />
             My Stalls
           </MenuItem>

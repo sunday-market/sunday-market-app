@@ -1,5 +1,4 @@
 import { Box, Typography } from "@mui/material";
-import "./landingPage.css";
 import Carousel from "../../components/Carousel";
 import ItemCard from "../../components/ItemCard";
 import CategoryAvatars from "../../components/CategoryAvatars";

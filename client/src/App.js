@@ -8,6 +8,7 @@ import AccountVerifyPage from "./pages/AccountVerify/AccountVerifyPage";
 import AccountConfirmTokenPage from "./pages/AccountConfirmToken/AccountConfirmTokenPage";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import Navbar from "./components/Navbar";
+import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
 
 function App() {
   return (
@@ -18,6 +19,7 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="/account" element={<AccountsPage />} />
+          <Route path="/mystalls" element={<MyStallsPage />} />
         </Route>
 
         <Route path="/login" element={<LoginPage />} />
