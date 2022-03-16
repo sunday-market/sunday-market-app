@@ -254,7 +254,10 @@ exports.verifyUser = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: "User email is verified",
+      data: {
+        fullName: user.fullname,
+      },
+      message: "User email is verified",
     });
   } catch (error) {
     next(error);
