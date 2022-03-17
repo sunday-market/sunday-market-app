@@ -471,7 +471,7 @@ export default function Navbar() {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         {Array.from(Array(5)).map((_, index) => (
-          <MenuItem sx={{ color: "white" }}>
+          <MenuItem sx={{ color: "white" }} key={index}>
             <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
             Category
           </MenuItem>
@@ -521,6 +521,7 @@ export default function Navbar() {
             justifyContent="center"
             alignContent={"center"}
             width={"100%"}
+            key={index}
           >
             <MenuItem sx={{ color: "white" }} width={"100%"}>
               <Box
