@@ -80,7 +80,7 @@ export default function Navbar() {
   // handle logout
   const HandleLogout = () => {
     localStorage.removeItem("authToken");
-    setUserToken(null);
+    navigate("/");
   };
 
   // this will adjust the screen size accordinly
