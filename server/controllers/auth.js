@@ -164,6 +164,34 @@ exports.changePassword = async (req, res, next) => {
   }
 };
 
+exports.getUserByResetToken = async (req, res, next) => {
+  const resetToken = crypto
+    .createHash("sha256")
+    .update(req.params.resetToken)
+    .digest("hex");
+
+  try {
+    const user = await User.findOne({
+      resetPasswordToken: resetToken,
+      //TODO: Figure out why the reset with expiry is not working
+      //resetPasswordExpiry: { $gt: Date.now() },
+    });
+
+    if (!user) {
+      return next(new ErrorResponse("Invalid Reset Token", 400));
+    }
+
+    res.status(200).json({
+      success: true,
+      data: {
+        fullName: user.fullname,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 exports.resetPassword = async (req, res, next) => {
   const resetPasswordToken = crypto
     .createHash("sha256")
@@ -173,7 +201,8 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({
       resetPasswordToken,
-      resetPasswordExpire: { $gt: Date.now() },
+      // TODO: Find out why the expiry is not working
+      // resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -263,7 +292,7 @@ exports.verifyUser = async (req, res, next) => {
     next(error);
   }
 };
-
+// TODO: Confirm this is still in use Possibilty needs deleteing?
 exports.updateUserCredentials = async (req, res, next) => {
   const { userId } = req.params;
   const data = req.body;
