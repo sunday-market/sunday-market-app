@@ -1,11 +1,7 @@
 import React from "react";
 import { Outlet, useNavigate } from "react-router";
 
-import AccountDetailsPage from "./AccountDetailsPage"
-
-import { Box, Grid, Typography, Button } from "@mui/material";
-
-
+import { Box, Grid, Button } from "@mui/material";
 
 const AccountPage = () => {
   const navigate = useNavigate();
