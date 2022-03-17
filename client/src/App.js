@@ -31,7 +31,7 @@ function App() {
 
         <Route element={<PrivateRoute />}>
           <Route path="account" element={<MyAccountPage />}>
-            <Route path="/" element={<AccountDetailsPage />} />
+            <Route path="/account" element={<AccountDetailsPage />} />
             <Route path="myaccount" element={<AccountDetailsPage />} />
             <Route path="mystalls" element={<MyStallsPage />} />
             {/* <Route path="myproducts" element={<MyProductsPage />} />
