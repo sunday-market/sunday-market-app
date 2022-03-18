@@ -99,7 +99,7 @@ export default function Navbar() {
   };
 
   const navigateToMyStalls = () => {
-    navigate("/mystalls");
+    navigate("/account/mystalls");
   };
 
   // Search submit
