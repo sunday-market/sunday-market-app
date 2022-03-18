@@ -11,8 +11,10 @@ import ForgotPasswordPage from "./pages/Authentication/ForgotPasswordPage";
 import PasswordResetPage from "./pages/Authentication/PasswordResetPage";
 
 // Accounts Pages
-import MyAccountPage from "./pages/Account/MyAccountPage";
+import MyAccountPage from "./pages/Account/MyAccountPage"; // Main
 import AccountDetailsPage from "./pages/Account/AccountDetailsPage";
+import MyStallsPage from "./components/MyStalls";
+import MyProducts from "./pages/Products/MyProducts";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
@@ -20,7 +22,11 @@ import Error404 from "./pages/Errors/Error404";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+<<<<<<< Updated upstream
 import MyStallsPage from "./pages/Account/MyStallsPage";
+=======
+
+>>>>>>> Stashed changes
 
 function App() {
   return (
@@ -34,9 +40,9 @@ function App() {
             <Route path="/account" element={<AccountDetailsPage />} />
             <Route path="myaccount" element={<AccountDetailsPage />} />
             <Route path="mystalls" element={<MyStallsPage />} />
-            {/* <Route path="myproducts" element={<MyProductsPage />} />
-            <Route path="myorders" element={<MyOrdersPage />} />
-            <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
+            <Route path="myproducts" element={<MyProducts />} />
+            {/* <Route path="myorders" element={<MyOrdersPage />} /> */}
+            {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
           </Route>
         </Route>
 
