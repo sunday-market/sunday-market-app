@@ -102,6 +102,22 @@ export default function Navbar() {
     navigate("/account/mystalls");
   };
 
+  const navigateToMessages = () => {
+    navigate("/account/messages");
+  };
+
+  const navigateToOrdersRecieved = () => {
+    navigate("/account/ordersrecieved");
+  };
+
+  const navigateToMyOrders = () => {
+    navigate("/accounts/myorders");
+  };
+
+  const navigateToMyProducts = () => {
+    navigate("/accounts/myproducts");
+  };
+
   // Search submit
   const onSearchSubmit = (e) => {
     console.log(e.key);
@@ -357,16 +373,16 @@ export default function Navbar() {
             <PersonIcon sx={{ pr: 1.5, scale: 2, margin: 0 }} />
             My Account
           </MenuItem>
-          <MenuItem sx={{ color: "white" }}>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToMessages}>
             <MailIcon sx={{ pr: 1.5 }} />
             Messages
           </MenuItem>
           <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
-          <MenuItem sx={{ color: "white" }}>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToOrdersRecieved}>
             <ReceiptIcon sx={{ pr: 1.5 }} />
             Orders Recieved
           </MenuItem>
-          <MenuItem sx={{ color: "white" }}>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToMyOrders}>
             <ReceiptLongTwoToneIcon sx={{ pr: 1.5 }} />
             My Orders
           </MenuItem>
@@ -374,7 +390,7 @@ export default function Navbar() {
             <StorefrontTwoToneIcon sx={{ pr: 1.5 }} />
             My Stalls
           </MenuItem>
-          <MenuItem sx={{ color: "white" }}>
+          <MenuItem sx={{ color: "white" }} onClick={navigateToMyProducts}>
             <Inventory2TwoToneIcon sx={{ pr: 1.5 }} />
             My Products
           </MenuItem>
