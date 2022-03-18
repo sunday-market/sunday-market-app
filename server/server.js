@@ -19,8 +19,10 @@ app.use("/images", express.static(path.join(__dirname, "public/images")));
 
 const port = process.env.PORT || 5000;
 
+// routes
 app.use("/api/auth", require("./routes/auth"));
-app.use("/api/user", require("./routes/user.routes"))
+app.use("/api/user", require("./routes/user.routes"));
+app.use("/api", require("./routes/stall.routes"));
 
 app.use(errorHandler);
 

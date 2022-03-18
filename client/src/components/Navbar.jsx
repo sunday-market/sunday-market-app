@@ -326,7 +326,7 @@ export default function Navbar() {
             elevation: 0,
             sx: {
               overflow: "visible",
-              // filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
               mt: 1.5,
               bgcolor: "#03a9f4",
               boxShadow: 5,
@@ -395,7 +395,7 @@ export default function Navbar() {
             elevation: 0,
             sx: {
               overflow: "visible",
-              // filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+              filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
               mt: 1.5,
               bgcolor: "#03a9f4",
               boxShadow: 5,
@@ -443,7 +443,7 @@ export default function Navbar() {
           elevation: 0,
           sx: {
             overflow: "visible",
-            // filter: 'drop-shadow(0px 2px 8px rgba(0,0,0,0.32))',
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             mt: 1.5,
             bgcolor: "#03a9f4",
             boxShadow: 5,
@@ -487,7 +487,7 @@ export default function Navbar() {
           elevation: 0,
           sx: {
             overflow: "visible",
-
+            filter: "drop-shadow(0px 2px 8px rgba(0,0,0,0.32))",
             mt: 1.5,
             bgcolor: "#03a9f4",
             boxShadow: 5,
