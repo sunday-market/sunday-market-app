@@ -13,8 +13,9 @@ import PasswordResetPage from "./pages/Authentication/PasswordResetPage";
 // Accounts Pages
 import MyAccountPage from "./pages/Account/MyAccountPage"; // Main
 import AccountDetailsPage from "./pages/Account/AccountDetailsPage";
-import MyStallsPage from "./components/MyStalls";
+import MyStallsPage from "./pages/Account/MyStallsPage";
 import MyProducts from "./pages/Products/MyProducts";
+
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
@@ -22,11 +23,7 @@ import Error404 from "./pages/Errors/Error404";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-<<<<<<< Updated upstream
-import MyStallsPage from "./pages/Account/MyStallsPage";
-=======
 
->>>>>>> Stashed changes
 
 function App() {
   return (
