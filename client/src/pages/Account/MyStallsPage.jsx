@@ -6,10 +6,28 @@ import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
 import { useUser } from "../../hooks/useUser";
 import StallCard from "../../components/MyStallCard";
+import axios from "axios";
+import jwt from "jwt-decode";
 
 export default function MyStalls() {
   const userData = useUser();
+  const [myStalls, setMyStalls] = useState([]);
 
+  useEffect(() => {
+    if (localStorage.getItem("authToken")) {
+      const FetchUsersStalls = async () => {
+        try {
+          const currentUserID = await jwt(localStorage.getItem("authToken"));
+          const stalls = await axios.get(`/api/mystalls/${currentUserID.id}`);
+          setMyStalls(stalls.data);
+        } catch (error) {
+          console.log(error);
+        }
+      };
+      FetchUsersStalls();
+    }
+  }, []);
+  console.log(myStalls);
   return (
     <>
       <div>My Stalls</div>
@@ -29,7 +47,7 @@ export default function MyStalls() {
           justify={"center"}
           sx={{ display: "flex", flexWrap: "wrap" }}
         >
-          {Array.from(Array(5)).map((_, index) => (
+          {myStalls.map((stall, index) => (
             <Box
               item
               key={index}
@@ -41,7 +59,14 @@ export default function MyStalls() {
                 p: 1,
               }}
             >
-              <StallCard />
+              <StallCard
+                cardTitle={stall.stallName}
+                stallActive={stall.activated}
+                imgTitle={`This is an image for the stall ${stall.stallName}`}
+                imgSource={stall.image_url}
+                cardCategory={stall.category}
+                cardDescription={stall.description}
+              />
             </Box>
           ))}
           <Card

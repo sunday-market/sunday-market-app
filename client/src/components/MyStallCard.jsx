@@ -4,6 +4,7 @@ export default function ItemCard({
   cardTitle,
   imgTitle,
   imgSource,
+  stallActive,
   cardCategory,
   cardDescription,
 }) {
@@ -19,9 +20,9 @@ export default function ItemCard({
       <Card
         sx={{
           width: "100%",
-          maxWidth:300,
-          height: 450,
-          maxHeight: 600,
+          maxWidth: 300,
+          height: "100%",
+          maxHeight: 650,
           margin: "auto",
           borderRadius: 5,
           bgcolor: "#eceff1",
@@ -59,6 +60,15 @@ export default function ItemCard({
               : "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
           }
         />
+        {stallActive ? (
+          <Typography sx={{ p: 0, marginBottom: 0, color: "green" }}>
+            {stallActive ? "Stall is active" : "Stall is deactivated"}
+          </Typography>
+        ) : (
+          <Typography sx={{ p: 0, marginBottom: 0, color: "red" }}>
+            {stallActive ? "Stall is active" : "Stall is deactivated"}
+          </Typography>
+        )}
         <Typography sx={{ p: 2, pb: 0, marginBottom: 0 }}>
           {cardCategory ? cardCategory : "Card Category"}
         </Typography>
