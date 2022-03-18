@@ -20,7 +20,7 @@ import Error404 from "./pages/Errors/Error404";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import MyStallsPage from "./components/MyStalls";
+import MyStallsPage from "./pages/Account/MyStallsPage";
 
 function App() {
   return (

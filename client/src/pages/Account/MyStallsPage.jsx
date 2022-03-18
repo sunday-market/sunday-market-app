@@ -4,19 +4,12 @@ import AddIcon from "@mui/icons-material/Add";
 import { Typography, Card, IconButton } from "@mui/material";
 import { Box } from "@mui/system";
 import { useEffect, useState } from "react";
-import { useUser } from "../hooks/useUser";
-import StallCard from "../components/MyStallCard";
+import { useUser } from "../../hooks/useUser";
+import StallCard from "../../components/MyStallCard";
 
 export default function MyStalls() {
   const userData = useUser();
 
-  const [userToken, setUserToken] = useState(null);
-  useEffect(() => {
-    function handleLoggedInStatus() {
-      setUserToken(localStorage.getItem("authToken"));
-    }
-    handleLoggedInStatus();
-  });
   return (
     <>
       <div>My Stalls</div>
