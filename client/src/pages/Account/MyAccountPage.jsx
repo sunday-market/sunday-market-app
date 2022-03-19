@@ -1,7 +1,15 @@
 import React from "react";
 import { Outlet, useNavigate } from "react-router";
 
-import { Box, Grid, Button } from "@mui/material";
+import { Box, Grid, Button} from "@mui/material";
+
+import {
+  PersonOutlined as AccountDetailsIcon,
+  StorefrontOutlined as MyStallsIcon,
+  Inventory2Outlined as MyProductsIcon,
+  ReceiptLongOutlined as MyOrdersIcon,
+  ReceiptOutlined as OrdersReceivedIcon,
+} from "@mui/icons-material";
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -13,61 +21,120 @@ const AccountPage = () => {
         container
         spacing={1}
         justifyContent="center"
-        padding={2}
+        pb={1}
         backgroundColor="white"
         border="solid 1px #c3c3c3"
       >
-        <Grid item>
-          <Button variant="contained" onClick={() => navigate("myaccount")}>
+        {/* Account Details Button */}
+        <Grid item display={{ xs: "none", md: "block" }}>
+          <Button
+            variant="outlined"
+            startIcon={<AccountDetailsIcon />}
+            onClick={() => navigate("myaccount")}
+          >
             Details
           </Button>
         </Grid>
-        <Grid item>
-          <Button variant="contained" onClick={() => navigate("mystalls")}>
+        <Grid item display={{ xs: "block", md: "none" }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("myaccount")}
+          >
+            <AccountDetailsIcon />
+          </Button>
+        </Grid>
+
+        {/* My Stalls Button  */}
+        <Grid item display={{ xs: "none", md: "block" }}>
+          <Button
+            variant="outlined"
+            startIcon={<MyStallsIcon />}
+            onClick={() => navigate("mystalls")}
+          >
             My Stalls
           </Button>
         </Grid>
-        <Grid item>
-          <Button variant="contained" onClick={() => navigate("myproducts")}>
+        <Grid item display={{ xs: "block", md: "none" }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("mystalls")}
+          >
+            <MyStallsIcon />
+          </Button>
+        </Grid>
+
+        {/* My Products Button  */}
+        <Grid item display={{ xs: "none", md: "block" }}>
+          <Button
+            variant="outlined"
+            startIcon={<MyProductsIcon />}
+            onClick={() => navigate("myproducts")}
+          >
             My Products
           </Button>
         </Grid>
-        <Grid item>
-          <Button variant="contained" onClick={() => navigate("myorders")}>
+        <Grid item display={{ xs: "block", md: "none" }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("myproducts")}
+          >
+            <MyProductsIcon />
+          </Button>
+        </Grid>
+
+        {/* My Orders Button  */}
+        <Grid item display={{ xs: "none", md: "block" }}>
+          <Button
+            variant="outlined"
+            startIcon={<MyOrdersIcon />}
+            onClick={() => navigate("myorders")}
+          >
             My Orders
           </Button>
         </Grid>
-        <Grid item>
+        <Grid item display={{ xs: "block", md: "none" }}>
           <Button
-            variant="contained"
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("myorders")}
+          >
+            <MyOrdersIcon />
+          </Button>
+        </Grid>
+
+        <Grid item display={{ xs: "none", md: "block" }}>
+          <Button
+            variant="outlined"
+            startIcon={<OrdersReceivedIcon />}
             onClick={() => navigate("ordersreceived")}
           >
             Orders Received
           </Button>
         </Grid>
+        <Grid item display={{ xs: "block", md: "none" }}>
+          <Button
+            size="small"
+            variant="outlined"
+            onClick={() => navigate("ordersreceived")}
+          >
+            <OrdersReceivedIcon />
+          </Button>
+        </Grid>
       </Grid>
 
-      {/* Nested Route  */}
-      <Box
-        display="flex"
-        flexDirection="column"
-        backgroundColor="#f5f5f5"
-        justifyContent="center"
-        alignItems="center"
-      >
+      <Box display="flex" justifyContent="center">
         <Box
           mt={3}
           backgroundColor="white"
           border="solid 1px #c3c3c3"
-          borderRadius="15px"
+          borderRadius="5px"
+          margin={1}
           padding={4}
           width="90%"
-          minWidth="350px"
-          maxWidth="900px"
-          display="flex"
-          flexDirection="column"
-          justifyContent="center"
-          alignItems="center"
+          maxWidth="1000px"
         >
           <Outlet />
         </Box>

@@ -12,13 +12,12 @@ const IncDecButton = ({
   incrementQuantity,
   decrementQuantity,
 }) => {
-
   return (
     <>
       <Grid container direction="column" align="center" p={1}>
         <Grid item>
           {counter <= 0 ? (
-            <Button variant="contained" onClick={incrementQuantity}>
+            <Button variant="contained" fullWidth onClick={incrementQuantity}>
               Add to Cart
             </Button>
           ) : (
