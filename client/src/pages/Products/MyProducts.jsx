@@ -34,7 +34,7 @@ const products = [
     description:
       "This is a test product.  This is dummy data to see what the contents of the title will contain",
     category: "Motor Vehicles",
-    qty: 1,
+    qty: 0,
     price: "10299",
   },
   {

@@ -119,6 +119,7 @@ const ProductCard = (props) => {
               item
               sx={{
                 display: "flex",
+                flexDirection: "column",
                 justifyContent: "center",
                 alignItems: "center",
               }}
@@ -129,6 +130,14 @@ const ProductCard = (props) => {
                 incrementQuantity={incrementQuantity}
                 decrementQuantity={decrementQuantity}
               />
+              <Typography
+                variant="body2"
+                color={quantityInStock <= 0 ? "red" : "grey.800"}
+              >
+                {quantityInStock <= 0
+                  ? "Out of Stock"
+                  : `Stock Remaining: ${quantityInStock}`}
+              </Typography>
             </Grid>
           </Grid>
         </Box>

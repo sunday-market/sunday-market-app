@@ -17,7 +17,12 @@ const IncDecButton = ({
       <Grid container direction="column" align="center" p={1}>
         <Grid item>
           {counter <= 0 ? (
-            <Button variant="contained" fullWidth onClick={incrementQuantity}>
+            <Button
+              disabled={quantityInStock <= 0}
+              variant="contained"
+              fullWidth
+              onClick={incrementQuantity}
+            >
               Add to Cart
             </Button>
           ) : (
