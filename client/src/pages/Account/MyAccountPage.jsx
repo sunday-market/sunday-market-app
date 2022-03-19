@@ -1,7 +1,7 @@
 import React from "react";
 import { Outlet, useNavigate } from "react-router";
 
-import { Box, Grid, Button} from "@mui/material";
+import { Box, Grid, Button } from "@mui/material";
 
 import {
   PersonOutlined as AccountDetailsIcon,
@@ -132,8 +132,9 @@ const AccountPage = () => {
           border="solid 1px #c3c3c3"
           borderRadius="5px"
           margin={1}
-          padding={4}
-          width="90%"
+          py={4}
+          px={{ xs: 1, sm: 3, md: 4 }}
+          width={{ xs: "100%", md: "90%" }}
           maxWidth="1000px"
         >
           <Outlet />
