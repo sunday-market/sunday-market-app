@@ -56,7 +56,7 @@ const AddProduct = () => {
           `../../api/mystalls/${decodedJWT.id}`,
           config
         );
-
+    
         if (!stalls) return;
 
         setUserStalls(stalls.data);

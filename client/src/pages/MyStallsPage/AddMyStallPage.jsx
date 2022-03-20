@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Grid,
   InputLabel,
@@ -26,20 +27,56 @@ export default function AddMyStallPage() {
   const [stallName, setStallName] = useState("");
   const [image, setImage] = useState("");
   const [activateStall, setActivateStall] = useState(false);
+  const [category, setCategory] = useState("");
+  const [description, setDescription] = useState("");
+  const [contactEmail, setContactEmail] = useState("");
+  const [location, setLocation] = useState("");
+  const [error, setError] = useState("");
 
-  // Radio button selection Change
-  const handleActivateDeactivate = (e) => {
-    setActivateStall(e.target.value);
-    console.log(e.target.value);
-    console.log("is true");
-    console.log(activateStall === true);
-    console.log("is false");
-    console.log(activateStall === false);
+  // navigation
+  const navigate = useNavigate();
+  const errorRef = useRef(null);
+
+  useEffect(() => {
+    if (!localStorage.getItem("authToken")) {
+      navigate("/");
+    }
+  }, [navigate]);
+
+  const saveStall = async (e) => {
+    e.preventDefault();
+
+    // Set header for Axios requests
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+
+    // check form details
+    // Check stall name for a value
+    if (stallName === "" || stallName.trim() === "") {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return setError("You Need To Provide A Stall Name");
+    }
+    // Check for stalls named the same
+    // TODO
+    //------
+
+    // Check for Category selected
   };
+
   return (
     <>
       <Typography variant="h4">Create A Stall</Typography>
       <Grid container direction={"column"} spacing={2}>
+        {/* Error Alert */}
+        <Grid item ref={errorRef}>
+          {error && <Alert severity="error">{error}</Alert>}
+        </Grid>
         <Grid item>
           <InputLabel required>Stall Name</InputLabel>
           <TextField
@@ -103,7 +140,7 @@ export default function AddMyStallPage() {
               aria-labelledby="activate-stall-button-group"
               name="controll-radio-button-group"
               value={activateStall}
-              onChange={handleActivateDeactivate}
+              onChange={(e) => setActivateStall(e.target.value)}
             >
               <FormControlLabel
                 value={false}
@@ -118,6 +155,7 @@ export default function AddMyStallPage() {
             </RadioGroup>
           </FormControl>
         </Grid>
+        {/* The category value needs to be stored as an id of category as the model only accepts object IDS */}
         <Grid item>
           <InputLabel required>Category</InputLabel>
           <Select
@@ -125,9 +163,9 @@ export default function AddMyStallPage() {
             variant="outlined"
             size="small"
             fullWidth
-            // value={}
+            value={category}
             placeholder="Choose A Category"
-            // onChange={(e) => setStall(e.target.value)}
+            onChange={(e) => setCategory(e.target.value)}
             sx={{ background: "white" }}
           >
             {Array.from(Array(6)).map((_, index) => (
@@ -138,14 +176,14 @@ export default function AddMyStallPage() {
           </Select>
         </Grid>
         <Grid item>
-          <InputLabel required>Stall Description</InputLabel>
+          <InputLabel>Stall Description</InputLabel>
           <TextField
             variant="outlined"
             fullWidth
             size="small"
             type="text"
-            // value={}
-            // onChange={}
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
             placeholder={`Enter A Description About ${
               stallName ? stallName : "Your Stall"
             }`}
@@ -162,8 +200,8 @@ export default function AddMyStallPage() {
             fullWidth
             size="small"
             type="text"
-            // value={}
-            // onChange={}
+            value={contactEmail}
+            onChange={(e) => setContactEmail(e.target.value)}
             placeholder={`Enter ${
               stallName ? stallName : "A Stall"
             } Contact Email..`}
@@ -171,14 +209,14 @@ export default function AddMyStallPage() {
           />
         </Grid>
         <Grid item>
-          <InputLabel>Stall Location</InputLabel>
+          <InputLabel required>Stall Location</InputLabel>
           <TextField
             variant="outlined"
             fullWidth
             size="small"
             type="text"
-            // value={}
-            // onChange={}
+            value={location}
+            onChange={(e) => setLocation(e.target.value)}
             placeholder={`Enter where the ${
               stallName ? stallName : "Stall"
             } is based..`}
@@ -190,6 +228,7 @@ export default function AddMyStallPage() {
             <Button
               sx={{ margin: 1 }}
               variant="contained"
+              onClick={saveStall}
               startIcon={<SaveIcon />}
             >
               Save
