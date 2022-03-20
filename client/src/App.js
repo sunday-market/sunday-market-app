@@ -27,6 +27,7 @@ import Error404 from "./pages/Errors/Error404";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
+import AddMyStallPage from "./pages/MyStallsPage/AddMyStallPage";
 
 function App() {
   return (
@@ -47,6 +48,7 @@ function App() {
 
             <Route path="stalls">
               <Route path="mystalls" element={<MyStallsPage />} />
+              <Route path="addstall" element={<AddMyStallPage />} />
             </Route>
 
             {/* <Route path="myorders" element={<MyOrdersPage />} /> */}
