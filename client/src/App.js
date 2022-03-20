@@ -15,7 +15,7 @@ import MyAccountPage from "./pages/Account/MyAccountPage"; // Main
 import AccountDetailsPage from "./pages/Account/AccountDetailsPage";
 
 // Stalls Pages
-import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
+import MyStallsPage from "./pages/Stalls/MyStallsPage";
 
 // Products Pages
 import MyProducts from "./pages/Products/MyProducts";
@@ -27,7 +27,7 @@ import Error404 from "./pages/Errors/Error404";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import AddMyStallPage from "./pages/MyStallsPage/AddMyStallPage";
+import AddMyStallPage from "./pages/Stalls/AddMyStallPage";
 
 function App() {
   return (
