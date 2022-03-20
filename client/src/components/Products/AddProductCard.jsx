@@ -1,39 +1,32 @@
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
-
 import { Typography, Card } from "@mui/material";
-import { useNavigate } from "react-router";
 
 const AddProductCard = (props) => {
-  const navigate = useNavigate();
-
   return (
-    <>
-      <Card
-        onClick={() => navigate("addproduct")}
-        sx={[
-          {
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-            height: "100%",
-            border: "solid 1px #eeeeee",
-            background: "#eeeeee",
+    <Card
+      sx={[
+        {
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100%",
+          border: "solid 1px #eeeeee",
+          background: "#eeeeee",
+        },
+        {
+          "&:hover": {
+            background: "#e0e0e0",
           },
-          {
-            "&:hover": {
-              background: "#e0e0e0",
-            },
-          },
-        ]}
-      >
-        <AddCircleOutlineRoundedIcon
-          color="disabled"
-          sx={{ height: "100px", width: "100px" }}
-        />
-        <Typography gutterBottom>Add Product</Typography>
-      </Card>
-    </>
+        },
+      ]}
+    >
+      <AddCircleOutlineRoundedIcon
+        color="disabled"
+        sx={{ height: "100px", width: "100px" }}
+      />
+      <Typography gutterBottom>Add Product</Typography>
+    </Card>
   );
 };
 

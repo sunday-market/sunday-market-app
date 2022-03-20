@@ -70,7 +70,7 @@ const AccountPage = () => {
           <Button
             variant="outlined"
             startIcon={<MyProductsIcon />}
-            onClick={() => navigate("myproducts")}
+            onClick={() => navigate("products/myproducts")}
           >
             My Products
           </Button>
@@ -79,7 +79,7 @@ const AccountPage = () => {
           <Button
             size="small"
             variant="outlined"
-            onClick={() => navigate("myproducts")}
+            onClick={() => navigate("products/myproducts")}
           >
             <MyProductsIcon />
           </Button>

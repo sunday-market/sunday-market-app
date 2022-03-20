@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Grid, Container, Pagination } from "@mui/material";
+import { useNavigate } from "react-router";
+import { Box, Grid, Container, Pagination, Typography } from "@mui/material";
 import ProductCard from "../../components/Products/ProductCard";
 import AddProductCard from "../../components/Products/AddProductCard";
 
@@ -61,6 +62,8 @@ const products = [
   },
 ];
 const MyProducts = () => {
+  const navigate = useNavigate();
+
   return (
     <>
       <Box
@@ -70,9 +73,21 @@ const MyProducts = () => {
         }}
       >
         <Container maxWidth={false}>
+          <Typography variant="h4" gutterBottom>
+            My Products
+          </Typography>
+
           <Box sx={{ pt: 0 }}>
             <Grid container spacing={3}>
-              <Grid item lg={3} md={4} sm={6} xs={12}>
+              {/* Add Product Card  */}
+              <Grid
+                item
+                lg={3}
+                md={4}
+                sm={6}
+                xs={12}
+                onClick={() => navigate("../add")}
+              >
                 <AddProductCard />
               </Grid>
 
