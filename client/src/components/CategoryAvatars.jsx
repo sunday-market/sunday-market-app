@@ -36,7 +36,9 @@ export default function CategoryAvatars({
         }
         onClick={GoToCategory}
       />
-      <Typography>{categoryTitle ? categoryLink : "Category"}</Typography>
+      <Typography align="center">
+        {categoryTitle ? categoryLink : "Category"}
+      </Typography>
     </>
   );
 }

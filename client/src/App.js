@@ -13,7 +13,7 @@ import PasswordResetPage from "./pages/Authentication/PasswordResetPage";
 // Accounts Pages
 import MyAccountPage from "./pages/Account/MyAccountPage"; // Main
 import AccountDetailsPage from "./pages/Account/AccountDetailsPage";
-import MyStallsPage from "./pages/Account/MyStallsPage";
+import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
 import MyProducts from "./pages/Products/MyProducts";
 
 

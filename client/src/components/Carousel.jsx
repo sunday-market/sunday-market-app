@@ -2,7 +2,16 @@ import SwipeableViews from "react-swipeable-views";
 import { useTheme } from "@mui/material/styles";
 import { autoPlay } from "react-swipeable-views-utils";
 import { useState } from "react";
-import { Box, Button, Paper, Card, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  Paper,
+  Card,
+  Typography,
+  Grid,
+  CardMedia,
+  CardContent,
+} from "@mui/material";
 import MobileStepper from "@mui/material/MobileStepper";
 import KeyboardArrowLeft from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRight from "@mui/icons-material/KeyboardArrowRight";
@@ -28,11 +37,11 @@ export default function Carousel({ Cards }) {
     <>
       <Card
         sx={{
-          maxWidth: "90%",
+          maxWidth: "92%",
           width: "100%",
           flexGrow: 1,
           padding: "1%",
-          borderRadius: 5,
+          borderRadius: 2,
           boxShadow: 5,
           margin: "auto",
           bgcolor: "#eceff1",
@@ -64,20 +73,44 @@ export default function Carousel({ Cards }) {
           {Cards.map((step, index) => (
             <div key={step.label ? step.label : index}>
               {Math.abs(activeStep - index) <= 2 ? (
-                <Box
-                  sx={{
-                    height: 300,
-                    display: "block",
-                    maxWidth: "90%",
-                    overflow: "hidden",
-                    width: "100%",
-                    margin: "auto",
-                    pt: 2,
-                  }}
-                >
-                  {/* this is where the filling goes will need to change text after  */}
-                  {step.text}
-                </Box>
+                <>
+                  <Box
+                    sx={{
+                      height: 300,
+                      display: "block",
+                      maxWidth: "90%",
+                      overflow: "hidden",
+                      width: "100%",
+                      margin: "auto",
+                      pt: 2,
+                    }}
+                  >
+                    {/* this is where the filling goes will need to change text after  */}
+                    {step.text}
+                  </Box>
+                  <Grid container spacing={2}>
+                    <Grid
+                      item
+                      lg={8}
+                      md={8}
+                      sm={8}
+                      xs={8}
+                      sx={{ bgcolor: "red" }}
+                    >
+                      <CardMedia>Product IMAGE</CardMedia>
+                    </Grid>
+                    <Grid
+                      item
+                      lg={4}
+                      md={4}
+                      sm={4}
+                      xs={4}
+                      sx={{ bgcolor: "blue" }}
+                    >
+                      <CardContent>Product Text</CardContent>
+                    </Grid>
+                  </Grid>
+                </>
               ) : null}
             </div>
           ))}

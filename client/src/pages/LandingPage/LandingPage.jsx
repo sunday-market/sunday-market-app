@@ -1,8 +1,9 @@
-import { Box, Typography } from "@mui/material";
+import { Box, Typography, Container, Grid } from "@mui/material";
 import Carousel from "../../components/Carousel";
 import ItemCard from "../../components/ItemCard";
 import CategoryAvatars from "../../components/CategoryAvatars";
 import { useIsMobileScreen } from "../../hooks/useIsMobileScreen";
+import ProductCard from "../../components/Products/ProductCard";
 
 export default function LandingPage() {
   const CardArray = [
@@ -27,6 +28,18 @@ export default function LandingPage() {
       text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
     },
   ];
+  const product = {
+    id: 1,
+    name: "Strawberries 500g Punnet",
+    image:
+      "https://images.unsplash.com/photo-1623227866882-c005c26dfe41?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
+    description:
+      "This is a test product.  This is dummy data to see what the contents of the title will contain",
+    category: "Fruits and Vegetables",
+    qty: 3,
+    price: "2.99",
+  };
+
   // this will adjust the screen size accordinly
   const windowSize = useIsMobileScreen();
   return (
@@ -57,43 +70,48 @@ export default function LandingPage() {
           Recently Added
         </Typography>
         {/* Item Cards of recently added */}
-        <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-          {Array.from(Array(4)).map((_, index) => (
-            <Box
-              item
-              key={index}
-              sx={{
-                margin: "auto",
-                textAlign: "center",
-                alignItems: "center",
-                justifyContent: "center",
-                p: 1,
-              }}
-            >
-              <ItemCard />
+        
+        <Box
+          sx={{
+            flexGrow: 1,
+          }}
+        >
+          <Container maxWidth={false}>
+            <Box sx={{ pt: 0 }}>
+              <Grid container spacing={3} sx={{ p: 2 }}>
+                {Array.from(Array(6)).map((_, index) => (
+                  <Grid item key={index} lg={3} md={4} sm={6} xs={12}>
+                    <ProductCard
+                      key={index}
+                      product={product}
+                      qty={product.qty}
+                    />
+                  </Grid>
+                ))}
+              </Grid>
             </Box>
-          ))}
+          </Container>
         </Box>
-        {/* Category Avatars */}
         {windowSize && (
-          <Box sx={{ display: "flex", flexWrap: "wrap" }}>
-            {Array.from(Array(12)).map((_, index) => (
-              <Box
-                item
-                key={index}
-                sx={{
-                  margin: "auto",
-                  textAlign: "center",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  p: 1,
-                }}
-              >
-                <CategoryAvatars />
+          <Box
+            sx={{
+              flexGrow: 1,
+            }}
+          >
+            <Container maxWidth={false}>
+              <Box sx={{ pt: 0 }}>
+                <Grid container spacing={3} sx={{ p: 2 }}>
+                  {Array.from(Array(12)).map((_, index) => (
+                    <Grid item lg={2} md={3} sm={4}>
+                      <CategoryAvatars />
+                    </Grid>
+                  ))}
+                </Grid>
               </Box>
-            ))}
+            </Container>
           </Box>
         )}
+        {/* Category Avatars */}
       </Box>
     </>
   );
