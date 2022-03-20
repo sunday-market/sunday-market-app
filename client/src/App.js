@@ -38,12 +38,15 @@ function App() {
           <Route path="account" element={<MyAccountPage />}>
             <Route path="/account" element={<AccountDetailsPage />} />
             <Route path="myaccount" element={<AccountDetailsPage />} />
-            <Route path="mystalls" element={<MyStallsPage />} />
 
             {/* Products Pages  */}
             <Route path="products">
               <Route path="myproducts" element={<MyProducts />} />
               <Route path="add" element={<AddProduct />} />
+            </Route>
+
+            <Route path="stalls">
+              <Route path="mystalls" element={<MyStallsPage />} />
             </Route>
 
             {/* <Route path="myorders" element={<MyOrdersPage />} /> */}

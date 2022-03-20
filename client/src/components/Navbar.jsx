@@ -99,7 +99,7 @@ export default function Navbar() {
   };
 
   const navigateToMyStalls = () => {
-    navigate("/account/mystalls");
+    navigate("/account/stalls/mystalls");
   };
 
   const navigateToMessages = () => {
@@ -115,7 +115,7 @@ export default function Navbar() {
   };
 
   const navigateToMyProducts = () => {
-    navigate("/accounts/myproducts");
+    navigate("/account/products/myproducts");
   };
 
   // Search submit

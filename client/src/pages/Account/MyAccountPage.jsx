@@ -50,7 +50,7 @@ const AccountPage = () => {
           <Button
             variant="outlined"
             startIcon={<MyStallsIcon />}
-            onClick={() => navigate("mystalls")}
+            onClick={() => navigate("stalls/mystalls")}
           >
             My Stalls
           </Button>
@@ -59,7 +59,7 @@ const AccountPage = () => {
           <Button
             size="small"
             variant="outlined"
-            onClick={() => navigate("mystalls")}
+            onClick={() => navigate("stalls/mystalls")}
           >
             <MyStallsIcon />
           </Button>
