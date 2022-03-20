@@ -13,9 +13,13 @@ import PasswordResetPage from "./pages/Authentication/PasswordResetPage";
 // Accounts Pages
 import MyAccountPage from "./pages/Account/MyAccountPage"; // Main
 import AccountDetailsPage from "./pages/Account/AccountDetailsPage";
-import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
-import MyProducts from "./pages/Products/MyProducts";
 
+// Stalls Pages
+import MyStallsPage from "./pages/MyStallsPage/MyStallsPage";
+
+// Products Pages
+import MyProducts from "./pages/Products/MyProducts";
+import AddProduct from "./pages/Products/AddProduct";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
@@ -24,25 +28,31 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 
-
 function App() {
   return (
     <Router>
       <Navbar />
       <Routes>
-        <Route path="/" element={<LandingPage />} />
-
+        {/* Private Routes  */}
         <Route element={<PrivateRoute />}>
           <Route path="account" element={<MyAccountPage />}>
             <Route path="/account" element={<AccountDetailsPage />} />
             <Route path="myaccount" element={<AccountDetailsPage />} />
             <Route path="mystalls" element={<MyStallsPage />} />
-            <Route path="myproducts" element={<MyProducts />} />
+
+            {/* Products Pages  */}
+            <Route path="products">
+              <Route path="myproducts" element={<MyProducts />} />
+              <Route path="add" element={<AddProduct />} />
+            </Route>
+
             {/* <Route path="myorders" element={<MyOrdersPage />} /> */}
             {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
           </Route>
         </Route>
 
+        {/* Public Routes  */}
+        <Route path="/" element={<LandingPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route

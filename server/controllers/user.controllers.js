@@ -15,6 +15,7 @@ exports.getUserById = async (req, res, next) => {
     res.status(200).json({
       success: true,
       data: {
+        id: user._id,
         username: user.username,
         fullname: user.fullname,
         email: user.email,
@@ -68,4 +69,3 @@ exports.updateUser = async (req, res, next) => {
     return next(error);
   }
 };
-

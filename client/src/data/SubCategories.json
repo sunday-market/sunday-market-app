@@ -1,0 +1,42 @@
+[
+  {
+    "id": "1",
+    "category": "Fruits"
+  },
+  {
+    "id": "2",
+    "category": "vegetables"
+  },  
+  {
+    "id": "3",
+    "category": "Baked Goods"
+  },
+  {
+    "id": "4",
+    "category": "Cars"
+  },
+  {
+    "id": "5",
+    "category": "Motorbikes"
+  },
+  {
+    "id": "6",
+    "category": "Kids Toys"
+  },
+  {
+    "id": "7",
+    "category": "Couches"
+  },
+  {
+    "id": "8",
+    "category": "Dining Tables"
+  },
+  {
+    "id": "9",
+    "category": "Coffee Tables"
+  },
+  {
+    "id": "10",
+    "category": "Other... (Please provide)"
+  }
+]
