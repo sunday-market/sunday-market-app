@@ -28,6 +28,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
 import AddMyStallPage from "./pages/Stalls/AddMyStallPage";
+import ViewStallPage from "./pages/Stalls/ViewStallPage";
 
 function App() {
   return (
@@ -49,6 +50,7 @@ function App() {
             <Route path="stalls">
               <Route path="mystalls" element={<MyStallsPage />} />
               <Route path="addstall" element={<AddMyStallPage />} />
+              <Route path="viewstall/:stallID" element={<ViewStallPage />} />
             </Route>
 
             {/* <Route path="myorders" element={<MyOrdersPage />} /> */}
