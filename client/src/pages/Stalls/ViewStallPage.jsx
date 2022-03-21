@@ -26,52 +26,59 @@ export default function ViewStallPage() {
 
   // need for getting params
   const params = useParams();
+  const stallid = params.stallID;
+
   // error ref for scrolling
   const errorRef = useRef(null);
-  // Set header for Axios requests
-  const config = {
-    headers: {
-      "Content-Type": "application/json",
-    },
-  };
+
   // Get stall info
   useEffect(() => {
-    if (params.stallID) {
-      const getStall = async (e) => {
+    if (stallid) {
+      const getStall = async () => {
         try {
-          setStall(await axios.get(`/api/stalls/${params.stallID}`, config));
-        } catch (error) {
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          setError(error.response.data.error);
+          const stallData = await axios.get(`/api/stalls/${stallid}`);
+          console.log(stallData.data);
+          setStall(stallData.data);
+        } catch (err) {
+          setError("No Stall Exists with that ID");
         }
       };
       getStall();
     }
-  });
+  }, [stallid]);
+
   // Get stall user from stall info
   useEffect(() => {
-    if (params.stallID) {
+    if (stall.length !== 0) {
       const getUser = async (e) => {
+        // Set header for Axios requests
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        };
         try {
-          const userID = await jwt(localStorage.getItem("authToken"));
+          const userID = stall[0].user;
           setUser(await axios.get(`api/user/${userID.id}`, config));
-        } catch (error) {
+        } catch (err) {
           errorRef.current.scrollIntoView({
             behavior: "smooth",
             block: "start",
           });
-          setError(error.response.data.error);
+          setError("User of this Stall can't be found can be found");
+          setTimeout(() => {
+            setError("");
+          }, 5000);
         }
       };
       getUser();
     }
-  });
+  }, [stall, user]);
+
   return (
     <>
       <div>ViewStallPage</div>
+      <div></div>
       <Grid container direction={"row"} spacing={2}>
         <Grid item ref={errorRef}>
           {error && <Alert severity="error">{error}</Alert>}
