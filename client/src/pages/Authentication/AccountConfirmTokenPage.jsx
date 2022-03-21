@@ -9,7 +9,6 @@ import ErrorImage from "../../assets/error.svg";
 
 const AccountConfirmTokenPage = () => {
   const [verified, setVerified] = useState(false);
-
   const [fullName, setFullName] = useState("John");
 
   const navigate = useNavigate();
