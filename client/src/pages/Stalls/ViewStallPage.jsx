@@ -17,7 +17,7 @@ import {
   FormLabel,
 } from "@mui/material";
 import axios from "axios";
-import jwt from "jwt-decode";
+import MailIcon from "@mui/icons-material/Mail";
 import { useParams } from "react-router-dom";
 
 export default function ViewStallPage() {
@@ -387,7 +387,8 @@ export default function ViewStallPage() {
                   }}
                   onClick={"contactUs"}
                 >
-                  Contact Us
+                  <MailIcon />
+                  &nbsp;Contact Us
                 </Button>
               </Box>
             </Box>

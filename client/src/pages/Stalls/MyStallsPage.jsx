@@ -76,6 +76,7 @@ export default function MyStalls() {
               {myStalls.map((stall, index) => (
                 <Grid item lg={3} md={4} xs={12} key={index}>
                   <StallCard
+                    cardId={stall._id}
                     cardTitle={stall.stallName}
                     stallActive={stall.activated}
                     imgTitle={`This is an image for the stall ${stall.stallName}`}

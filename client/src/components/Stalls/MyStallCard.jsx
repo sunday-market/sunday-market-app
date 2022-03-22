@@ -7,8 +7,10 @@ import {
   CardContent,
   CardMedia,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function ItemCard({
+  cardId,
   cardTitle,
   imgTitle,
   imgSource,
@@ -16,11 +18,12 @@ export default function ItemCard({
   cardCategory,
   cardDescription,
 }) {
-  const AddToCart = async (e) => {
-    console.log("Add to cart");
+  const navigate = useNavigate();
+  const UpdateCard = async (e) => {
+    console.log("UpdateCard");
   };
   const CardDetails = async (e) => {
-    console.log("Details clicked");
+    navigate(`/account/stalls/viewstall/${cardId}`);
   };
 
   return (
@@ -163,7 +166,7 @@ export default function ItemCard({
                   borderRadius: 2,
                   fontFamily: "Tahoma",
                 }}
-                onClick={AddToCart}
+                onClick={UpdateCard}
               >
                 Update
               </Button>
