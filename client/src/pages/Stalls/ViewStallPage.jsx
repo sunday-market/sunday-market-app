@@ -43,9 +43,10 @@ export default function ViewStallPage() {
 
   // Handle image height function for dynamic resizing
   const getImageHeight = () => {
-    const newHeight = imgRef.current.height;
-    console.log(newHeight);
-    setImageHeight(newHeight);
+    if (imgRef) {
+      const newHeight = imgRef.current.height;
+      setImageHeight(newHeight);
+    }
   };
 
   // Handle imageHeight when screen resizes
