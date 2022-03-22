@@ -145,7 +145,7 @@ export default function ItemCard({
                   pt: 0.5,
                   pb: 0.5,
                   margin: 0.5,
-                  borderRadius: 25,
+                  borderRadius: 2,
                   fontFamily: "Tahoma",
                 }}
                 onClick={CardDetails}
@@ -160,7 +160,7 @@ export default function ItemCard({
                   pt: 0.5,
                   pb: 0.5,
                   margin: 0.5,
-                  borderRadius: 25,
+                  borderRadius: 2,
                   fontFamily: "Tahoma",
                 }}
                 onClick={AddToCart}

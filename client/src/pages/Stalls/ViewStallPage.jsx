@@ -25,6 +25,7 @@ export default function ViewStallPage() {
   const [user, setUser] = useState([]);
   const [error, setError] = useState("");
   const [imageHeight, setImageHeight] = useState();
+  const [date, setDate] = useState("");
 
   // need for getting params
   const params = useParams();
@@ -77,6 +78,24 @@ export default function ViewStallPage() {
   // Get stall user from stall info
   useEffect(() => {
     if (stall.length !== 0) {
+      const months = [
+        "01",
+        "02",
+        "03",
+        "04",
+        "05",
+        "06",
+        "07",
+        "08",
+        "09",
+        "10",
+        "11",
+        "12",
+      ];
+      const dayDate = new Date(stall[0].createdAt).getDate();
+      const monthDate = new Date(stall[0].createdAt).getMonth();
+      const yearDate = new Date(stall[0].createdAt).getFullYear();
+      setDate(`${dayDate}/${months[monthDate]}/${yearDate}`);
       const getUser = async (e) => {
         // Set header for Axios requests
         const config = {
@@ -86,7 +105,8 @@ export default function ViewStallPage() {
         };
         try {
           const userID = stall[0].user;
-          setUser(await axios.get(`api/user/${userID.id}`, config));
+          const userData = await axios.get(`/api/user/${userID}`, config);
+          setUser(userData.data.data);
         } catch (err) {
           setError(
             "User of this Stall can't be found can be found, please contact management"
@@ -104,7 +124,6 @@ export default function ViewStallPage() {
   const stallLengthBool = stall.length > 0;
   return (
     <>
-      <div>{imageHeight}</div>
       <Box
         component="main"
         sx={{
@@ -185,10 +204,193 @@ export default function ViewStallPage() {
           </Grid>
           <Grid item lg={3} md={3} sm={12} xs={11} zeroMinWidth>
             <Box
-              width={"100%"}
-              height={imageHeight}
-              sx={{ boxShadow: 3 }}
-            ></Box>
+              minHeight={imageHeight}
+              maxHeight={"100%"}
+              borderRadius={2}
+              sx={{
+                boxShadow: 3,
+                pt: 1,
+                pb: 1,
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              {user && (
+                <Typography
+                  align="center"
+                  color="textPrimary"
+                  variant="body2"
+                  sx={{
+                    display: "-webkit-box !important",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    pl: 2,
+                    fontWeight: "bold",
+                  }}
+                >
+                  Stall User:
+                </Typography>
+              )}
+              {user && (
+                <Typography
+                  align="center"
+                  color="textPrimary"
+                  variant="body2"
+                  sx={{
+                    display: "-webkit-box !important",
+                    WebkitLineClamp: 3,
+                    WebkitBoxOrient: "vertical",
+                    pl: 2,
+                  }}
+                >
+                  {user.username
+                    ? user.username
+                    : "No Username Can be found For This Stall"}
+                </Typography>
+              )}
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                  fontWeight: "bold",
+                }}
+              >
+                Stall Active:
+              </Typography>
+              <Typography
+                align="center"
+                color={stallLengthBool && stall[0].activated ? "green" : "red"}
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                }}
+              >
+                {stallLengthBool && stall[0].activated
+                  ? "Stall Is Currently Activate"
+                  : "Stall Is Currently Deactivated"}
+              </Typography>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                  fontWeight: "bold",
+                }}
+              >
+                Stall Established Since:
+              </Typography>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                }}
+              >
+                {stallLengthBool && stall[0].createdAt
+                  ? date
+                  : "This Stall Has No Creation Date"}
+              </Typography>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                  fontWeight: "bold",
+                }}
+              >
+                Contact Email:
+              </Typography>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                }}
+              >
+                {stallLengthBool && stall[0].email
+                  ? stall[0].email
+                  : "No Contact Email has been Provided"}
+              </Typography>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                  fontWeight: "bold",
+                }}
+              >
+                Location:
+              </Typography>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="body2"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pl: 2,
+                }}
+              >
+                {stallLengthBool && stall[0].city_location
+                  ? stall[0].city_location
+                  : "No Location has been Provided"}
+              </Typography>
+              <Box sx={{ pt: 0.5, marginBottom: 0.5 }} />
+              <Box
+                width={"100%"}
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <Button
+                  variant="contained"
+                  sx={{
+                    pl: 1,
+                    pr: 1,
+                    pt: 0.5,
+                    pb: 0.5,
+                    margin: "auto",
+                    borderRadius: 1,
+                    fontFamily: "Tahoma",
+                  }}
+                  onClick={"contactUs"}
+                >
+                  Contact Us
+                </Button>
+              </Box>
+            </Box>
           </Grid>
         </Grid>
       </Box>
