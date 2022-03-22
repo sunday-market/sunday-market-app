@@ -24,6 +24,7 @@ export default function ViewStallPage() {
   const [stall, setStall] = useState([]);
   const [user, setUser] = useState([]);
   const [error, setError] = useState("");
+  const [imageHeight, setImageHeight] = useState();
 
   // need for getting params
   const params = useParams();
@@ -31,6 +32,26 @@ export default function ViewStallPage() {
 
   // error ref for scrolling
   const errorRef = useRef(null);
+
+  // image ref for resizing
+  const imgRef = useRef(null);
+
+  // Handle image on load function
+  const onImageLoad = ({ target: img }) => {
+    setImageHeight(img.height);
+  };
+
+  // Handle image height function for dynamic resizing
+  const getImageHeight = () => {
+    const newHeight = imgRef.current.height;
+    console.log(newHeight);
+    setImageHeight(newHeight);
+  };
+
+  // Handle imageHeight when screen resizes
+  useEffect(() => {
+    window.addEventListener("resize", getImageHeight);
+  }, []);
 
   // Get stall info
   useEffect(() => {
@@ -82,48 +103,69 @@ export default function ViewStallPage() {
   const stallLengthBool = stall.length > 0;
   return (
     <>
-      <Typography
-        align="center"
-        color="textPrimary"
-        variant="h3"
-        sx={{
-          display: "-webkit-box !important",
-          WebkitLineClamp: 3,
-          WebkitBoxOrient: "vertical",
-          pb: 2,
-        }}
-      >
-        {stallLengthBool
-          ? stall[0].stallName.toUpperCase()
-          : "No Stall Name Provided Provided"}
-      </Typography>
+      <div>{imageHeight}</div>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
         }}
       >
-        <Grid container spacing={1} alignItems="center" justifyContent="center">
+        <Grid
+          container
+          display={"flex"}
+          spacing={1}
+          alignItems="center"
+          justifyContent="center"
+        >
           {error && (
             <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
               <Alert severity="error">{error}</Alert>
             </Grid>
           )}
+          <Grid item lg={12} md={12} sm={12} xs={12}>
+            <Typography
+              align="center"
+              color="textPrimary"
+              variant="h5"
+              sx={{
+                display: "-webkit-box !important",
+                WebkitLineClamp: 3,
+                WebkitBoxOrient: "vertical",
+                pb: 2,
+              }}
+            >
+              {stallLengthBool && stall[0].stallName
+                ? stall[0].stallName.toUpperCase()
+                : "No Stall Name Provided Provided"}
+            </Typography>
+          </Grid>
           <Grid item lg={5} md={4} sm={5} xs={11} zeroMinWidth>
             <Box
+              ref={imgRef}
               component={"img"}
               width={"100%"}
               sx={{ borderRadius: 2 }}
+              onLoad={onImageLoad}
               src={
-                stallLengthBool
+                stallLengthBool && stall[0].image_url
                   ? stall[0].image_url
                   : "https://randomwordgenerator.com/img/picture-generator/53e4d2464252ae14f1dc8460962e33791c3ad6e04e507440722d72d59448c5_640.jpg"
               }
               alt={stallLengthBool ? stall[0].stallName : "Image for the store"}
             />
-            <Box bgcolor={"yellow"} width={"100%"} height={"100px"}></Box>
           </Grid>
-          <Grid item lg={4} md={5} sm={7} xs={11} zeroMinWidth>
+          <Grid
+            item
+            container
+            display="flex"
+            justifyContent="start"
+            lg={4}
+            md={5}
+            sm={7}
+            xs={11}
+            height={imageHeight}
+            zeroMinWidth
+          >
             <Typography
               align="center"
               color="textPrimary"
@@ -132,16 +174,20 @@ export default function ViewStallPage() {
                 display: "-webkit-box !important",
                 WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
+                pl: 2,
               }}
             >
-              {stallLengthBool
+              {stallLengthBool && stall[0].description
                 ? stall[0].description
-                : "No Description Provided"}
+                : "No Description Provided For This Stall"}
             </Typography>
-            <Box bgcolor={"yellow"} width={"100%"} height={"100px"}></Box>
           </Grid>
           <Grid item lg={3} md={3} sm={12} xs={11} zeroMinWidth>
-            <Box bgcolor={"yellow"} width={"100%"} height={"100px"}></Box>
+            <Box
+              width={"100%"}
+              height={imageHeight}
+              sx={{ boxShadow: 3 }}
+            ></Box>
           </Grid>
         </Grid>
       </Box>
