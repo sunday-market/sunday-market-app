@@ -10,11 +10,11 @@ const orderSchema = new mongoose.Schema(
       id: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
-        required: [true, "Customer id is required"],
+        required: [true, "Stall id is required"],
       },
       name: {
         type: String,
-        required: [true, "Customer name is required"],
+        required: [true, "Stall name is required"],
       },
       category_id: {
         type: mongoose.Schema.Types.ObjectId,
@@ -23,11 +23,19 @@ const orderSchema = new mongoose.Schema(
       },
       email: {
         type: String,
-        required: [true, "Customer email is required"],
+        required: [true, "Stall email is required"],
         match: [
           /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[0-9]{1,3}\.[0-9]{1,3}\.[0-9{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)[a-zA-Z]{2,}))$/,
           "Please provide a valid email",
         ],
+      },
+      phone: {
+        type: String,
+        required: [true, "Stall name is required"],
+      },
+      location: {
+        type: String,
+        required: [true, "Address is required"],
       },
     },
     customer: {
