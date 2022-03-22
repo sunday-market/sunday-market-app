@@ -17,6 +17,20 @@ exports.getAllOrders = async (req, res, next) => {
   }
 };
 
+exports.getOrderById = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.orderId });
+
+    if (!order) {
+      return next(new ErrorResponse("No order found", 400));
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 // POST: Create a new Order
 exports.createOrder = async (req, res, next) => {
   try {
