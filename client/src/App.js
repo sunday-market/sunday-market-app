@@ -22,7 +22,7 @@ import MyProducts from "./pages/Products/MyProducts";
 import AddProduct from "./pages/Products/AddProduct";
 
 // Orders Pages
-import MyOrders from "./pages/Orders/MyOrders";
+//import MyOrders from "./pages/Orders/MyOrders";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
@@ -57,7 +57,7 @@ function App() {
             </Route>
 
             <Route path="orders">
-              <Route path="myorders" element={<MyOrders />} />
+              {/* <Route path="myorders" element={<MyOrders />} /> */}
               {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
             </Route>
           </Route>
