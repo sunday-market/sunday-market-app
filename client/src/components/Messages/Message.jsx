@@ -1,7 +1,20 @@
-import React from 'react'
+import { Box, Typography } from "@mui/material";
+import { format } from "timeago.js";
 
-export default function Message() {
+export default function Message({ message, own }) {
   return (
-    <div>Message</div>
-  )
+    <>
+      {own ? (
+        <Box>
+          <Typography>OWN..{message.message}</Typography>
+          <Typography>{format(message.createdAt)}</Typography>
+        </Box>
+      ) : (
+        <Box>
+          <Typography>OTHER..{message.message}</Typography>
+          <Typography>{format(message.createdAt)}</Typography>
+        </Box>
+      )}
+    </>
+  );
 }
