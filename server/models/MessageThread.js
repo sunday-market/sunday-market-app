@@ -17,4 +17,4 @@ const MessageThreadSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-module.exports = mongoose.model("MessageThread", ThreadSchema);
+module.exports = mongoose.model("MessageThread", MessageThreadSchema);
