@@ -1,6 +1,9 @@
 const { Product } = require("../models/Product");
 const ErrorResponse = require("../utils/errorResponse");
 
+const multer = require("multer");
+const path = require("path");
+
 // GETS
 // Get all Products
 exports.getAllProducts = async (req, res, next) => {
@@ -44,13 +47,31 @@ exports.getUserProducts = async (req, res, next) => {
 // POSTS
 // Add Product
 exports.addProduct = async (req, res, next) => {
-  try {
-    const product = await Product.create(req.body);
+  const product_name = req.body.product_name;
+  const product_description = req.body.product_description;
+  const product_subcategory = req.body.product_subcategory;
+  const product_stall = req.body.product_stall;
+  const product_price = req.body.product_price;
+  const quantity_in_stock = req.body.quantity_in_stock;
+  const image = req.file ? req.file.filename : "noimage.jpg";
 
-    res.status(200).json({
-      success: true,
-      data: product,
-    });
+  const productData = {
+    product_name,
+    product_description,
+    product_subcategory,
+    product_stall,
+    product_price,
+    quantity_in_stock,
+    image,
+  };
+
+  const newProduct = new Product(productData);
+
+  try {
+    await newProduct
+      .save()
+      .then(() => res.json({ success: true, data: productData }))
+      .catch((err) => res.status(400).json("Error: " + err));
   } catch (error) {
     return next(error);
   }

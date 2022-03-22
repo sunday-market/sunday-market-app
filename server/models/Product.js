@@ -1,5 +1,6 @@
 const mongoose = require("mongoose");
 const { StallSchema } = require("./Stall");
+const { SubCategorySchema } = require("./SubCategory");
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -15,6 +16,11 @@ const ProductSchema = new mongoose.Schema(
       ref: "Stall",
       required: [true, "Stall must be supplied"],
     },
+    product_subcategory: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "SubCategory",
+      required: [true, "Category not supplied"],
+    },
     product_price: {
       type: Number,
       required: [true, "Product price not supplied"],
@@ -27,8 +33,8 @@ const ProductSchema = new mongoose.Schema(
     },
     image: {
       type: String,
-      default:
-        "https://socialistmodernism.com/wp-content/uploads/2017/07/placeholder-image.png",
+      trim: true,
+      default: "noimage.jpg",
     },
   },
   { timestamps: true }

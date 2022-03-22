@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import {
@@ -18,24 +18,127 @@ import {
   Alert,
   Button,
   Divider,
+  Input,
 } from "@mui/material";
 
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import SubCategoriesData from "../../data/SubCategories.json";
 
 const AddProduct = () => {
+  const [product, setProduct] = useState({
+    product_name: "",
+    product_description: "",
+    product_subcategory: "",
+    product_stall: "",
+    product_price: "",
+    quantity_in_stock: "",
+    image: "",
+  });
+  const [imageName, setImageName] = useState("");
   const [userStalls, setUserStalls] = useState([]);
-  const [stall, setStall] = useState("");
-  const [name, setName] = useState("");
-  const [description, setDescription] = useState("");
-  const [subCategory, setSubCategory] = useState("");
-  const [subCategoryOther, setSubCategoryOther] = useState("");
-  const [image, setImage] = useState("");
-  const [price, setPrice] = useState();
-  const [quantity, setQuantity] = useState();
-
+  const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
+
+  const errorRef = useRef(null);
+  const successRef = useRef(null);
+
+  const navigate = useNavigate();
+
+  const handleClearForm = () => {
+    setProduct({
+      product_name: "",
+      product_description: "",
+      product_subcategory: "",
+      product_stall: "",
+      product_price: "",
+      quantity_in_stock: "",
+      image: "",
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const formData = new FormData();
+
+    formData.append("product_name", product.product_name);
+    formData.append("product_description", product.product_description);
+    formData.append("product_subcategory", product.product_subcategory);
+    formData.append("product_stall", product.product_stall);
+    formData.append("product_price", product.product_price);
+    formData.append("quantity_in_stock", product.quantity_in_stock);
+    formData.append("image", product.image);
+
+    if (!product.product_stall) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return setError("You must select a stall");
+    }
+
+    if (!product.product_name) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return setError("You must provide a name for the product");
+    }
+
+    if (!product.product_subcategory) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return setError("You must provide a product category");
+    }
+
+    if (!product.product_price || product.product_price === 0) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return setError("You must specify a price to sell this product");
+    }
+
+    if (!product.quantity_in_stock) {
+      setProduct(0);
+    }
+
+    try {
+      await axios.post("/api/product/", formData).catch(function (error) {
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        setError(error);
+        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      });
+
+      handleClearForm();
+
+      setSuccess("Product added");
+
+      setTimeout(() => {
+        setSuccess("");
+      }, 6000);
+      successRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    } catch (error) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      setError(error);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+  };
+
+  const handleChange = (e) => {
+    setProduct({ ...product, [e.target.name]: e.target.value });
+  };
+
+  const handleImage = (e) => {
+    setProduct({ ...product, image: e.target.files[0] });
+    setImageName(e.target.files[0].name);
+  };
 
   // Get the User Stalls
   useEffect(() => {
@@ -56,8 +159,6 @@ const AddProduct = () => {
           `../../api/mystalls/${decodedJWT.id}`,
           config
         );
-    
-        if (!stalls) return;
 
         setUserStalls(stalls.data);
       } catch (error) {
@@ -71,199 +172,221 @@ const AddProduct = () => {
 
   return (
     <>
-      <Typography variant="h4">Add Product</Typography>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <Typography variant="h4">Add Product</Typography>
 
-      {/* Stall */}
-      <Grid container direction="column" spacing={2}>
-        {/* Error Alert */}
-        <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
+        {/* Stall */}
+        <Grid container direction="column" spacing={2}>
+          {/* Success Alert */}
+          <Grid item ref={successRef}>
+            {success && <Alert severity="success">{success}</Alert>}
+          </Grid>
+          {/* Error Alert */}
+          <Grid item ref={errorRef}>
+            {error && <Alert severity="error">{error}</Alert>}
+          </Grid>
 
-        <Grid item></Grid>
-        <Grid item>
-          <InputLabel required>Stall</InputLabel>
-
-          <Select
-            disabled={userStalls.length === 0}
-            variant="outlined"
-            size="small"
-            fullWidth
-            value={stall}
-            placeholder="Choose a Stall"
-            onChange={(e) => setStall(e.target.value)}
-            sx={{ background: "white" }}
-          >
-            {userStalls.map((stall) => (
-              <MenuItem key={stall._id} value={stall._id}>
-                {stall.stallName}
-              </MenuItem>
-            ))}
-          </Select>
-        </Grid>
-
-        {/* No Stall Warning  */}
-        <Grid item>
-          {userStalls.length === 0 && (
-            <Alert severity="warning">
-              You do not have any stalls. You must have a stall in order to add
-              a product.
-              <br />
-              <Link to="../../stalls/add">Click Here</Link> to add a stall.
-            </Alert>
-          )}
-        </Grid>
-
-        <Grid item>
-          <Divider />
-        </Grid>
-
-        {/* Name */}
-        <Grid item>
-          <InputLabel required>Product Name</InputLabel>
-          <TextField
-            variant="outlined"
-            fullWidth
-            size="small"
-            type="text"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-            placeholder="Stall"
-            sx={{ background: "white" }}
-          />
-        </Grid>
-
-        {/* Description */}
-        <Grid item>
-          <InputLabel required>Description</InputLabel>
-          <TextField
-            variant="outlined"
-            fullWidth
-            multiline
-            minRows={4}
-            maxRows={8}
-            size="small"
-            type="text"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-            placeholder="Enter a description of the product here..."
-            sx={{ background: "white" }}
-          />
-        </Grid>
-
-        {/* Category */}
-        <Grid item>
-          <InputLabel required>Product Category</InputLabel>
-
-          <Select
-            variant="outlined"
-            size="small"
-            fullWidth
-            value={subCategory}
-            placeholder="Product Category"
-            onChange={(e) => setSubCategory(e.target.value)}
-            sx={{ background: "white" }}
-          >
-            {SubCategoriesData.map((category) => (
-              <MenuItem key={category.id} value={category.category}>
-                {category.category}
-              </MenuItem>
-            ))}
-          </Select>
-          {stall}
-        </Grid>
-
-        {subCategory === "Other... (Please provide)" && (
+          <Grid item></Grid>
           <Grid item>
-            <InputLabel required>Category Other</InputLabel>
+            <InputLabel required>Stall</InputLabel>
+
+            <Select
+              name="product_stall"
+              disabled={userStalls.length === 0}
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={product.product_stall}
+              placeholder="Choose a Stall"
+              onChange={handleChange}
+              sx={{ background: "white" }}
+            >
+              {userStalls.map((stall) => (
+                <MenuItem key={stall._id} value={stall._id}>
+                  {stall.stallName}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
+
+          {/* No Stall Warning  */}
+          <Grid item>
+            {userStalls.length === 0 && (
+              <Alert severity="warning">
+                You do not have any stalls. You must have a stall in order to
+                add a product.
+                <br />
+                <Link to="../../stalls/add">Click Here</Link> to add a stall.
+              </Alert>
+            )}
+          </Grid>
+
+          <Grid item>
+            <Divider />
+          </Grid>
+
+          {/* Name */}
+          <Grid item>
+            <InputLabel required>Product Name</InputLabel>
             <TextField
+              autoFocus
+              name="product_name"
               variant="outlined"
               fullWidth
               size="small"
               type="text"
-              value={subCategoryOther}
-              onChange={(e) => setSubCategoryOther(e.target.value)}
-              placeholder="Please provide your category..."
+              value={product.product_name}
+              onChange={handleChange}
+              placeholder="Product Name"
               sx={{ background: "white" }}
             />
           </Grid>
-        )}
 
-        {/* Price  */}
-        <Grid item>
-          <InputLabel required>Price</InputLabel>
-          <TextField
-            variant="outlined"
-            size="small"
-            type="text"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-            placeholder="0.00"
-            sx={{ background: "white" }}
-          />
-        </Grid>
-
-        {/* Quanity In Stock  */}
-        <Grid item>
-          <InputLabel required>Quantity in Stock</InputLabel>
-          <TextField
-            variant="outlined"
-            size="small"
-            type="text"
-            value={quantity}
-            onChange={(e) => setQuantity(e.target.value)}
-            placeholder="0"
-            sx={{ background: "white" }}
-          />
-        </Grid>
-
-        {/* Image Upload  */}
-        <Grid item>
-          <InputLabel>Upload an image</InputLabel>
-          <Typography variant="body2" gutterBottom>
-            Draw attention to your product by uploading an image
-          </Typography>
-          <Button
-            component="label"
-            variant="contained"
-            endIcon={<ImageIcon />}
-            size="small"
-          >
-            <input
-              accept="image/*"
-              hidden
-              type="file"
-              value={image}
-              onChange={(e) => setImage(e.target.value)}
+          {/* Description */}
+          <Grid item>
+            <InputLabel>Description</InputLabel>
+            <TextField
+              name="product_description"
+              variant="outlined"
+              fullWidth
+              multiline
+              minRows={4}
+              maxRows={8}
+              size="small"
+              type="text"
+              value={product.product_description}
+              onChange={handleChange}
+              placeholder="Enter a description of the product here..."
+              InputProps={{ style: { fontSize: "1em" } }}
+              sx={{ background: "white" }}
             />
-            Add Image
-          </Button>
-          <Button
-            variant="outlined"
-            startIcon={<DeleteIcon />}
-            onClick={() => setImage("")}
-            size="small"
-          >
-            Remove Image
-          </Button>
-          <Grid item mt={2}>
-            {image && <Typography variant="body2">Image: {image} </Typography>}
+          </Grid>
+
+          {/* Category */}
+          <Grid item>
+            <InputLabel required>Product Category</InputLabel>
+
+            <Select
+              name="product_subcategory"
+              variant="outlined"
+              size="small"
+              fullWidth
+              value={product.product_subcategory}
+              placeholder="Product Category"
+              onChange={handleChange}
+              sx={{ background: "white" }}
+            >
+              {SubCategoriesData.map((category) => (
+                <MenuItem key={category.id} value={category.id}>
+                  {category.category}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
+
+          {/* Price  */}
+          <Grid item>
+            <InputLabel required>Price</InputLabel>
+            <TextField
+              name="product_price"
+              variant="outlined"
+              size="small"
+              type="text"
+              value={product.product_price}
+              onChange={handleChange}
+              placeholder="0.00"
+              sx={{ background: "white" }}
+            />
+          </Grid>
+
+          {/* Quanity In Stock  */}
+          <Grid item>
+            <InputLabel required>Quantity in Stock</InputLabel>
+            <TextField
+              name="quantity_in_stock"
+              variant="outlined"
+              size="small"
+              type="text"
+              value={product.quantity_in_stock}
+              onChange={handleChange}
+              placeholder="0"
+              sx={{ background: "white" }}
+            />
+          </Grid>
+
+          {/* Image Upload  */}
+          <Grid item>
+            <InputLabel>Upload an image</InputLabel>
+            <Typography variant="body2" mb={2}>
+              Draw attention to your product by uploading an image
+            </Typography>
+
+            <label htmlFor="upload-button">
+              <input
+                accept="image/*"
+                id="upload-button"
+                name="productImage"
+                type="file"
+                style={{ display: "none" }}
+                onChange={handleImage}
+              />
+              <Button
+                variant="contained"
+                size="small"
+                component="span"
+                startIcon={<ImageIcon />}
+              >
+                Upload
+              </Button>
+            </label>
+
+            {product.image && (
+              <>
+                <Button
+                  name="image"
+                  variant="outlined"
+                  startIcon={<DeleteIcon />}
+                  onClick={() => {
+                    setImageName("");
+                    setProduct({ ...product, image: "" });
+                  }}
+                  size="small"
+                >
+                  Remove Image
+                </Button>
+
+                <Typography mt={1} variant="body2" color="disabled">
+                  Selected: {imageName}
+                </Typography>
+              </>
+            )}
+          </Grid>
+
+          <Grid item>
+            <Divider />
+          </Grid>
+
+          {/* Product Actions  */}
+          <Grid item>
+            <Grid container justifyContent="center">
+              <Button
+                type="submit"
+                variant="contained"
+                startIcon={<SaveIcon />}
+              >
+                Save
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<CancelIcon />}
+                onClick={() => navigate("../myproducts")}
+              >
+                Cancel
+              </Button>
+            </Grid>
           </Grid>
         </Grid>
-
-        <Grid item>
-          <Divider />
-        </Grid>
-
-        <Grid item>
-          <Grid container justifyContent="center">
-            <Button variant="contained" startIcon={<SaveIcon />}>
-              Save
-            </Button>
-            <Button variant="outlined" startIcon={<CancelIcon />}>
-              Cancel
-            </Button>
-          </Grid>
-        </Grid>
-      </Grid>
+      </form>
     </>
   );
 };
