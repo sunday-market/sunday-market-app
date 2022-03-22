@@ -21,6 +21,9 @@ import MyStallsPage from "./pages/Stalls/MyStallsPage";
 import MyProducts from "./pages/Products/MyProducts";
 import AddProduct from "./pages/Products/AddProduct";
 
+// Orders Pages
+import MyOrders from "./pages/Orders/MyOrders";
+
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
 
@@ -53,8 +56,10 @@ function App() {
               <Route path="viewstall/:stallID" element={<ViewStallPage />} />
             </Route>
 
-            {/* <Route path="myorders" element={<MyOrdersPage />} /> */}
-            {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
+            <Route path="orders">
+              <Route path="myorders" element={<MyOrders />} />
+              {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
+            </Route>
           </Route>
         </Route>
 
