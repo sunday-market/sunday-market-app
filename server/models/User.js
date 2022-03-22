@@ -12,7 +12,7 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: [true, "Please provide a password"],
-    minlength: 8,
+    minlength: [8, "Password must be greater than 8 characters"],
     select: false,
   },
   email: {
@@ -55,10 +55,10 @@ const UserSchema = new mongoose.Schema({
     required: true,
     default: false,
   },
-  reset_token: {
+  resetPasswordToken: {
     type: String,
   },
-  reset_expriry: {
+  resetPasswordExpiry: {
     type: Date,
   },
 });
@@ -94,7 +94,7 @@ UserSchema.methods.getResetPasswordToken = function () {
     .update(resetToken)
     .digest("hex");
 
-  this.resetPasswordExpire = Date.now() + 10 * (60 * 1000); // 10 min reset
+  this.resetPasswordExpiry = Date.now() + 10 * (60 * 1000); // 10 min reset
 
   return resetToken;
 };
@@ -104,5 +104,4 @@ UserSchema.methods.getVerified = function () {
 };
 
 const User = mongoose.model("User", UserSchema);
-
-module.exports = [UserSchema, User];
+module.exports = { User, UserSchema };

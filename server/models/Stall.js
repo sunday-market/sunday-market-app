@@ -48,5 +48,5 @@ const StallSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
-const Stall = mongoose.model("Stall", StallSchema);
-module.exports = [Stall, StallSchema];
+module.exports = mongoose.model("Stall", StallSchema);
+
