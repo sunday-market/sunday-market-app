@@ -3,7 +3,7 @@ const ErrorResponse = require("../utils/errorResponse");
 
 // GETS
 // Get All Stalls
-exports.GetAllStalls = async (req, res, next) => {
+exports.getAllStalls = async (req, res, next) => {
   try {
     const stall = await Stall.find({});
     if (stall.length === 0) {
@@ -16,7 +16,7 @@ exports.GetAllStalls = async (req, res, next) => {
 };
 
 // Get all Stalls ascosiated to user
-exports.GetMyStalls = async (req, res, next) => {
+exports.getMyStalls = async (req, res, next) => {
   try {
     const stall = await Stall.find({ user: req.params.userid });
     if (stall.length === 0) {
@@ -29,7 +29,7 @@ exports.GetMyStalls = async (req, res, next) => {
 };
 
 // Get all Stalls ascosiated to user
-exports.GetStallByID = async (req, res, next) => {
+exports.getStallByID = async (req, res, next) => {
   try {
     const stall = await Stall.find({ _id: req.params.stallid });
     if (stall.length === 0) {
@@ -43,7 +43,7 @@ exports.GetStallByID = async (req, res, next) => {
 
 // POSTS
 // Add Stall
-exports.AddNewStall = async (req, res, next) => {
+exports.addNewStall = async (req, res, next) => {
   try {
     const stall = await Stall.findOne({ stallName: req.body.stallName });
     if (stall) {
@@ -65,7 +65,7 @@ exports.AddNewStall = async (req, res, next) => {
 };
 
 // PUT
-exports.UpdateStall = async (req, res, next) => {
+exports.updateStall = async (req, res, next) => {
   const stallID = req.params.stallid;
   const data = req.body;
   try {
@@ -91,7 +91,7 @@ exports.UpdateStall = async (req, res, next) => {
 
 // DELETE
 // delete stall by stall id
-exports.DeleteStallByID = async (req, res, next) => {
+exports.deleteStallByID = async (req, res, next) => {
   try {
     await Stall.deleteOne({ _id: req.params.stallid });
     res.status(200).json({

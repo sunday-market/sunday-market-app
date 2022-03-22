@@ -1,20 +1,20 @@
 const express = require("express");
 const router = express.Router();
 const {
-  GetAllStalls,
-  AddNewStall,
-  GetMyStalls,
-  GetStallByID,
-  UpdateStall,
-  DeleteStallByID,
+  getAllStalls,
+  addNewStall,
+  getMyStalls,
+  getStallByID,
+  updateStall,
+  deleteStallByID,
 } = require("../controllers/stall.controllers");
 
-router.route("/stalls").get(GetAllStalls).post(AddNewStall);
-router.route("/mystalls/:userid").get(GetMyStalls);
+router.route("/stalls").get(getAllStalls).post(addNewStall);
+router.route("/mystalls/:userid").get(getMyStalls);
 router
   .route("/stalls/:stallid")
-  .get(GetStallByID)
-  .put(UpdateStall)
-  .delete(DeleteStallByID);
+  .get(getStallByID)
+  .put(updateStall)
+  .delete(deleteStallByID);
 
 module.exports = router;
