@@ -17,6 +17,40 @@ exports.getAllOrders = async (req, res, next) => {
   }
 };
 
+exports.getOrderById = async (req, res, next) => {
+  try {
+    const order = await Order.findOne({ _id: req.params.orderId });
+
+    if (!order) {
+      return next(new ErrorResponse("No order found", 400));
+    }
+
+    res.status(200).json(order);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getUserOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ "customer.id": req.params.userId });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+exports.getStallOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ "stall.id": req.params.stallId });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 // POST: Create a new Order
 exports.createOrder = async (req, res, next) => {
   try {
