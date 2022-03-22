@@ -5,10 +5,7 @@ const MessageThread = require("../models/MessageThread");
 exports.getMessageThreads = async (req, res, next) => {
   try {
     const messageThread = await MessageThread.find({
-      $or: [
-        { recieve_user: req.params.userId },
-        { send_user: req.params.userId },
-      ],
+      message_members: { $in: [req.params.userId] },
     });
     res.status(200).json(messageThread);
   } catch (error) {
@@ -21,12 +18,12 @@ exports.getMessageThreads = async (req, res, next) => {
 exports.addMessageThread = async (req, res, next) => {
   try {
     const newMessageThread = new MessageThread({
-      send_user: req.body.senderId,
-      recieve_user: req.body.recieverId,
+      message_members: [req.body.send_user, req.body.recieve_user],
     });
     const savedMessageThread = await newMessageThread.save();
     res.status(200).json(savedMessageThread);
   } catch (error) {
+    console.log(error);
     return next(error);
   }
 };

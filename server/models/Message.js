@@ -5,6 +5,7 @@ const MessageSchema = new mongoose.Schema(
     message_thread_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "MessageThread",
+      required: [true, "You can not send a message, without a message thread ID"],
     },
     message: {
       type: String,
@@ -18,6 +19,7 @@ const MessageSchema = new mongoose.Schema(
     send_user: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      required: [true, "You can not send a message without a send user"],
     },
   },
   { timestamps: true }
