@@ -2,6 +2,7 @@ const dotenv = require("dotenv");
 const express = require("express");
 const connectDB = require("./config/db");
 const errorHandler = require("./middleware/error");
+const path = require("path");
 
 // This is a test
 dotenv.config();
