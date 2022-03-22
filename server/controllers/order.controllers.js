@@ -41,6 +41,16 @@ exports.getUserOrders = async (req, res, next) => {
   }
 };
 
+exports.getStallOrders = async (req, res, next) => {
+  try {
+    const orders = await Order.find({ "stall.id": req.params.stallId });
+
+    res.status(200).json(orders);
+  } catch (error) {
+    return next(error);
+  }
+};
+
 // POST: Create a new Order
 exports.createOrder = async (req, res, next) => {
   try {
