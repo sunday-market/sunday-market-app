@@ -1,9 +1,6 @@
 const { Product } = require("../models/Product");
 const ErrorResponse = require("../utils/errorResponse");
 
-const multer = require("multer");
-const path = require("path");
-
 // GETS
 // Get all Products
 exports.getAllProducts = async (req, res, next) => {
