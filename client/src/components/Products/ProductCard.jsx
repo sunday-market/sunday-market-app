@@ -17,6 +17,8 @@ const ProductCard = (props) => {
   const [counter, setCounter] = useState(0);
   const [quantityInStock, setQuantityInStock] = useState(qty);
 
+  const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+
   const incrementQuantity = () => {
     setCounter(counter + 1);
     setQuantityInStock(quantityInStock - 1);
@@ -56,7 +58,7 @@ const ProductCard = (props) => {
             <CardMedia
               component="img"
               height="175"
-              image={product.image}
+              image={`${PUBLIC_FOLDER}/products/${product.image}`}
               alt={product.product_name}
             />
 
