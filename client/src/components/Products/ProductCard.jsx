@@ -57,11 +57,11 @@ const ProductCard = (props) => {
               component="img"
               height="175"
               image={product.image}
-              alt={product.name}
+              alt={product.product_name}
             />
 
             <Typography gutterBottom variant="body1" align="center">
-              <b>{product.name.toUpperCase()}</b>
+              <b>{product.product_name.toUpperCase()}</b>
             </Typography>
             <Typography
               gutterBottom
@@ -69,7 +69,7 @@ const ProductCard = (props) => {
               variant="body2"
               sx={{ backgroundColor: "#eeeeee" }}
             >
-              {product.category}
+              {product.product_subcategory}
             </Typography>
           </Box>
 
@@ -85,7 +85,7 @@ const ProductCard = (props) => {
               WebkitBoxOrient: "vertical",
             }}
           >
-            {product.description}
+            {product.product_description}
           </Typography>
         </CardContent>
         <Box sx={{ flexGrow: 1 }} />
@@ -110,7 +110,7 @@ const ProductCard = (props) => {
                 sx={{ pl: 1, fontFamily: "Tahoma" }}
                 variant="h5"
               >
-                {priceToCurrency(product.price)}
+                {priceToCurrency(product.product_price)}
               </Typography>
               <Button>View</Button>
             </Grid>

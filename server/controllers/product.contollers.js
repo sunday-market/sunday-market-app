@@ -7,7 +7,7 @@ exports.getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find({});
     if (products.length === 0) {
-      return next(new ErrorResponse("No products exist"));
+      return next(new ErrorResponse("No products exist", 404));
     }
     res.status(200).json(products);
   } catch (error) {
@@ -20,7 +20,9 @@ exports.getProductById = async (req, res, next) => {
   try {
     const product = await Product.findOne({ _id: req.params.productid });
     if (!product) {
-      return next(new ErrorResponse("No product exists with that product id"));
+      return next(
+        new ErrorResponse("No product exists with that product id", 404)
+      );
     }
     res.status(200).json(product);
   } catch (error) {
@@ -31,10 +33,13 @@ exports.getProductById = async (req, res, next) => {
 // Get all Products ascosiated to user
 exports.getUserProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ _id: req.params.userid });
+    const products = await Product.find({ user: req.params.userid });
     if (products.length === 0) {
-      return next(new ErrorResponse("No products exist for specified user"));
+      return next(
+        new ErrorResponse("No products exist for specified user", 404)
+      );
     }
+    // console.log(`Products: ${products}`)
     res.status(200).json(products);
   } catch (error) {
     return next(error);
