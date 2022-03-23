@@ -46,13 +46,6 @@ export default function AddMyStallPage() {
   const saveStall = async (e) => {
     e.preventDefault();
 
-    // Set header for Axios requests
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    };
-
     // check form details
     // Check stall name for a value
     if (stallName === "" || stallName.trim() === "") {

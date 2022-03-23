@@ -64,7 +64,7 @@ function App() {
               {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
             </Route>
 
-            <Route path="message" element={<MessagePage />}></Route>
+            <Route path="messages" element={<MessagePage />}></Route>
           </Route>
         </Route>
 

@@ -8,7 +8,7 @@ import {
   Box,
   InputLabel,
   Typography,
-  TextField,
+  TextareaAutosize,
   Select,
   MenuItem,
   Alert,
@@ -76,6 +76,32 @@ export default function MessagePage() {
     };
     getMesssages();
   }, [currentMessage]);
+
+  // scroll use effect
+  useEffect(() => {
+    scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  // const functions
+  // handle submit of new message
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    const message = {
+      send_user: currentUser.id,
+      message: newMessage,
+      message_thread_id: messageThreads[0]._id,
+    };
+    console.log(message);
+    try {
+      const res = await axios.post("/api/messages/", message);
+      setMessages([...messages, res.data]);
+      setNewMessage("");
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
     <>
       <Typography>Current username: {currentUser?.username}</Typography>
@@ -94,6 +120,7 @@ export default function MessagePage() {
           alignItems="center"
           justifyContent="center"
         >
+          {/* THREAD BOX */}
           <Grid item lg={3} md={3} sm={3} xs={3}>
             <Typography
               align="center"
@@ -111,40 +138,58 @@ export default function MessagePage() {
               </Box>
             ))}
           </Grid>
+          {/* CHATBOX */}
           <Grid item lg={9} md={9} sm={9} xs={9}>
-            <Typography
-              align="center"
-              color="textPrimary"
-              variant="h5"
-              sx={{
-                display: "-webkit-box !important",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-                pb: 2,
-              }}
-            >
-              Conversations
+            {/* CHATBOX WRAPPER */}
+            <Box>
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="h5"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pb: 2,
+                }}
+              >
+                Conversations
+              </Typography>
               {currentMessage ? (
                 <>
-                  {messages.map((m) => (
-                    <>
-                      <Box margin={"auto"}>
+                  {/* CHATBOX TOP */}
+                  <Box>
+                    {messages.map((m) => (
+                      <Box margin={"auto"} ref={scrollRef}>
                         <Message
                           message={m}
                           own={m.send_user === currentUser.id}
                         />
                       </Box>
-                    </>
-                  ))}
+                    ))}
+                  </Box>
+                  {/* CHATBOX BOTTOM */}
+                  <Box>
+                    <TextareaAutosize
+                      aria-label="empty textarea"
+                      placeholder="Send a new message..."
+                      style={{ width: 200 }}
+                      onChange={(e) => setNewMessage(e.target.value)}
+                      value={newMessage}
+                    />
+                    <Button variant="contained" onClick={handleSubmit}>
+                      Send
+                    </Button>
+                  </Box>
                 </>
               ) : (
                 <>
-                  <Typography>
+                  <Box component="span">
                     Open a message thread to view message..
-                  </Typography>
+                  </Box>
                 </>
               )}
-            </Typography>
+            </Box>
           </Grid>
         </Grid>
       </Box>
