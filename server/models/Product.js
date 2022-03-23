@@ -1,6 +1,4 @@
 const mongoose = require("mongoose");
-const { StallSchema } = require("./Stall");
-const { SubCategorySchema } = require("./SubCategory");
 
 const ProductSchema = new mongoose.Schema(
   {
@@ -10,6 +8,11 @@ const ProductSchema = new mongoose.Schema(
     },
     product_description: {
       type: String,
+    },
+    product_user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: [true, "User must be supplied"],
     },
     product_stall: {
       type: mongoose.Schema.Types.ObjectId,

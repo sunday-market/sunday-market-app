@@ -18,7 +18,6 @@ import {
   Alert,
   Button,
   Divider,
-  Input,
 } from "@mui/material";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -59,12 +58,16 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
+
     const formData = new FormData();
 
     formData.append("product_name", product.product_name);
     formData.append("product_description", product.product_description);
     formData.append("product_subcategory", product.product_subcategory);
     formData.append("product_stall", product.product_stall);
+    formData.append("product_user", decodedJWT.id);
     formData.append("product_price", product.product_price);
     formData.append("quantity_in_stock", product.quantity_in_stock);
     formData.append("image", product.image);

@@ -53,6 +53,7 @@ exports.addProduct = async (req, res, next) => {
   const product_description = req.body.product_description;
   const product_subcategory = req.body.product_subcategory;
   const product_stall = req.body.product_stall;
+  const product_user = req.body.product_user;
   const product_price = req.body.product_price;
   const quantity_in_stock = req.body.quantity_in_stock;
   const image = req.file ? req.file.filename : "noimage.jpg";
@@ -62,6 +63,7 @@ exports.addProduct = async (req, res, next) => {
     product_description,
     product_subcategory,
     product_stall,
+    product_user,
     product_price,
     quantity_in_stock,
     image,

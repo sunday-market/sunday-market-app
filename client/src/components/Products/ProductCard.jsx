@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import jwtDecode from "jwt-decode";
+import { useNavigate } from "react-router";
+
 import {
   Typography,
   Grid,
@@ -14,10 +17,12 @@ import IncDecButton from "../IncDecButton";
 
 const ProductCard = (props) => {
   const { product, qty } = props;
+  const [isUserProduct, setIsUserProduct] = useState(false);
   const [counter, setCounter] = useState(0);
   const [quantityInStock, setQuantityInStock] = useState(qty);
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+  const navigate = useNavigate();
 
   const incrementQuantity = () => {
     setCounter(counter + 1);
@@ -35,6 +40,14 @@ const ProductCard = (props) => {
       currency: "NZD",
     });
   };
+
+  // Check if the current user is selling this product
+  useEffect(() => {
+    (async () => {
+      const authToken = await jwtDecode(localStorage.getItem("authToken"));
+      setIsUserProduct(authToken.id === product.product_user);
+    })();
+  }, [product.product_user]);
 
   return (
     <>
@@ -126,12 +139,33 @@ const ProductCard = (props) => {
                 alignItems: "center",
               }}
             >
-              <IncDecButton
-                counter={counter}
-                quantityInStock={quantityInStock}
-                incrementQuantity={incrementQuantity}
-                decrementQuantity={decrementQuantity}
-              />
+              {isUserProduct ? (
+                <Box sx={{marginBottom: 2}}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => navigate(`/products/${product._id}`)}
+                    sx={{ marginRight: 1 }}
+                  >
+                    View Product
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => navigate(`/account/products/${product._id}`)}
+                  >
+                    Edit
+                  </Button>
+                </Box>
+              ) : (
+                <IncDecButton
+                  counter={counter}
+                  quantityInStock={quantityInStock}
+                  incrementQuantity={incrementQuantity}
+                  decrementQuantity={decrementQuantity}
+                />
+              )}
+
               <Typography
                 variant="body2"
                 color={quantityInStock <= 0 ? "red" : "grey.800"}
