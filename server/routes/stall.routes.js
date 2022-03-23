@@ -1,5 +1,7 @@
 const express = require("express");
 const router = express.Router();
+const { protect } = require("../middleware/auth");
+
 const {
   getAllStalls,
   addNewStall,
@@ -9,12 +11,12 @@ const {
   deleteStallByID,
 } = require("../controllers/stall.controllers");
 
-router.route("/stalls").get(getAllStalls).post(addNewStall);
-router.route("/mystalls/:userid").get(getMyStalls);
+router.route("/stalls").get(getAllStalls).post(protect, addNewStall);
+router.route("/mystalls/:userid").get(protect, getMyStalls);
 router
   .route("/stalls/:stallid")
-  .get(getStallByID)
-  .put(updateStall)
-  .delete(deleteStallByID);
+  .get(protect, getStallByID)
+  .put(protect, updateStall)
+  .delete(protect, deleteStallByID);
 
 module.exports = router;

@@ -20,6 +20,7 @@ import {
   FormControlLabel,
   FormLabel,
 } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
 export default function MessagePage() {
   // States
@@ -31,51 +32,86 @@ export default function MessagePage() {
 
   // const variables
   const scrollRef = useRef();
+  const navigate = useNavigate();
 
   // useEffects
   // get current user
   useEffect(() => {
     const getCurrentUser = async () => {
       if (localStorage.getItem("authToken")) {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
         try {
           const decodedJWT = await jwt(localStorage.getItem("authToken"));
-          const user = await axios.get(`/api/user/${decodedJWT.id}`);
+          const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUser(user.data.data);
         } catch (error) {
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+          }
           console.log(error);
         }
       }
     };
     getCurrentUser();
-  }, []);
+  }, [navigate]);
 
   // get messagethreads
   useEffect(() => {
     const getMessageThreads = async () => {
       if (currentUser) {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
         try {
-          const res = await axios.get(`/api/messagethreads/${currentUser.id}`);
+          const res = await axios.get(
+            `/api/messagethreads/${currentUser.id}`,
+            config
+          );
           setMessageThread(res.data);
         } catch (error) {
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+          }
           console.log(error);
         }
       }
     };
     getMessageThreads();
-  }, [currentUser]);
+  }, [currentUser, navigate]);
 
   // get messages
   useEffect(() => {
     const getMesssages = async () => {
       try {
-        const res = await axios(`/api/messages/${currentMessage?._id}`);
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
+        const res = await axios(`/api/messages/${currentMessage?._id}`, config);
         setMessages(res.data);
       } catch (error) {
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          navigate("/login");
+        }
+
         console.log(error);
       }
     };
     getMesssages();
-  }, [currentMessage]);
+  }, [currentMessage, navigate]);
 
   // scroll use effect
   useEffect(() => {
@@ -94,10 +130,20 @@ export default function MessagePage() {
     };
     console.log(message);
     try {
-      const res = await axios.post("/api/messages/", message);
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+      };
+      const res = await axios.post("/api/messages/", message, config);
       setMessages([...messages, res.data]);
       setNewMessage("");
     } catch (error) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("authToken");
+        navigate("/login");
+      }
       console.log(error);
     }
   };

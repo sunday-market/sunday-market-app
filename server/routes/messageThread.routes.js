@@ -4,8 +4,9 @@ const {
   getMessageThreads,
   addMessageThread,
 } = require("../controllers/messageThread.controller");
+const { protect } = require("../middleware/auth");
 
-router.route("/:userId").get(getMessageThreads);
-router.route("/").post(addMessageThread);
+router.route("/:userId").get(protect, getMessageThreads);
+router.route("/").post(protect, addMessageThread);
 
 module.exports = router;

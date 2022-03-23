@@ -11,7 +11,13 @@ export default function MessageThread({ messageThread, currentUser }) {
     );
     const getUser = async () => {
       try {
-        const res = await axios(`/api/user/${otherUserId}`);
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
+        const res = await axios(`/api/user/${otherUserId}`, config);
         setUser(res.data.data);
       } catch (error) {
         console.log(error);

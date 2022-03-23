@@ -43,6 +43,8 @@ export default function AddMyStallPage() {
     }
   }, [navigate]);
 
+
+  
   const saveStall = async (e) => {
     e.preventDefault();
 

@@ -12,23 +12,36 @@ import {
   Pagination,
 } from "@mui/material";
 import { useEffect, useState } from "react";
-import { useUser } from "../../hooks/useUser";
+import { useNavigate } from "react-router-dom";
 import StallCard from "../../components/Stalls/MyStallCard";
 import axios from "axios";
 import jwt from "jwt-decode";
 
 export default function MyStalls() {
-  const userData = useUser();
+  const navigate = useNavigate();
   const [myStalls, setMyStalls] = useState([]);
 
   useEffect(() => {
     if (localStorage.getItem("authToken")) {
       const FetchUsersStalls = async () => {
         try {
+          const config = {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          };
           const currentUserID = await jwt(localStorage.getItem("authToken"));
-          const stalls = await axios.get(`/api/mystalls/${currentUserID.id}`);
+          const stalls = await axios.get(
+            `/api/mystalls/${currentUserID.id}`,
+            config
+          );
           setMyStalls(stalls.data);
         } catch (error) {
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+          }
           console.log(error);
         }
       };
