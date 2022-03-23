@@ -93,6 +93,10 @@ const AccountsPage = () => {
           setAddressLine3(user.addressLine3 || "");
           setPhone(user.phone || "");
         } catch (error) {
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            navigate("/login");
+          }
           setError(error.response.data.error);
 
           setTimeout(() => {

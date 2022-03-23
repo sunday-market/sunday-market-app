@@ -36,13 +36,16 @@ const {
   deleteProduct,
 } = require("../controllers/product.contollers");
 
-router.route("/").get(getAllProducts).post(upload.single("image"), addProduct);
+router
+  .route("/")
+  .get(getAllProducts)
+  .post(protect, upload.single("image"), addProduct);
 
 router
   .route("/:productid")
-  .get(getProductById)
-  .put(updateProduct)
-  .delete(deleteProduct);
+  .get(protect, getProductById)
+  .put(protect, updateProduct)
+  .delete(protect, deleteProduct);
 
 router.route("/user/:userid").get(protect, getUserProducts);
 

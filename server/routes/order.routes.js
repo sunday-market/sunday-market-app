@@ -8,10 +8,12 @@ const {
   createOrder,
 } = require("../controllers/order.controllers");
 
-router.route("/").get(getAllOrders).post(createOrder);
-router.route("/:orderId").get(getOrderById);
+const { protect } = require("../middleware/auth");
 
-router.route("/user/:userId").get(getUserOrders);
-router.route("/stall/:stallId").get(getStallOrders);
+router.route("/").get(protect, getAllOrders).post(protect, createOrder);
+router.route("/:orderId").get(protect, getOrderById);
+
+router.route("/user/:userId").get(protect, getUserOrders);
+router.route("/stall/:stallId").get(protect, getStallOrders);
 
 module.exports = router;

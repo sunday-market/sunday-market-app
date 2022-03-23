@@ -108,14 +108,15 @@ const AddProduct = () => {
       setProduct(0);
     }
 
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
+
     try {
-      await axios.post("/api/product/", formData).catch(function (error) {
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        setError(error);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      await axios.post("/api/product/", formData, config);
 
       handleClearForm();
 
@@ -126,10 +127,16 @@ const AddProduct = () => {
       }, 6000);
       successRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("authToken");
+        return navigate("/login");
+      }
+
       setTimeout(() => {
         setError("");
       }, 5000);
       setError(error);
+
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
@@ -155,6 +162,7 @@ const AddProduct = () => {
         const config = {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         };
 
@@ -165,13 +173,17 @@ const AddProduct = () => {
 
         setUserStalls(stalls.data);
       } catch (error) {
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          navigate("/login");
+        }
         setTimeout(() => {
           setError("");
         }, 5000);
         return setError(error.response.data.error);
       }
     })();
-  }, []);
+  }, [navigate]);
 
   return (
     <>

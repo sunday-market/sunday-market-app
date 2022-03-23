@@ -47,7 +47,7 @@ const MyProducts = () => {
         }, 5000);
       }
     })();
-  }, []);
+  }, [navigate]);
 
   return (
     <>
