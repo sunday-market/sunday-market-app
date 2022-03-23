@@ -5,7 +5,7 @@ export default function Message({ message, own }) {
   return (
     <>
       {own ? (
-        <Box>
+        <Box sx={{ padding: 2 }}>
           <Typography>OWN..{message.message}</Typography>
           <Typography>{format(message.createdAt)}</Typography>
         </Box>

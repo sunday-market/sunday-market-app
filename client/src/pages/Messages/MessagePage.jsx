@@ -23,7 +23,7 @@ import {
 
 export default function MessagePage() {
   // States
-  const [messageTheads, setMessageThread] = useState([]);
+  const [messageThreads, setMessageThread] = useState([]);
   const [currentMessage, setCurrentMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
@@ -56,7 +56,6 @@ export default function MessagePage() {
         try {
           const res = await axios.get(`/api/messagethreads/${currentUser.id}`);
           setMessageThread(res.data);
-          console.log(res.data);
         } catch (error) {
           console.log(error);
         }
@@ -64,6 +63,19 @@ export default function MessagePage() {
     };
     getMessageThreads();
   }, [currentUser]);
+
+  // get messages
+  useEffect(() => {
+    const getMesssages = async () => {
+      try {
+        const res = await axios(`/api/messages/${currentMessage?._id}`);
+        setMessages(res.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    getMesssages();
+  }, [currentMessage]);
   return (
     <>
       <Typography>Current username: {currentUser?.username}</Typography>
@@ -72,6 +84,7 @@ export default function MessagePage() {
         component="main"
         sx={{
           flexGrow: 1,
+          height: "100vh",
         }}
       >
         <Grid
@@ -81,27 +94,24 @@ export default function MessagePage() {
           alignItems="center"
           justifyContent="center"
         >
-          <Grid item lg={3} md={3} sm={3} xs={2}>
+          <Grid item lg={3} md={3} sm={3} xs={3}>
             <Typography
               align="center"
               color="textPrimary"
-              variant="h5"
+              variant="h6"
               sx={{
-                display: "-webkit-box !important",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
                 pb: 2,
               }}
             >
               MESSAGE THREADS
             </Typography>
-            {messageTheads?.map((m) => (
-              <Box bgcolor={"red"}>
+            {messageThreads?.map((m) => (
+              <Box bgcolor={"red"} onClick={() => setCurrentMessage(m)}>
                 <MessageThread messageThread={m} currentUser={currentUser.id} />
               </Box>
             ))}
           </Grid>
-          <Grid item lg={9} md={9} sm={9} xs={10}>
+          <Grid item lg={9} md={9} sm={9} xs={9}>
             <Typography
               align="center"
               color="textPrimary"
@@ -114,6 +124,26 @@ export default function MessagePage() {
               }}
             >
               Conversations
+              {currentMessage ? (
+                <>
+                  {messages.map((m) => (
+                    <>
+                      <Box margin={"auto"}>
+                        <Message
+                          message={m}
+                          own={m.send_user === currentUser.id}
+                        />
+                      </Box>
+                    </>
+                  ))}
+                </>
+              ) : (
+                <>
+                  <Typography>
+                    Open a message thread to view message..
+                  </Typography>
+                </>
+              )}
             </Typography>
           </Grid>
         </Grid>
