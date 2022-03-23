@@ -22,7 +22,7 @@ import MyProducts from "./pages/Products/MyProducts";
 import AddProduct from "./pages/Products/AddProduct";
 
 // Message Pages
-import Message from "./pages/Messages/Message";
+import MessagePage from "./pages/Messages/MessagePage";
 
 // Orders Pages
 import MyOrders from "./pages/Orders/MyOrders";
@@ -64,7 +64,7 @@ function App() {
               {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
             </Route>
 
-            <Route path="message" element={<Message />}></Route>
+            <Route path="message" element={<MessagePage />}></Route>
           </Route>
         </Route>
 

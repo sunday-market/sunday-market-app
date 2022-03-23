@@ -1,4 +1,8 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
+import axios from "axios";
+import Message from "../../components/Messages/Message";
+import MessageThread from "../../components/Messages/MessageThread";
+
 import {
   Grid,
   Box,
@@ -17,7 +21,7 @@ import {
   FormLabel,
 } from "@mui/material";
 
-export default function Message() {
+export default function MessagePage() {
   return (
     <Box
       component="main"
