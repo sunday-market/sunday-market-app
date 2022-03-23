@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
@@ -10,8 +9,6 @@ import OrderCard from "../../components/Orders/OrderCard";
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState("");
-
-  const navigate = useNavigate();
 
   useEffect(() => {
     (async () => {
@@ -41,20 +38,26 @@ const MyOrders = () => {
 
       <Typography variant="h5">My Orders</Typography>
       <Typography variant="body1" mb={2}>
-        View your past orders here. Select an order to view more details
+        View your past orders here.
       </Typography>
+
+      {orders.length === 0 && (
+        <Typography
+          variant="body1"
+          mb={2}
+          p={2}
+          textAlign="center"
+          backgroundColor="grey.200"
+        >
+          <strong>No orders to display</strong> <br />
+          Once you place an order through the cart it will display here!
+        </Typography>
+      )}
+
       <Grid container spacing={3}>
         {/* Order Cards */}
         {orders.map((order) => (
-          <Grid
-            key={order._id}
-            onClick={() => navigate(`../${order._id}`)}
-            item
-            lg={4}
-            md={4}
-            sm={6}
-            xs={12}
-          >
+          <Grid key={order._id} item lg={4} md={4} sm={6} xs={12}>
             <OrderCard order={order} />
           </Grid>
         ))}
