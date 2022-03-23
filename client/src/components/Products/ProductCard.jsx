@@ -61,7 +61,7 @@ const ProductCard = (props) => {
             />
 
             <Typography gutterBottom variant="body1" align="center">
-              <b>{product.product_name.toUpperCase()}</b>
+              <b>{product.product_name}</b>
             </Typography>
             <Typography
               gutterBottom
