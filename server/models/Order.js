@@ -37,6 +37,10 @@ const orderSchema = new mongoose.Schema(
         type: String,
         required: [true, "Address is required"],
       },
+      image: {
+        type: String,
+        default: "noimage.png",
+      },
     },
     customer: {
       id: {
