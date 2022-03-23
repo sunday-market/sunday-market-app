@@ -22,11 +22,24 @@ const MyProducts = () => {
   useEffect(() => {
     (async () => {
       try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
         const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
-        const data = await axios.get(`/api/product/user/${decodedJWT.id}`);
-
+        let data = await axios.get(
+          `/api/product/user/${decodedJWT.id}`,
+          config
+        );
         setProducts(data.data);
       } catch (error) {
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          navigate("/login");
+        }
+
         setError(error.response.data.error);
 
         setTimeout(() => {

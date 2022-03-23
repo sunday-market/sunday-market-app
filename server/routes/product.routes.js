@@ -4,6 +4,8 @@ const router = express.Router();
 const multer = require("multer");
 const path = require("path");
 
+const { protect } = require("../middleware/auth");
+
 const storage = multer.diskStorage({
   destination: function (req, file, cb) {
     cb(null, "public/images/products");
@@ -42,6 +44,6 @@ router
   .put(updateProduct)
   .delete(deleteProduct);
 
-router.route("/user/:userid").get(getUserProducts);
+router.route("/user/:userid").get(protect, getUserProducts);
 
 module.exports = router;
