@@ -71,7 +71,11 @@ const ProductCard = (props) => {
             <CardMedia
               component="img"
               height="175"
-              image={`${PUBLIC_FOLDER}/products/${product.image}`}
+              image={
+                product.image
+                  ? `${PUBLIC_FOLDER}products/${product.image}`
+                  : `${PUBLIC_FOLDER}products/noimage.jpg`
+              }
               alt={product.product_name}
             />
 
@@ -140,7 +144,7 @@ const ProductCard = (props) => {
               }}
             >
               {isUserProduct ? (
-                <Box sx={{marginBottom: 2}}>
+                <Box sx={{ marginBottom: 2 }}>
                   <Button
                     variant="contained"
                     size="small"
