@@ -15,7 +15,7 @@ router.route("/stalls").get(getAllStalls).post(protect, addNewStall);
 router.route("/mystalls/:userid").get(protect, getMyStalls);
 router
   .route("/stalls/:stallid")
-  .get(protect, getStallByID)
+  .get(getStallByID)
   .put(protect, updateStall)
   .delete(protect, deleteStallByID);
 
