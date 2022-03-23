@@ -33,7 +33,7 @@ exports.getProductById = async (req, res, next) => {
 // Get all Products ascosiated to user
 exports.getUserProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ user: req.params.userid });
+    const products = await Product.find({ product_user: req.params.userid });
     if (products.length === 0) {
       return next(
         new ErrorResponse("No products exist for specified user", 404)
