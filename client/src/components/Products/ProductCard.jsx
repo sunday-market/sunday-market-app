@@ -131,7 +131,11 @@ const ProductCard = (props) => {
               >
                 {priceToCurrency(product.product_price)}
               </Typography>
-              <Button>View</Button>
+              {!isUserProduct && (
+                <Button onClick={() => navigate(`/products/${product._id}`)}>
+                  View
+                </Button>
+              )}
             </Grid>
 
             <Grid
@@ -151,7 +155,7 @@ const ProductCard = (props) => {
                     onClick={() => navigate(`/products/${product._id}`)}
                     sx={{ marginRight: 1 }}
                   >
-                    View Product
+                    View
                   </Button>
                   <Button
                     variant="outlined"
