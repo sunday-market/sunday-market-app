@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router";
-import { Link } from "react-router-dom";
 import axios from "axios";
 
 import { Alert, Button, Typography, Divider, CardMedia } from "@mui/material";
@@ -37,6 +36,7 @@ const ViewProduct = () => {
           config
         );
         setProduct(productData.data);
+
         setQuantityInStock(productData.data.quantity_in_stock);
 
         // Get Stall Information
@@ -145,11 +145,7 @@ const ViewProduct = () => {
                 </Typography>
 
                 <Box display="flex" justifyContent="center" p={2}>
-                  <Button
-                    variant="contained"
-                    justifySelf="center"
-                    sx={{ marginRight: 1 }}
-                  >
+                  <Button variant="contained" sx={{ marginRight: 1 }}>
                     View
                   </Button>
                   <Button variant="outlined">Contact</Button>

@@ -83,22 +83,34 @@ exports.addProduct = async (req, res, next) => {
 
 // PUT
 exports.updateProduct = async (req, res, next) => {
-  const productId = req.params.productid;
-  const data = req.body;
+  const product_name = req.body.product_name;
+  const product_description = req.body.product_description;
+  const product_subcategory = req.body.product_subcategory;
+  const product_stall = req.body.product_stall;
+  const product_user = req.body.product_user;
+  const product_price = req.body.product_price;
+  const quantity_in_stock = req.body.quantity_in_stock;
+  const image = req.file ? req.file.filename : "noimage.jpg";
 
-  if (Object.keys(data).length === 0) {
-    res.status(400).json({
-      success: false,
-      message: `No product data supplied`,
-    });
-  }
+  const productData = {
+    product_name,
+    product_description,
+    product_subcategory,
+    product_stall,
+    product_user,
+    product_price,
+    quantity_in_stock,
+    image,
+  };
+
+  const productId = req.params.productid;
 
   try {
-    await Product.findByIdAndUpdate(productId, data);
+    await Product.findByIdAndUpdate(productId, productData);
     res.status(200).json({
       success: true,
       message: `Product ID: ${productId} successfully updated.`,
-      data: data,
+      data: productData,
     });
   } catch (error) {
     return next(error);

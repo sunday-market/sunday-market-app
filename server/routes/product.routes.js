@@ -44,7 +44,7 @@ router
 router
   .route("/:productid")
   .get(getProductById)
-  .put(protect, updateProduct)
+  .put(protect, upload.single("image"), updateProduct)
   .delete(protect, deleteProduct);
 
 router.route("/user/:userid").get(protect, getUserProducts);
