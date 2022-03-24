@@ -15,6 +15,11 @@ export default function ViewStallPage() {
   const params = useParams();
   const stallid = params.stallID;
 
+  // handle contact us button onclick
+  const contactUs = () => {
+    console.log("Clicked contact us");
+  };
+
   // error ref for scrolling
   const errorRef = useRef(null);
 
@@ -376,7 +381,7 @@ export default function ViewStallPage() {
                     borderRadius: 1,
                     fontFamily: "Tahoma",
                   }}
-                  onClick={"contactUs"}
+                  onClick={contactUs}
                 >
                   <MailIcon />
                   &nbsp;Contact Us
