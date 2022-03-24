@@ -11,9 +11,9 @@ import {
   TextareaAutosize,
   Button,
 } from "@mui/material";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
-export default function MessagePage() {
+export default function MessagePage(props) {
   // States
   const [messageThreads, setMessageThread] = useState([]);
   const [currentMessage, setCurrentMessage] = useState(null);
@@ -21,6 +21,7 @@ export default function MessagePage() {
   const [newMessage, setNewMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState("");
+  const { state } = useLocation();
 
   // const variables
   const scrollRef = useRef();
@@ -94,7 +95,15 @@ export default function MessagePage() {
       }
     };
     getMessageThreads();
-  }, [currentUser, navigate]);
+    if (state && currentMessage === null) {
+      messageThreads.forEach((m) => {
+        console.log(m);
+        if (m._id === state._id) {
+          setCurrentMessage(m);
+        }
+      });
+    }
+  }, [currentUser, messageThreads, navigate, currentMessage, state]);
 
   // get messages
   useEffect(() => {
@@ -141,13 +150,11 @@ export default function MessagePage() {
   // handle submit of new message
   const handleSubmit = async (e) => {
     e.preventDefault();
-
     const message = {
       send_user: currentUser.id,
       message: newMessage,
-      message_thread_id: messageThreads[0]._id,
+      message_thread_id: currentMessage._id,
     };
-    console.log(message);
     try {
       const config = {
         headers: {
@@ -229,27 +236,83 @@ export default function MessagePage() {
                   mb: 2,
                 }}
               >
-                {messageThreads?.map((m) => (
-                  <Box
-                    pl={2}
-                    pr={2}
-                    m={1}
-                    borderRadius={1}
-                    bgcolor={
-                      currentMessage !== null && m._id === currentMessage._id
-                        ? "lightBlue"
-                        : "#cfd8dc"
-                    }
-                    onClick={() => setCurrentMessage(m)}
-                    key={m._id}
-                    sx={{ cursor: "pointer" }}
-                  >
-                    <MessageThread
-                      messageThread={m}
-                      currentUser={currentUser.id}
-                    />
-                  </Box>
-                ))}
+                {state !== null ? (
+                  <>
+                    {messageThreads?.map((m) => (
+                      <>
+                        {m._id === state._id ? (
+                          <Box
+                            pl={2}
+                            pr={2}
+                            m={1}
+                            borderRadius={1}
+                            bgcolor={
+                              currentMessage !== null &&
+                              m._id === currentMessage._id
+                                ? "lightBlue"
+                                : "#cfd8dc"
+                            }
+                            onClick={() => setCurrentMessage(m)}
+                            key={m._id}
+                            sx={{ cursor: "pointer" }}
+                          >
+                            <MessageThread
+                              messageThread={m}
+                              currentUser={currentUser.id}
+                            />
+                          </Box>
+                        ) : (
+                          <Box
+                            pl={2}
+                            pr={2}
+                            m={1}
+                            borderRadius={1}
+                            bgcolor={
+                              currentMessage !== null &&
+                              m._id === currentMessage._id
+                                ? "lightBlue"
+                                : "#cfd8dc"
+                            }
+                            onClick={() => setCurrentMessage(m)}
+                            key={m._id}
+                            sx={{ cursor: "pointer" }}
+                          >
+                            <MessageThread
+                              messageThread={m}
+                              currentUser={currentUser.id}
+                            />
+                          </Box>
+                        )}
+                      </>
+                    ))}
+                  </>
+                ) : (
+                  <>
+                    {messageThreads?.map((m) => (
+                      <Box
+                        pl={2}
+                        pr={2}
+                        m={1}
+                        borderRadius={1}
+                        bgcolor={
+                          currentMessage !== null &&
+                          m._id === currentMessage._id
+                            ? "lightBlue"
+                            : "#cfd8dc"
+                        }
+                        onClick={() => setCurrentMessage(m)}
+                        key={m._id}
+                        sx={{ cursor: "pointer" }}
+                      >
+                        <MessageThread
+                          messageThread={m}
+                          currentUser={currentUser.id}
+                        />
+                      </Box>
+                    ))}
+                  </>
+                )}
+
                 <Box height="100%" />
               </Box>
             </Box>

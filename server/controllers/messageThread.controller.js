@@ -18,6 +18,7 @@ exports.getMessageThreads = async (req, res, next) => {
 exports.addMessageThread = async (req, res, next) => {
   try {
     const newMessageThread = new MessageThread({
+      stall_name: req.body.stall_name,
       message_members: [req.body.send_user, req.body.recieve_user],
     });
     const savedMessageThread = await newMessageThread.save();

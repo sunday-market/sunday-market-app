@@ -2,6 +2,9 @@ const mongoose = require("mongoose");
 
 const MessageThreadSchema = new mongoose.Schema(
   {
+    stall_name: {
+      type: String,
+    },
     message_members: [
       {
         type: mongoose.Schema.Types.ObjectId,

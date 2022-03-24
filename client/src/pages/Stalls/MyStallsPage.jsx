@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import StallCard from "../../components/Stalls/MyStallCard";
+import StallCard from "../../components/Stalls/StallCard";
 import axios from "axios";
 import jwt from "jwt-decode";
 

@@ -28,6 +28,13 @@ export default function MessageThread({ messageThread, currentUser }) {
   return (
     <>
       <Box>
+        {messageThread.stall_name ? (
+          <Typography sx={{ fontWeight: "bold" }}>
+            {messageThread.stall_name}
+          </Typography>
+        ) : (
+          <></>
+        )}
         <Typography>{user?.username}</Typography>
       </Box>
     </>

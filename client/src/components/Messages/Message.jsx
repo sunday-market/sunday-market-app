@@ -1,4 +1,3 @@
-import { AlignVerticalCenter } from "@mui/icons-material";
 import { Box, Typography } from "@mui/material";
 import { format } from "timeago.js";
 

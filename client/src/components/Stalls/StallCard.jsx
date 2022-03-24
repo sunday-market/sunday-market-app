@@ -8,9 +8,13 @@ import {
   CardMedia,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import axios from "axios";
+import jwt from "jwt-decode";
 
-export default function ItemCard({
+export default function StallCard({
   cardId,
+  stallOwner,
   cardTitle,
   imgTitle,
   imgSource,
@@ -18,6 +22,7 @@ export default function ItemCard({
   cardCategory,
   cardDescription,
 }) {
+  const [currentUser, setCurrentUser] = useState(null);
   const navigate = useNavigate();
   const UpdateCard = async (e) => {
     console.log("UpdateCard");
@@ -25,6 +30,31 @@ export default function ItemCard({
   const CardDetails = async (e) => {
     navigate(`/account/stalls/viewstall/${cardId}`);
   };
+
+  // get current user
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      if (localStorage.getItem("authToken")) {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
+        try {
+          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
+          setCurrentUser(user.data.data);
+        } catch (error) {
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            return navigate("/login");
+          }
+        }
+      }
+    };
+    getCurrentUser();
+  }, [navigate]);
 
   return (
     <>
@@ -140,6 +170,56 @@ export default function ItemCard({
                 justifyContent: "center",
               }}
             >
+              {stallOwner === currentUser ? (
+                <>
+                  <Button
+                    variant="outlined"
+                    sx={{
+                      pl: 1,
+                      pr: 1,
+                      pt: 0.5,
+                      pb: 0.5,
+                      margin: 0.5,
+                      borderRadius: 2,
+                      fontFamily: "Tahoma",
+                    }}
+                    onClick={CardDetails}
+                  >
+                    View Details
+                  </Button>
+                  <Button
+                    variant="contained"
+                    sx={{
+                      pl: 1,
+                      pr: 1,
+                      pt: 0.5,
+                      pb: 0.5,
+                      margin: 0.5,
+                      borderRadius: 2,
+                      fontFamily: "Tahoma",
+                    }}
+                    onClick={UpdateCard}
+                  >
+                    Update
+                  </Button>
+                </>
+              ) : (
+                <Button
+                  variant="outlined"
+                  sx={{
+                    pl: 1,
+                    pr: 1,
+                    pt: 0.5,
+                    pb: 0.5,
+                    margin: 0.5,
+                    borderRadius: 2,
+                    fontFamily: "Tahoma",
+                  }}
+                  onClick={CardDetails}
+                >
+                  View Details
+                </Button>
+              )}
               <Button
                 variant="outlined"
                 sx={{

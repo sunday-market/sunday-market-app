@@ -1,23 +1,29 @@
 import { useRef, useEffect, useState } from "react";
 import { Grid, Box, Typography, Alert, Button } from "@mui/material";
 import axios from "axios";
+import { useNavigate, Redirect } from "react-router-dom";
 import MailIcon from "@mui/icons-material/Mail";
 import { useParams } from "react-router-dom";
+import BuildIcon from "@mui/icons-material/Build";
+import jwt from "jwt-decode";
 
 export default function ViewStallPage() {
+  const [currentUser, setCurrentUser] = useState(null);
   const [stall, setStall] = useState([]);
   const [user, setUser] = useState([]);
   const [error, setError] = useState("");
   const [imageHeight, setImageHeight] = useState();
   const [date, setDate] = useState("");
+  const [isOwnStall, setIsOwnStall] = useState(false);
 
   // need for getting params
   const params = useParams();
+  const navigate = useNavigate();
   const stallid = params.stallID;
 
-  // handle contact us button onclick
-  const contactUs = () => {
-    console.log("Clicked contact us");
+  // handle update button click
+  const update = () => {
+    console.log("update clicked");
   };
 
   // error ref for scrolling
@@ -56,10 +62,8 @@ export default function ViewStallPage() {
             },
           };
           const stallData = await axios.get(`/api/stalls/${stallid}`, config);
-          console.log(stallData.data);
           setStall(stallData.data);
         } catch (err) {
-          console.log("error");
           setError("No Stall Exists with that ID");
           setTimeout(() => {
             setError("");
@@ -69,6 +73,32 @@ export default function ViewStallPage() {
       getStall();
     }
   }, [stallid]);
+
+  // get current user
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      if (localStorage.getItem("authToken")) {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
+        try {
+          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
+          setCurrentUser(user.data.data);
+        } catch (error) {
+          console.log(error);
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            return navigate("/login");
+          }
+        }
+      }
+    };
+    getCurrentUser();
+  }, [navigate]);
 
   // Get stall user from stall info
   useEffect(() => {
@@ -116,6 +146,89 @@ export default function ViewStallPage() {
       getUser();
     }
   }, [stall, user]);
+  useEffect(() => {
+    const checkIfOwner = () => {
+      if (user && currentUser) {
+        setIsOwnStall(currentUser.id === user.id);
+      }
+    };
+    checkIfOwner();
+  }, [user, currentUser]);
+
+  // new message
+  const handleNewMessage = async (e) => {
+    e.preventDefault();
+    console.log(`this is the user: ${user}`);
+    console.log(`this is the current user: ${currentUser}`);
+    if (user && currentUser) {
+      const messageThread = {
+        stall_name: stall[0].stallName,
+        send_user: currentUser.id,
+        recieve_user: user.id,
+      };
+      console.log(messageThread);
+      try {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+        };
+        // check for messages already existing
+        let mesCheck = await axios.get(
+          `/api/messagethreads/${currentUser.id}`,
+          config
+        );
+        mesCheck = mesCheck.data;
+        let stateCheck = null;
+        mesCheck.forEach((mt) => {
+          if (messageThread.stall_name === mt.stall_name) {
+            if (
+              (messageThread.send_user === mt.message_members[0] &&
+                messageThread.recieve_user === mt.message_members[1]) ||
+              (messageThread.send_user === mt.message_members[1] &&
+                messageThread.recieve_user === mt.message_members[0])
+            ) {
+              console.log("true");
+              return (stateCheck = mt);
+            }
+          }
+        });
+        if (stateCheck) {
+          navigate("/account/messages", { state: stateCheck });
+        } else {
+          console.log("pass return wtf");
+          const res = await axios.post(
+            "/api/messagethreads/",
+            messageThread,
+            config
+          );
+          return navigate("/account/messages", { state: res.data });
+        }
+      } catch (error) {
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          return navigate("/login");
+        }
+        setError("Unable to send new message.");
+        setTimeout(() => {
+          setError("");
+        }, 15000);
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    } else {
+      setError(
+        "You are either not logged in or this stall has no user assigned to it, please contact management."
+      );
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }
+  };
 
   const stallLengthBool = stall.length > 0;
   return (
@@ -190,7 +303,6 @@ export default function ViewStallPage() {
                 display: "-webkit-box !important",
                 WebkitLineClamp: 3,
                 WebkitBoxOrient: "vertical",
-                pl: 2,
               }}
             >
               {stallLengthBool && stall[0].description
@@ -220,7 +332,7 @@ export default function ViewStallPage() {
                     display: "-webkit-box !important",
                     WebkitLineClamp: 3,
                     WebkitBoxOrient: "vertical",
-                    pl: 2,
+
                     fontWeight: "bold",
                   }}
                 >
@@ -236,7 +348,6 @@ export default function ViewStallPage() {
                     display: "-webkit-box !important",
                     WebkitLineClamp: 3,
                     WebkitBoxOrient: "vertical",
-                    pl: 2,
                   }}
                 >
                   {user.username
@@ -252,7 +363,7 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
+
                   fontWeight: "bold",
                 }}
               >
@@ -266,7 +377,6 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
                 }}
               >
                 {stallLengthBool && stall[0].activated
@@ -281,7 +391,7 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
+
                   fontWeight: "bold",
                 }}
               >
@@ -295,7 +405,6 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
                 }}
               >
                 {stallLengthBool && stall[0].createdAt
@@ -310,7 +419,7 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
+
                   fontWeight: "bold",
                 }}
               >
@@ -324,7 +433,6 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
                 }}
               >
                 {stallLengthBool && stall[0].email
@@ -339,7 +447,7 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
+
                   fontWeight: "bold",
                 }}
               >
@@ -353,7 +461,6 @@ export default function ViewStallPage() {
                   display: "-webkit-box !important",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
-                  pl: 2,
                 }}
               >
                 {stallLengthBool && stall[0].city_location
@@ -370,22 +477,41 @@ export default function ViewStallPage() {
                   alignItems: "center",
                 }}
               >
-                <Button
-                  variant="contained"
-                  sx={{
-                    pl: 1,
-                    pr: 1,
-                    pt: 0.5,
-                    pb: 0.5,
-                    margin: "auto",
-                    borderRadius: 1,
-                    fontFamily: "Tahoma",
-                  }}
-                  onClick={contactUs}
-                >
-                  <MailIcon />
-                  &nbsp;Contact Us
-                </Button>
+                {isOwnStall ? (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      pl: 1,
+                      pr: 1,
+                      pt: 0.5,
+                      pb: 0.5,
+                      margin: "auto",
+                      borderRadius: 1,
+                      fontFamily: "Tahoma",
+                    }}
+                    onClick={update}
+                  >
+                    <BuildIcon />
+                    &nbsp;Update
+                  </Button>
+                ) : (
+                  <Button
+                    variant="contained"
+                    sx={{
+                      pl: 1,
+                      pr: 1,
+                      pt: 0.5,
+                      pb: 0.5,
+                      margin: "auto",
+                      borderRadius: 1,
+                      fontFamily: "Tahoma",
+                    }}
+                    onClick={handleNewMessage}
+                  >
+                    <MailIcon />
+                    &nbsp;Instant Message
+                  </Button>
+                )}
               </Box>
             </Box>
           </Grid>
