@@ -20,6 +20,7 @@ import MyStallsPage from "./pages/Stalls/MyStallsPage";
 // Products Pages
 import MyProducts from "./pages/Products/MyProducts";
 import AddProduct from "./pages/Products/AddProduct";
+import ViewProduct from "./pages/Products/ViewProduct";
 
 // Message Pages
 import MessagePage from "./pages/Messages/MessagePage";
@@ -29,6 +30,8 @@ import MyOrders from "./pages/Orders/MyOrders";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
+
+import PageContainer from "./components/PageContainer"
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -83,6 +86,10 @@ function App() {
           path="/passwordreset/:resetToken"
           element={<PasswordResetPage />}
         />
+
+        <Route path="products" element={<PageContainer/>}>
+          <Route path=":productId" element={<ViewProduct />} />
+        </Route>
 
         <Route path="*" element={<Error404 />} />
       </Routes>

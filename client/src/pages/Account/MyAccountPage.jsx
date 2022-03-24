@@ -11,6 +11,8 @@ import {
   ReceiptOutlined as OrdersReceivedIcon,
 } from "@mui/icons-material";
 
+import PageContainer from "../../components/PageContainer";
+
 const AccountPage = () => {
   const navigate = useNavigate();
   const [detailsButton, setDetailsButton] = useState("outlined");
@@ -174,21 +176,9 @@ const AccountPage = () => {
         </Grid>
       </Grid>
 
-      <Box display="flex" justifyContent="center">
-        <Box
-          mt={3}
-          backgroundColor="white"
-          border="solid 1px #c3c3c3"
-          borderRadius="5px"
-          margin={1}
-          py={4}
-          px={{ xs: 1, sm: 3, md: 4 }}
-          width={{ xs: "100%", md: "90%" }}
-          maxWidth="1000px"
-        >
-          <Outlet />
-        </Box>
-      </Box>
+      <PageContainer>
+        <Outlet />
+      </PageContainer>
     </>
   );
 };
