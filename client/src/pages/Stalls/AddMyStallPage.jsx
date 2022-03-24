@@ -9,7 +9,6 @@ import {
   MenuItem,
   Alert,
   Button,
-  Divider,
   RadioGroup,
   Radio,
   FormControl,
@@ -43,8 +42,6 @@ export default function AddMyStallPage() {
     }
   }, [navigate]);
 
-
-  
   const saveStall = async (e) => {
     e.preventDefault();
 

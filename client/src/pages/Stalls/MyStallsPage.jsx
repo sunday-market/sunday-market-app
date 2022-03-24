@@ -1,11 +1,8 @@
-import Paper from "@mui/material/Paper";
-import Stack from "@mui/material/Stack";
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 
 import {
   Typography,
   Card,
-  IconButton,
   Box,
   Grid,
   Container,
@@ -47,7 +44,7 @@ export default function MyStalls() {
       };
       FetchUsersStalls();
     }
-  }, []);
+  }, [navigate]);
   // console.log(myStalls);
   return (
     <>

@@ -1,24 +1,15 @@
-import { useEffect, useState, useRef, useContext } from "react";
+import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import Message from "../../components/Messages/Message";
 import MessageThread from "../../components/Messages/MessageThread";
 import jwt from "jwt-decode";
 import {
+  Alert,
   Grid,
   Box,
-  InputLabel,
   Typography,
   TextareaAutosize,
-  Select,
-  MenuItem,
-  Alert,
   Button,
-  Divider,
-  RadioGroup,
-  Radio,
-  FormControl,
-  FormControlLabel,
-  FormLabel,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 
@@ -29,10 +20,12 @@ export default function MessagePage() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
   const [currentUser, setCurrentUser] = useState(null);
+  const [error, setError] = useState("");
 
   // const variables
   const scrollRef = useRef();
   const navigate = useNavigate();
+  const errorRef = useRef(null);
 
   // useEffects
   // get current user
@@ -52,9 +45,16 @@ export default function MessagePage() {
         } catch (error) {
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
-            navigate("/login");
+            return navigate("/login");
           }
-          console.log(error);
+          setError("Login has expired");
+          setTimeout(() => {
+            setError("");
+          }, 15000);
+          errorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
         }
       }
     };
@@ -80,9 +80,16 @@ export default function MessagePage() {
         } catch (error) {
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
-            navigate("/login");
+            return navigate("/login");
           }
-          console.log(error);
+          setError("Unable to load message threads.");
+          setTimeout(() => {
+            setError("");
+          }, 15000);
+          errorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
         }
       }
     };
@@ -92,24 +99,36 @@ export default function MessagePage() {
   // get messages
   useEffect(() => {
     const getMesssages = async () => {
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        };
-        const res = await axios(`/api/messages/${currentMessage?._id}`, config);
-        setMessages(res.data);
-      } catch (error) {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          navigate("/login");
+      if (currentMessage) {
+        try {
+          const config = {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          };
+          const res = await axios(
+            `/api/messages/${currentMessage?._id}`,
+            config
+          );
+          setMessages(res.data);
+        } catch (error) {
+          if (error.response.status === 401) {
+            localStorage.removeItem("authToken");
+            return navigate("/login");
+          }
+          setError("Unable to get messages for thread.");
+          setTimeout(() => {
+            setError("");
+          }, 15000);
+          errorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
         }
-
-        console.log(error);
       }
     };
+
     getMesssages();
   }, [currentMessage, navigate]);
 
@@ -142,52 +161,117 @@ export default function MessagePage() {
     } catch (error) {
       if (error.response.status === 401) {
         localStorage.removeItem("authToken");
-        navigate("/login");
+        return navigate("/login");
       }
-      console.log(error);
+      setError("Unable to send new message.");
+      setTimeout(() => {
+        setError("");
+      }, 15000);
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
     }
   };
 
   return (
     <>
-      <Typography>Current username: {currentUser?.username}</Typography>
-      <Typography>Current user id: {currentUser?.id}</Typography>
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          height: "100vh",
         }}
       >
-        <Grid
-          container
-          display={"flex"}
-          spacing={1}
-          alignItems="center"
-          justifyContent="center"
-        >
+        <Grid container spacing={1} alignItems="center" justifyContent="center">
+          {/* ERROR */}
+          {error && (
+            <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
+              <Alert severity="error">{error}</Alert>
+            </Grid>
+          )}
           {/* THREAD BOX */}
-          <Grid item lg={3} md={3} sm={3} xs={3}>
-            <Typography
-              align="center"
-              color="textPrimary"
-              variant="h6"
+          <Grid item lg={3} md={3} sm={3} xs={12} height="500px">
+            <Box
               sx={{
-                pb: 2,
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                position: "relative",
               }}
+              boxShadow={3}
+              height="100%"
+              borderRadius={1}
+              pl={2}
+              pr={2}
             >
-              MESSAGE THREADS
-            </Typography>
-            {messageThreads?.map((m) => (
-              <Box bgcolor={"red"} onClick={() => setCurrentMessage(m)}>
-                <MessageThread messageThread={m} currentUser={currentUser.id} />
+              <Typography
+                align="center"
+                color="textPrimary"
+                variant="h5"
+                sx={{
+                  display: "-webkit-box !important",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  pb: 2,
+                }}
+              >
+                Message Threads
+              </Typography>
+              <Box
+                height="100%"
+                sx={{
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "space-between",
+                  position: "relative",
+                  overflowY: "scroll",
+                  mb: 2,
+                }}
+              >
+                {messageThreads?.map((m) => (
+                  <Box
+                    pl={2}
+                    pr={2}
+                    m={1}
+                    borderRadius={1}
+                    bgcolor={"#eceff1"}
+                    onClick={() => setCurrentMessage(m)}
+                    key={m._id}
+                  >
+                    <MessageThread
+                      messageThread={m}
+                      currentUser={currentUser.id}
+                    />
+                  </Box>
+                ))}
+                <Box height="100%" />
               </Box>
-            ))}
+            </Box>
           </Grid>
           {/* CHATBOX */}
-          <Grid item lg={9} md={9} sm={9} xs={9}>
+          <Grid
+            item
+            lg={9}
+            md={9}
+            sm={9}
+            xs={12}
+            maxHeight="500px"
+            height="100%"
+          >
             {/* CHATBOX WRAPPER */}
-            <Box>
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
+                position: "relative",
+                flexGrow: 1,
+              }}
+              boxShadow={5}
+              borderRadius={1}
+              pl={2}
+              pr={2}
+            >
               <Typography
                 align="center"
                 color="textPrimary"
@@ -204,34 +288,72 @@ export default function MessagePage() {
               {currentMessage ? (
                 <>
                   {/* CHATBOX TOP */}
-                  <Box>
-                    {messages.map((m) => (
-                      <Box margin={"auto"} ref={scrollRef}>
-                        <Message
-                          message={m}
-                          own={m.send_user === currentUser.id}
-                        />
-                      </Box>
-                    ))}
+                  <Box
+                    height="100%"
+                    maxHeight="375px"
+                    sx={{ overflowY: "scroll" }}
+                  >
+                    {messages.length !== 0 ? (
+                      messages.map((m) => (
+                        <Box margin={"auto"} ref={scrollRef} key={m._id}>
+                          <Message
+                            message={m}
+                            own={m.send_user === currentUser.id}
+                          />
+                        </Box>
+                      ))
+                    ) : (
+                      <>
+                        <Box height="100%" />
+                        <Typography height={"100%"}>
+                          No messages, send them a new message!
+                        </Typography>
+                      </>
+                    )}
                   </Box>
                   {/* CHATBOX BOTTOM */}
-                  <Box>
+                  <Box
+                    height="100%"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      margin: 1,
+                    }}
+                  >
                     <TextareaAutosize
                       aria-label="empty textarea"
                       placeholder="Send a new message..."
-                      style={{ width: 200 }}
+                      style={{ margin: 1, width: "80%" }}
                       onChange={(e) => setNewMessage(e.target.value)}
                       value={newMessage}
                     />
-                    <Button variant="contained" onClick={handleSubmit}>
+                    <Button
+                      variant="contained"
+                      sx={{ margin: 1, width: "15%" }}
+                      onClick={handleSubmit}
+                    >
                       Send
                     </Button>
                   </Box>
                 </>
               ) : (
                 <>
-                  <Box component="span">
-                    Open a message thread to view message..
+                  <Box height="444px">
+                    <Typography
+                      align="center"
+                      color="textPrimary"
+                      variant="body2"
+                      sx={{
+                        display: "-webkit-box !important",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                        pb: 2,
+                      }}
+                    >
+                      Open a message thread to view message..
+                    </Typography>
+                    <Box height="100%" />
                   </Box>
                 </>
               )}
