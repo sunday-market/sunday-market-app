@@ -197,6 +197,7 @@ export default function MessagePage() {
                 flexDirection: "column",
                 justifyContent: "space-between",
                 position: "relative",
+                bgcolor: "#fafafa",
               }}
               boxShadow={3}
               height="100%"
@@ -234,9 +235,14 @@ export default function MessagePage() {
                     pr={2}
                     m={1}
                     borderRadius={1}
-                    bgcolor={"#eceff1"}
+                    bgcolor={
+                      currentMessage !== null && m._id === currentMessage._id
+                        ? "lightBlue"
+                        : "#cfd8dc"
+                    }
                     onClick={() => setCurrentMessage(m)}
                     key={m._id}
+                    sx={{ cursor: "pointer" }}
                   >
                     <MessageThread
                       messageThread={m}
@@ -249,23 +255,14 @@ export default function MessagePage() {
             </Box>
           </Grid>
           {/* CHATBOX */}
-          <Grid
-            item
-            lg={9}
-            md={9}
-            sm={9}
-            xs={12}
-            maxHeight="500px"
-            height="100%"
-          >
+          <Grid item lg={9} md={9} sm={9} xs={12} maxHeight="500px">
             {/* CHATBOX WRAPPER */}
             <Box
+              height="100%"
               sx={{
                 display: "flex",
                 flexDirection: "column",
-                justifyContent: "space-between",
-                position: "relative",
-                flexGrow: 1,
+                bgcolor: "#fafafa",
               }}
               boxShadow={5}
               borderRadius={1}
@@ -303,12 +300,13 @@ export default function MessagePage() {
                         </Box>
                       ))
                     ) : (
-                      <>
-                        <Box height="100%" />
-                        <Typography height={"100%"}>
+                      <Box height="100%" maxHeight="375px">
+                        <Typography
+                          sx={{ textAlign: "center", verticalAlign: "end" }}
+                        >
                           No messages, send them a new message!
                         </Typography>
-                      </>
+                      </Box>
                     )}
                   </Box>
                   {/* CHATBOX BOTTOM */}

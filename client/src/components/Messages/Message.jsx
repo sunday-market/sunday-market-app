@@ -12,11 +12,30 @@ export default function Message({ message, own }) {
           flexDirection: "column",
           ml: 4,
           mr: 4,
+          my: 2,
         }}
       >
-        <Box sx={{ py: 2 }}>
-          <Typography>{message.message}</Typography>
-          <Typography>{format(message.createdAt)}</Typography>
+        <Box
+          sx={{
+            p: 1,
+            borderRadius: 2,
+            width: "80%",
+            ...(own === true && { bgcolor: "#80d8ff" }),
+            ...(own === false && { bgcolor: "#cfd8dc" }),
+          }}
+        >
+          <Typography sx={{ ...(own === true && { textAlign: "end" }) }}>
+            {message.message}
+          </Typography>
+          <Typography
+            sx={{
+              ...(own === true && { textAlign: "end" }),
+              fontSize: "10px",
+              marginTop: 2,
+            }}
+          >
+            {format(message.createdAt)}
+          </Typography>
         </Box>
       </Box>
     </>
