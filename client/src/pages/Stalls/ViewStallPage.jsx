@@ -44,8 +44,14 @@ export default function ViewStallPage() {
     if (stallid) {
       const getStall = async () => {
         try {
-          const stallData = await axios.get(`/api/stalls/${stallid}`);
-          console.log(stallData);
+          const config = {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+          };
+          const stallData = await axios.get(`/api/stalls/${stallid}`, config);
+          console.log(stallData.data);
           setStall(stallData.data);
         } catch (err) {
           console.log("error");
@@ -85,6 +91,7 @@ export default function ViewStallPage() {
         const config = {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         };
         try {
