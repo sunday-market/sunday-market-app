@@ -29,7 +29,7 @@ const MyProducts = () => {
           },
         };
         const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
-        let data = await axios.get(
+        const data = await axios.get(
           `/api/product/user/${decodedJWT.id}`,
           config
         );

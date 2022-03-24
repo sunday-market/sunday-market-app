@@ -14,6 +14,7 @@ import {
 } from "@mui/material";
 
 import IncDecButton from "../IncDecButton";
+import { priceToCurrency } from "../../utils/currency";
 
 const ProductCard = (props) => {
   const { product, qty } = props;
@@ -32,13 +33,6 @@ const ProductCard = (props) => {
   const decrementQuantity = () => {
     setCounter(counter - 1);
     setQuantityInStock(quantityInStock + 1);
-  };
-
-  const priceToCurrency = (price) => {
-    return Number(price).toLocaleString("en-NZ", {
-      style: "currency",
-      currency: "NZD",
-    });
   };
 
   // Check if the current user is selling this product

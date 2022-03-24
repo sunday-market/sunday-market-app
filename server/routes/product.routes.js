@@ -43,7 +43,7 @@ router
 
 router
   .route("/:productid")
-  .get(protect, getProductById)
+  .get(getProductById)
   .put(protect, updateProduct)
   .delete(protect, deleteProduct);
 
