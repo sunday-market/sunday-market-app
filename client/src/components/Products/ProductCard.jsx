@@ -154,7 +154,7 @@ const ProductCard = (props) => {
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => navigate(`/account/products/${product._id}`)}
+                    onClick={() => navigate(`/account/products/edit/${product._id}`)}
                   >
                     Edit
                   </Button>

@@ -21,6 +21,7 @@ import MyStallsPage from "./pages/Stalls/MyStallsPage";
 import MyProducts from "./pages/Products/MyProducts";
 import AddProduct from "./pages/Products/AddProduct";
 import ViewProduct from "./pages/Products/ViewProduct";
+import EditProduct from "./pages/Products/EditProduct";
 
 // Message Pages
 import MessagePage from "./pages/Messages/MessagePage";
@@ -54,6 +55,7 @@ function App() {
             <Route path="products">
               <Route path="myproducts" element={<MyProducts />} />
               <Route path="add" element={<AddProduct />} />
+              <Route path="edit/:productId" element={<EditProduct />} />
             </Route>
 
             <Route path="stalls">
