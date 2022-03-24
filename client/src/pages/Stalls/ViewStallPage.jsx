@@ -239,13 +239,7 @@ export default function ViewStallPage() {
           flexGrow: 1,
         }}
       >
-        <Grid
-          container
-          display={"flex"}
-          spacing={1}
-          alignItems="center"
-          justifyContent="center"
-        >
+        <Grid container spacing={1} justifyContent="center">
           {error && (
             <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
               <Alert severity="error">{error}</Alert>
@@ -292,7 +286,6 @@ export default function ViewStallPage() {
             md={5}
             sm={7}
             xs={11}
-            height={imageHeight}
             zeroMinWidth
           >
             <Typography
