@@ -36,7 +36,7 @@ const EditProduct = () => {
     image: "",
   });
 
-  const [filePreview, setFilePreview] = useState(null);
+  const [filePreview, setFilePreview] = useState(undefined);
   const [userStalls, setUserStalls] = useState([]);
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
@@ -160,7 +160,7 @@ const EditProduct = () => {
     }
 
     if (!product.quantity_in_stock) {
-      setProduct(0);
+      setProduct({ ...product, quantity_in_stock: 0 });
     }
 
     const config = {
@@ -169,8 +169,6 @@ const EditProduct = () => {
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
     };
-
-    console.log(`FORM_DATA: ${formData.get("image")}`);
 
     try {
       await axios.put(`/api/product/${productId}`, formData, config);
@@ -216,9 +214,11 @@ const EditProduct = () => {
                 component="img"
                 width="100%"
                 src={
-                  filePreview !== null
+                  filePreview !== undefined
                     ? filePreview
-                    : `${PUBLIC_FOLDER}products/${product.image}`
+                    : product.image
+                    ? `${PUBLIC_FOLDER}products/${product.image}`
+                    : `${PUBLIC_FOLDER}products/noimage.jpg`
                 }
                 alt={product.product_name}
                 border="solid 1px #e0e0e0"
