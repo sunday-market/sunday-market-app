@@ -1,5 +1,7 @@
 const { Product } = require("../models/Product");
 const ErrorResponse = require("../utils/errorResponse");
+const fs = require("fs");
+const path = require("path");
 
 // GETS
 // Get all Products
@@ -122,6 +124,16 @@ exports.updateProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   try {
     await Product.deleteOne({ _id: req.params.productid });
+
+    if (req.body.image !== "noimage.jpg") {
+      await fs.unlink(
+        path.resolve(`../server/public/images/products/${req.body.image}`),
+        (err) => {
+          if (err) next(err);
+        }
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: `Successfully deleted product ${req.params.productid}`,

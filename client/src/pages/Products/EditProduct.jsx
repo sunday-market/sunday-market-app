@@ -21,6 +21,7 @@ import {
   Button,
   Divider,
   Box,
+  Modal,
 } from "@mui/material";
 
 import SubCategoriesData from "../../data/SubCategories.json";
@@ -41,6 +42,10 @@ const EditProduct = () => {
   const [success, setSuccess] = useState("");
   const [error, setError] = useState("");
 
+  const [openModal, setOpenModal] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
+
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
 
   const errorRef = useRef(null);
@@ -48,6 +53,18 @@ const EditProduct = () => {
 
   const navigate = useNavigate();
   const { productId } = useParams();
+
+  const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+  };
 
   useEffect(() => {
     (async () => {
@@ -109,6 +126,33 @@ const EditProduct = () => {
       quantity_in_stock: "",
       image: filePreview,
     });
+  };
+
+  const handleDelete = async () => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        data: {
+          image: product.image,
+        },
+      };
+
+      await axios.delete(`/api/product/${productId}`, config);
+      navigate("/account/products/myproducts");
+    } catch (error) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("authToken");
+        return navigate("/login");
+      }
+      setError(error.response.data.error);
+
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -437,7 +481,7 @@ const EditProduct = () => {
               <Button
                 // variant="contained"
                 startIcon={<DeleteIcon />}
-                onClick={() => alert("Still to implement...")}
+                onClick={handleOpenModal}
                 color="error"
               >
                 Delete Product
@@ -446,6 +490,34 @@ const EditProduct = () => {
           </Grid>
         </Grid>
       </form>
+
+      <Modal
+        open={openModal}
+        onClose={handleCloseModal}
+        aria-labelledby="modal-modal-title"
+        aria-describedby="modal-modal-description"
+      >
+        <Box sx={modalStyle}>
+          <Typography id="modal-modal-title" variant="h6" component="h2">
+            Delete Product?
+          </Typography>
+          <Typography id="modal-modal-description" mt={2} mb={2}>
+            Are you sure you want to delete this product? <br />
+            This action cannot be undone.
+          </Typography>
+          <Button
+            variant="contained"
+            color="error"
+            onClick={handleDelete}
+            sx={{ marginRight: 1 }}
+          >
+            Delete
+          </Button>
+          <Button variant="outlined" onClick={handleCloseModal}>
+            Cancel
+          </Button>
+        </Box>
+      </Modal>
     </>
   );
 };
