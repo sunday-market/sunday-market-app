@@ -28,7 +28,7 @@ const StallSchema = new mongoose.Schema(
     image_url: {
       type: String,
       required: [true, "No image has been selected"],
-      default: "./images/stall_noimage",
+      default: "noimage.png",
     },
     email: {
       type: String,

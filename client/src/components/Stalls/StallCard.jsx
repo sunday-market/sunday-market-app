@@ -30,7 +30,7 @@ export default function StallCard({
   const CardDetails = async (e) => {
     navigate(`/account/stalls/viewstall/${cardId}`);
   };
-
+  const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
   // get current user
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -95,11 +95,7 @@ export default function StallCard({
                   ? imgTitle
                   : "No alternative text has been provided for this image, we are very sorry for your inconvience"
               }
-              image={
-                imgSource
-                  ? imgSource
-                  : "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
-              }
+              image={imgSource ? PF + imgSource : PF + "noimage.png"}
             ></CardMedia>
             {stallActive ? (
               <Typography

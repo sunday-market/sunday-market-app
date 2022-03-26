@@ -1,7 +1,7 @@
 import { useRef, useEffect, useState } from "react";
 import { Grid, Box, Typography, Alert, Button } from "@mui/material";
 import axios from "axios";
-import { useNavigate, Redirect } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import MailIcon from "@mui/icons-material/Mail";
 import { useParams } from "react-router-dom";
 import BuildIcon from "@mui/icons-material/Build";
@@ -12,9 +12,10 @@ export default function ViewStallPage() {
   const [stall, setStall] = useState([]);
   const [user, setUser] = useState([]);
   const [error, setError] = useState("");
-  const [imageHeight, setImageHeight] = useState();
   const [date, setDate] = useState("");
   const [isOwnStall, setIsOwnStall] = useState(false);
+
+  const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
 
   // need for getting params
   const params = useParams();
@@ -31,24 +32,6 @@ export default function ViewStallPage() {
 
   // image ref for resizing
   const imgRef = useRef(null);
-
-  // Handle image on load function
-  const onImageLoad = ({ target: img }) => {
-    setImageHeight(img.height);
-  };
-
-  // Handle image height function for dynamic resizing
-  const getImageHeight = () => {
-    if (imgRef) {
-      const newHeight = imgRef.current.height;
-      setImageHeight(newHeight);
-    }
-  };
-
-  // Handle imageHeight when screen resizes
-  useEffect(() => {
-    window.addEventListener("resize", getImageHeight);
-  }, []);
 
   // Get stall info
   useEffect(() => {
@@ -239,21 +222,26 @@ export default function ViewStallPage() {
           flexGrow: 1,
         }}
       >
-        <Grid container spacing={1} justifyContent="center">
+        <Grid container spacing={0} justifyContent="center">
           {error && (
             <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
               <Alert severity="error">{error}</Alert>
             </Grid>
           )}
-          <Grid item lg={12} md={12} sm={12} xs={12}>
+          <Grid
+            justifyContent="center"
+            alignItems={"center"}
+            item
+            lg={12}
+            md={12}
+            sm={12}
+            xs={12}
+          >
             <Typography
               align="center"
               color="textPrimary"
               variant="h5"
               sx={{
-                display: "-webkit-box !important",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
                 pb: 2,
               }}
             >
@@ -262,17 +250,16 @@ export default function ViewStallPage() {
                 : "No Stall Name Provided Provided"}
             </Typography>
           </Grid>
-          <Grid item lg={5} md={4} sm={5} xs={11} zeroMinWidth>
+          <Grid item lg={5} md={4} sm={5} xs={11}>
             <Box
               ref={imgRef}
               component={"img"}
               width={"100%"}
               sx={{ borderRadius: 2 }}
-              onLoad={onImageLoad}
               src={
-                stallLengthBool && stall[0].image_url
-                  ? stall[0].image_url
-                  : "https://randomwordgenerator.com/img/picture-generator/53e4d2464252ae14f1dc8460962e33791c3ad6e04e507440722d72d59448c5_640.jpg"
+                stallLengthBool && PF + stall[0].image_url
+                  ? PF + stall[0].image_url
+                  : PF + "noimage.png"
               }
               alt={stallLengthBool ? stall[0].stallName : "Image for the store"}
             />
@@ -281,37 +268,29 @@ export default function ViewStallPage() {
             item
             container
             display="flex"
+            px={3}
+            py={2}
             justifyContent="start"
             lg={4}
             md={5}
             sm={7}
             xs={11}
-            zeroMinWidth
+            maxHeight={"100%"}
           >
-            <Typography
-              align="center"
-              color="textPrimary"
-              variant="body2"
-              sx={{
-                display: "-webkit-box !important",
-                WebkitLineClamp: 3,
-                WebkitBoxOrient: "vertical",
-              }}
-            >
+            <Typography align="center" color="textPrimary" variant="body2">
               {stallLengthBool && stall[0].description
                 ? stall[0].description
                 : "No Description Provided For This Stall"}
             </Typography>
           </Grid>
-          <Grid item lg={3} md={3} sm={12} xs={11} zeroMinWidth>
+          <Grid item lg={3} md={3} sm={12} xs={11}>
             <Box
-              minHeight={imageHeight}
               maxHeight={"100%"}
               borderRadius={2}
               sx={{
                 boxShadow: 3,
-                pt: 1,
-                pb: 1,
+                pt: 2,
+                pb: 2,
                 justifyContent: "center",
                 alignItems: "center",
               }}
@@ -322,10 +301,6 @@ export default function ViewStallPage() {
                   color="textPrimary"
                   variant="body2"
                   sx={{
-                    display: "-webkit-box !important",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-
                     fontWeight: "bold",
                   }}
                 >
@@ -333,16 +308,7 @@ export default function ViewStallPage() {
                 </Typography>
               )}
               {user && (
-                <Typography
-                  align="center"
-                  color="textPrimary"
-                  variant="body2"
-                  sx={{
-                    display: "-webkit-box !important",
-                    WebkitLineClamp: 3,
-                    WebkitBoxOrient: "vertical",
-                  }}
-                >
+                <Typography align="center" color="textPrimary" variant="body2">
                   {user.username
                     ? user.username
                     : "No Username Can be found For This Stall"}
@@ -353,10 +319,6 @@ export default function ViewStallPage() {
                 color="textPrimary"
                 variant="body2"
                 sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-
                   fontWeight: "bold",
                 }}
               >
@@ -366,11 +328,6 @@ export default function ViewStallPage() {
                 align="center"
                 color={stallLengthBool && stall[0].activated ? "green" : "red"}
                 variant="body2"
-                sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}
               >
                 {stallLengthBool && stall[0].activated
                   ? "Stall Is Currently Activate"
@@ -381,10 +338,6 @@ export default function ViewStallPage() {
                 color="textPrimary"
                 variant="body2"
                 sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-
                   fontWeight: "bold",
                 }}
               >
@@ -394,11 +347,7 @@ export default function ViewStallPage() {
                 align="center"
                 color="textPrimary"
                 variant="body2"
-                sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}
+                sx={{}}
               >
                 {stallLengthBool && stall[0].createdAt
                   ? date
@@ -409,10 +358,6 @@ export default function ViewStallPage() {
                 color="textPrimary"
                 variant="body2"
                 sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-
                   fontWeight: "bold",
                 }}
               >
@@ -422,11 +367,7 @@ export default function ViewStallPage() {
                 align="center"
                 color="textPrimary"
                 variant="body2"
-                sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}
+                sx={{}}
               >
                 {stallLengthBool && stall[0].email
                   ? stall[0].email
@@ -437,25 +378,12 @@ export default function ViewStallPage() {
                 color="textPrimary"
                 variant="body2"
                 sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-
                   fontWeight: "bold",
                 }}
               >
                 Location:
               </Typography>
-              <Typography
-                align="center"
-                color="textPrimary"
-                variant="body2"
-                sx={{
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
+              <Typography align="center" color="textPrimary" variant="body2">
                 {stallLengthBool && stall[0].city_location
                   ? stall[0].city_location
                   : "No Location has been Provided"}

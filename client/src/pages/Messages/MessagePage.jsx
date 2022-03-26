@@ -12,6 +12,7 @@ import {
   Button,
 } from "@mui/material";
 import { useNavigate, useLocation } from "react-router-dom";
+import { io } from "socket.io-client";
 
 export default function MessagePage(props) {
   // States
@@ -22,13 +23,41 @@ export default function MessagePage(props) {
   const [currentUser, setCurrentUser] = useState(null);
   const [error, setError] = useState("");
   const { state } = useLocation();
+  const [arrivalMessage, setArrivalMessage] = useState(null);
 
   // const variables
   const scrollRef = useRef();
   const navigate = useNavigate();
   const errorRef = useRef(null);
+  const socket = useRef();
 
   // useEffects
+  // SOCKET IO
+  useEffect(() => {
+    socket.current = io("ws://localhost:8900");
+    socket.current.on("getMessage", (data) => {
+      setArrivalMessage({
+        send_user: data.senderId,
+        message: data.sentMessage,
+        createdAt: Date.now(),
+      });
+    });
+  }, []);
+  useEffect(() => {
+    arrivalMessage &&
+      currentMessage?.message_members.includes(arrivalMessage.send_user) &&
+      setMessages((prev) => [...prev, arrivalMessage]);
+  }, [arrivalMessage, currentMessage]);
+
+  useEffect(() => {
+    if (currentUser) {
+      socket.current.emit("addUser", currentUser.id);
+      socket.current.on("getUsers", (users) => {
+        console.log(users);
+      });
+    }
+  }, [currentUser]);
+
   // get current user
   useEffect(() => {
     const getCurrentUser = async () => {
@@ -155,6 +184,19 @@ export default function MessagePage(props) {
       message: newMessage,
       message_thread_id: currentMessage._id,
     };
+
+    // SOCKET IO instant message
+    // get reciever from current chat message
+    const recieverId = currentMessage.message_members.find(
+      (member) => member !== currentUser.id
+    );
+    // emit new message to socket io
+    socket.current.emit("sendMessage", {
+      senderId: currentUser.id,
+      recieverId,
+      sentMessage: newMessage,
+    });
+
     try {
       const config = {
         headers: {
