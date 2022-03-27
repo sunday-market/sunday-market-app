@@ -272,7 +272,7 @@ const EditProduct = () => {
             <Box mt={2}>
               <label htmlFor="upload-button">
                 <input
-                  accept="image/*"
+                  accept="image/jpg, image/jpeg, image/png"
                   id="upload-button"
                   name="productImage"
                   type="file"

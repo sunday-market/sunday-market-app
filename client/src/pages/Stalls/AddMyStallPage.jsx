@@ -231,7 +231,7 @@ export default function AddMyStallPage() {
               sx={{ margin: 1, marginLeft: 0 }}
             >
               <input
-                accept="image/*"
+                accept="image/jpg, image/jpeg, image/png"
                 hidden
                 type="file"
                 onChange={(e) => setImage(e.target.files[0])}

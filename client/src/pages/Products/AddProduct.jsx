@@ -18,7 +18,7 @@ import {
   Alert,
   Button,
   Divider,
-  Box
+  Box,
 } from "@mui/material";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -339,7 +339,7 @@ const AddProduct = () => {
 
             <label htmlFor="upload-button">
               <input
-                accept="image/*"
+                accept="image/jpg, image/jpeg, image/png"
                 id="upload-button"
                 name="productImage"
                 type="file"
