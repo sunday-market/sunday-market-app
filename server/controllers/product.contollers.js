@@ -27,10 +27,8 @@ exports.getAllActiveProducts = async (req, res, next) => {
       match: { activated: { $eq: true } },
     });
 
-    if (!products) {
-      return next(
-        new ErrorResponse("No product exists with that product id", 404)
-      );
+    if (products.length === 0) {
+      return next(new ErrorResponse("No active product exists", 404));
     }
 
     res.status(200).json(
@@ -68,6 +66,23 @@ exports.getUserProducts = async (req, res, next) => {
       );
     }
     // console.log(`Products: ${products}`)
+    res.status(200).json(products);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// Get Stall Products
+exports.getStallProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({
+      product_stall: req.params.stallid,
+    });
+
+    if (products.length === 0) {
+      return next(new ErrorResponse("No product exists for that stall", 404));
+    }
+
     res.status(200).json(products);
   } catch (error) {
     return next(error);

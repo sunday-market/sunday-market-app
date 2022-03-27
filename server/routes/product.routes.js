@@ -31,10 +31,11 @@ const {
   getAllProducts,
   getProductById,
   getUserProducts,
+  getAllActiveProducts,
+  getStallProducts,
   addProduct,
   updateProduct,
   deleteProduct,
-  getAllActiveProducts,
 } = require("../controllers/product.contollers");
 
 router
@@ -43,6 +44,8 @@ router
   .post(protect, upload.single("image"), addProduct);
 
 router.route("/active").get(protect, getAllActiveProducts);
+
+router.route("/stall/:stallid").get(protect, getStallProducts);
 
 router
   .route("/:productid")
