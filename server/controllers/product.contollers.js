@@ -3,6 +3,8 @@ const ErrorResponse = require("../utils/errorResponse");
 const fs = require("fs");
 const path = require("path");
 
+const mongoose = require("mongoose");
+
 // GETS
 // Get all Products
 exports.getAllProducts = async (req, res, next) => {
@@ -12,6 +14,30 @@ exports.getAllProducts = async (req, res, next) => {
       return next(new ErrorResponse("No products exist", 404));
     }
     res.status(200).json(products);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// Get All Products where the stall is Active
+exports.getAllActiveProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({}).populate({
+      path: "product_stall",
+      match: { activated: { $eq: true } },
+    });
+
+    if (!products) {
+      return next(
+        new ErrorResponse("No product exists with that product id", 404)
+      );
+    }
+
+    res.status(200).json(
+      products.filter((product) => {
+        return product.product_stall !== null;
+      })
+    );
   } catch (error) {
     return next(error);
   }
