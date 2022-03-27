@@ -45,7 +45,7 @@ export default function MyStalls() {
       FetchUsersStalls();
     }
   }, [navigate]);
-  // console.log(myStalls);
+
   return (
     <>
       <Box
@@ -55,10 +55,11 @@ export default function MyStalls() {
         }}
       >
         <Container maxWidth={false}>
-          <Box sx={{ pt: 0 }}>
+          <Box sx={{ pt: 2 }}>
             <Grid container spacing={3}>
               <Grid item lg={3} md={4} xs={12}>
                 <Card
+                  onClick={() => navigate("../addstall")}
                   sx={[
                     {
                       display: "flex",
@@ -89,6 +90,7 @@ export default function MyStalls() {
                     cardId={stall._id}
                     cardTitle={stall.stallName}
                     stallActive={stall.activated}
+                    stallOwner={stall.user}
                     imgTitle={`This is an image for the stall ${stall.stallName}`}
                     imgSource={stall.image_url}
                     cardCategory={stall.category}

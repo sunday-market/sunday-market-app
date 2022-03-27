@@ -22,7 +22,7 @@ export default function StallCard({
   cardCategory,
   cardDescription,
 }) {
-  const [currentUser, setCurrentUser] = useState(null);
+  const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
   const UpdateCard = async (e) => {
     console.log("UpdateCard");
@@ -33,7 +33,7 @@ export default function StallCard({
   const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
   // get current user
   useEffect(() => {
-    const getCurrentUser = async () => {
+    const getCurrentUserId = async () => {
       if (localStorage.getItem("authToken")) {
         const config = {
           headers: {
@@ -44,7 +44,7 @@ export default function StallCard({
         try {
           const decodedJWT = await jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
-          setCurrentUser(user.data.data);
+          setCurrentUserId(user.data.data.id);
         } catch (error) {
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
@@ -53,9 +53,8 @@ export default function StallCard({
         }
       }
     };
-    getCurrentUser();
+    getCurrentUserId();
   }, [navigate]);
-
   return (
     <>
       <Card
@@ -85,8 +84,6 @@ export default function StallCard({
             >
               {cardTitle ? cardTitle.toUpperCase() : "Card Title"}
             </Typography>
-            {/* Backup Image taken from below link */}
-            {/* https://unsplash.com/photos/WtolM5hsj14 */}
             <CardMedia
               component="img"
               height="175"
@@ -166,10 +163,10 @@ export default function StallCard({
                 justifyContent: "center",
               }}
             >
-              {stallOwner === currentUser ? (
+              {stallOwner === currentUserId ? (
                 <>
                   <Button
-                    variant="outlined"
+                    variant="contained"
                     sx={{
                       pl: 1,
                       pr: 1,
@@ -184,7 +181,7 @@ export default function StallCard({
                     View Details
                   </Button>
                   <Button
-                    variant="contained"
+                    variant="outlined"
                     sx={{
                       pl: 1,
                       pr: 1,
@@ -201,7 +198,7 @@ export default function StallCard({
                 </>
               ) : (
                 <Button
-                  variant="outlined"
+                  variant="contained"
                   sx={{
                     pl: 1,
                     pr: 1,
@@ -216,36 +213,6 @@ export default function StallCard({
                   View Details
                 </Button>
               )}
-              <Button
-                variant="outlined"
-                sx={{
-                  pl: 1,
-                  pr: 1,
-                  pt: 0.5,
-                  pb: 0.5,
-                  margin: 0.5,
-                  borderRadius: 2,
-                  fontFamily: "Tahoma",
-                }}
-                onClick={CardDetails}
-              >
-                View Details
-              </Button>
-              <Button
-                variant="contained"
-                sx={{
-                  pl: 1,
-                  pr: 1,
-                  pt: 0.5,
-                  pb: 0.5,
-                  margin: 0.5,
-                  borderRadius: 2,
-                  fontFamily: "Tahoma",
-                }}
-                onClick={UpdateCard}
-              >
-                Update
-              </Button>
             </Grid>
           </Grid>
         </Box>

@@ -27,6 +27,7 @@ app.use("/api/order", require("./routes/order.routes"));
 app.use("/api", require("./routes/stall.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api/messagethreads", require("./routes/messageThread.routes"));
+app.use("/api/category", require("./routes/category.routes"));
 
 app.use(errorHandler);
 

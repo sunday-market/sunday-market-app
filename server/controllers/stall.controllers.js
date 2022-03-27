@@ -53,10 +53,23 @@ exports.addNewStall = async (req, res, next) => {
         )
       );
     }
-    const newStall = await Stall.create(req.body);
+    console.log(req.body);
+    const stallData = {
+      user: req.body.user,
+      stallName: req.body.stallName,
+      category: req.body.category,
+      activated: req.body.activated,
+      description: req.body.description ? req.body.description : "",
+      image_url: req.file ? req.file.filename : "noimage.png",
+      email: req.body.email ? req.body.email : "",
+      city_location: req.body.city_location,
+    };
+
+    const newStall = await Stall.create(stallData);
 
     res.status(200).json({
       success: true,
+      message: "Stall successfully added.",
       data: newStall,
     });
   } catch (error) {
@@ -67,7 +80,17 @@ exports.addNewStall = async (req, res, next) => {
 // PUT
 exports.updateStall = async (req, res, next) => {
   const stallID = req.params.stallid;
-  const data = req.body;
+  const stallData = {
+    user: req.body.user,
+    stallName: req.body.stallName,
+    category: req.body.category,
+    activated: req.body.activated,
+    description: req.body.description ? req.body.description : "",
+    image_url: req.file ? req.file.filename : "noimage.png",
+    email: req.body.email ? req.body.email : "",
+    city_location: req.body.city_location,
+  };
+
   try {
     // check that no stall with the same name exists
     const stall = await Stall.findOne({ stallName: req.body.stallName });
@@ -78,11 +101,11 @@ exports.updateStall = async (req, res, next) => {
         )
       );
     }
-    await Stall.findByIdAndUpdate(stallID, data);
+    await Stall.findByIdAndUpdate(stallID, stallData);
     res.status(200).json({
       success: true,
       message: `Stall with the ID: ${stallID}, was successfully updated.`,
-      data: data,
+      data: stallData,
     });
   } catch (error) {
     return next(error);
