@@ -14,6 +14,7 @@ import {
   Alert,
   InputLabel,
   Modal,
+  Divider,
 } from "@mui/material";
 
 const AccountsPage = () => {
@@ -271,35 +272,33 @@ const AccountsPage = () => {
   };
 
   return (
-    <Box p={2}>
+    <Box px={{ xs: 2, sm: 8, md: 22 }} py={4}>
       {/* General Errors  */}
       <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
 
       {/* Account Details  */}
-      <Grid container direction="column" spacing={2} marginBottom={8}>
+      <Grid container direction="column">
         <Grid item>
-          <Typography variant="h5">Account Details</Typography>
+          <Typography variant="h4">Account Details</Typography>
         </Grid>
 
-        {/* Username */}
-        <Grid item marginBottom={2} padding={3} sx={{ background: "#f5f5f5" }}>
-          <InputLabel>Username</InputLabel>
-
-          <TextField
-            disabled={true}
-            variant="outlined"
-            size="small"
-            type="text"
-            value={username.toLowerCase()}
-            onChange={(e) => setUsername(e.target.value)}
-            placeholder="Username"
-            sx={{ background: "white" }}
-          />
+        <Grid item mb={2}>
+          <Divider />
         </Grid>
+
+        <Grid item>
+          <Typography variant="body1">
+            The details of your account are listed below. You can update your
+            details if they are incorrect. Please note you are unable to change
+            your username and email address.{" "}
+          </Typography>
+        </Grid>
+
+        <Grid item my={1} />
 
         {/* Full Name */}
-        <Grid item>
-          <InputLabel required>Full Name</InputLabel>
+        <Grid item p={1} py={3}>
+          <InputLabel required>Name</InputLabel>
           <TextField
             disabled={!accountDetailsEdit}
             variant="outlined"
@@ -313,8 +312,25 @@ const AccountsPage = () => {
           />
         </Grid>
 
+        {/* Username */}
+        <Grid item p={1}>
+          <InputLabel>Username</InputLabel>
+
+          <TextField
+            disabled={true}
+            fullWidth
+            variant="outlined"
+            size="small"
+            type="text"
+            value={username.toLowerCase()}
+            onChange={(e) => setUsername(e.target.value)}
+            placeholder="Username"
+            sx={{ background: "white" }}
+          />
+        </Grid>
+
         {/* Email */}
-        <Grid item>
+        <Grid item p={1}>
           <InputLabel required>Email Address</InputLabel>
           <TextField
             disabled
@@ -329,8 +345,25 @@ const AccountsPage = () => {
           />
         </Grid>
 
+        {/* Phone */}
+        <Grid item p={1}>
+          <InputLabel>Phone Number</InputLabel>
+          <TextField
+            disabled={!accountDetailsEdit}
+            variant="outlined"
+            size="small"
+            type="text"
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            placeholder="+64 21 111 222 333"
+            sx={{ background: "white", maxWidth: "30char" }}
+          />
+        </Grid>
+
+        <Grid item my={2}></Grid>
+
         {/* Address */}
-        <Grid item>
+        <Grid item px={1}>
           <InputLabel>Address</InputLabel>
           <TextField
             disabled={!accountDetailsEdit}
@@ -345,7 +378,7 @@ const AccountsPage = () => {
           />
         </Grid>
 
-        <Grid item>
+        <Grid item p={1}>
           <TextField
             disabled={!accountDetailsEdit}
             variant="outlined"
@@ -359,7 +392,7 @@ const AccountsPage = () => {
           />
         </Grid>
 
-        <Grid item>
+        <Grid item px={1}>
           <TextField
             disabled={!accountDetailsEdit}
             variant="outlined"
@@ -373,36 +406,16 @@ const AccountsPage = () => {
           />
         </Grid>
 
-        {/* Phone */}
-        <Grid item>
-          <InputLabel>Phone Number</InputLabel>
-          <TextField
-            disabled={!accountDetailsEdit}
-            variant="outlined"
-            fullWidth
-            size="small"
-            type="text"
-            value={phone}
-            onChange={(e) => setPhone(e.target.value)}
-            placeholder="+64 21 111 222 333"
-            sx={{ background: "white" }}
-          />
-        </Grid>
-
-        {/* Update Successful Message  */}
+        {/* Alert Messages  */}
         <Grid item>
           {success && <Alert severity="success">{success}</Alert>}
-        </Grid>
-
-        {/* Login Details Errors  */}
-        <Grid item>
           {accountDetailsError && (
             <Alert severity="error">{accountDetailsError}</Alert>
           )}
         </Grid>
 
         {/* Update Account Details Button */}
-        <Grid item textAlign={"right"}>
+        <Grid item textAlign={"right"} m={0} p={2}>
           {!accountDetailsEdit ? (
             <Button
               variant="contained"
@@ -414,20 +427,22 @@ const AccountsPage = () => {
           ) : (
             <>
               <Button
-                variant="outlined"
-                startIcon={<Cancel />}
-                onClick={cancelAccountDetailsHandler}
-              >
-                Cancel
-              </Button>
-              <Button
                 disabled={!accountDetailsEdit}
                 color="success"
                 variant="contained"
                 startIcon={<Save />}
                 onClick={saveAccountDetailsHandler}
+                sx={{ marginRight: 1 }}
               >
                 Save
+              </Button>
+              <Button
+                variant="outlined"
+                startIcon={<Cancel />}
+                onClick={cancelAccountDetailsHandler}
+                style={{ color: "grey", borderColor: "grey" }}
+              >
+                Cancel
               </Button>
             </>
           )}
@@ -436,7 +451,7 @@ const AccountsPage = () => {
 
       {/* Change Password  */}
       <form>
-        <Grid container direction="column" spacing={2} marginBottom={8}>
+        <Grid container direction="column" marginBottom={8}>
           <Grid item>
             <Typography variant="h5">Change Password</Typography>
             <Typography variant="body2" mb={1}>
@@ -446,7 +461,7 @@ const AccountsPage = () => {
             </Typography>
           </Grid>
 
-          <Grid item>
+          <Grid item p={1}>
             <InputLabel>Enter Current Password</InputLabel>
             <TextField
               variant="outlined"
@@ -460,7 +475,7 @@ const AccountsPage = () => {
             />
           </Grid>
 
-          <Grid item>
+          <Grid item p={1}>
             <InputLabel>New Password</InputLabel>
             <TextField
               variant="outlined"
@@ -475,7 +490,7 @@ const AccountsPage = () => {
           </Grid>
 
           {/* Confirm Password  */}
-          <Grid item>
+          <Grid item p={1}>
             <InputLabel>Confirm your Password</InputLabel>
             <TextField
               variant="outlined"
@@ -505,7 +520,11 @@ const AccountsPage = () => {
 
           {/* Change Password Button */}
           <Grid item textAlign={"center"}>
-            <Button variant="contained" onClick={changePasswordHandler}>
+            <Button
+              variant="contained"
+              size="small"
+              onClick={changePasswordHandler}
+            >
               Change Password
             </Button>
           </Grid>
@@ -529,7 +548,6 @@ const AccountsPage = () => {
         </Grid>
         <Grid item padding={3} textAlign={"center"}>
           <Button
-            variant="outlined"
             startIcon={<Delete />}
             color="error"
             onClick={handleOpenDeleteModal}
