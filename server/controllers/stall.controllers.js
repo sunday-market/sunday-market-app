@@ -53,7 +53,6 @@ exports.addNewStall = async (req, res, next) => {
         )
       );
     }
-    console.log(req.body);
     const stallData = {
       user: req.body.user,
       stallName: req.body.stallName,
@@ -66,7 +65,6 @@ exports.addNewStall = async (req, res, next) => {
     };
 
     const newStall = await Stall.create(stallData);
-
     res.status(200).json({
       success: true,
       message: "Stall successfully added.",

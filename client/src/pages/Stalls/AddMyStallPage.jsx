@@ -137,7 +137,7 @@ export default function AddMyStallPage() {
     } else {
       stallData.append("stallName", stallName);
     }
- 
+
     // Check for Category selected
     if (!category) {
       setTimeout(() => {
@@ -191,7 +191,7 @@ export default function AddMyStallPage() {
         setError("");
       }, 5000);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return setError("You need to select a category to upload a store");
+      return setError(error.response.data.error);
     }
   };
 
