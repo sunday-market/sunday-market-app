@@ -18,6 +18,7 @@ import {
   Alert,
   Button,
   Divider,
+  Box
 } from "@mui/material";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -186,7 +187,7 @@ const AddProduct = () => {
   }, [navigate]);
 
   return (
-    <>
+    <Box p={2}>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <Typography variant="h4">Add Product</Typography>
 
@@ -402,7 +403,7 @@ const AddProduct = () => {
           </Grid>
         </Grid>
       </form>
-    </>
+    </Box>
   );
 };
 

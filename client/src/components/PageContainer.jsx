@@ -5,13 +5,10 @@ const PageContainer = () => {
   return (
     <Box display="flex" justifyContent="center">
       <Box
-        mt={3}
+        mt={{ xs: 0, md: 3 }}
         backgroundColor="white"
-        border="solid 1px #c3c3c3"
-        borderRadius="5px"
-        margin={1}
-        py={4}
-        px={{ xs: 1, sm: 3, md: 4 }}
+        border={{ xs: "none", sm: "solid 1px #c3c3c3" }}
+        borderRadius={{ xs: "none", md: 2 }}
         width={{ xs: "100%", md: "90%" }}
         maxWidth="1000px"
       >

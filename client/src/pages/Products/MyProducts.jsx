@@ -53,6 +53,7 @@ const MyProducts = () => {
     <>
       <Box
         component="main"
+        p={2}
         sx={{
           flexGrow: 1,
         }}

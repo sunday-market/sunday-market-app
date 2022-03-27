@@ -1,4 +1,5 @@
 import React from "react";
+import { useNavigate } from "react-router";
 import {
   Typography,
   Card,
@@ -14,6 +15,10 @@ import {
 } from "@mui/icons-material";
 
 const OrderCard = ({ order }) => {
+  const navigate = useNavigate();
+
+  const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+
   return (
     <Card
       sx={{
@@ -26,7 +31,11 @@ const OrderCard = ({ order }) => {
       <CardMedia
         component="img"
         height="100"
-        image="https://images.unsplash.com/photo-1590779033100-9f60a05a013d?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=687&q=80"
+        image={
+          order.stall.image
+            ? `${PUBLIC_FOLDER}stalls/${order.stall.image}`
+            : `${PUBLIC_FOLDER}stalls/noimage.png`
+        }
         alt={order.stall.name}
       />
       <CardContent>
@@ -83,6 +92,7 @@ const OrderCard = ({ order }) => {
           size="small"
           startIcon={<ArticleIcon />}
           sx={{ marginRight: "5px" }}
+          onClick={() => navigate(`/account/orders/${order._id}`)}
         >
           {" "}
           View

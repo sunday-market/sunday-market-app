@@ -27,12 +27,13 @@ import EditProduct from "./pages/Products/EditProduct";
 import MessagePage from "./pages/Messages/MessagePage";
 
 // Orders Pages
+import Order from "./pages/Orders/Order";
 import MyOrders from "./pages/Orders/MyOrders";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
 
-import PageContainer from "./components/PageContainer"
+import PageContainer from "./components/PageContainer";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -66,6 +67,7 @@ function App() {
 
             <Route path="orders">
               <Route path="myorders" element={<MyOrders />} />
+              <Route path=":orderid" element={<Order />} />
               {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
             </Route>
 
@@ -89,7 +91,7 @@ function App() {
           element={<PasswordResetPage />}
         />
 
-        <Route path="products" element={<PageContainer/>}>
+        <Route path="products" element={<PageContainer />}>
           <Route path=":productId" element={<ViewProduct />} />
         </Route>
 

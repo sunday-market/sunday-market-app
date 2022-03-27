@@ -65,7 +65,7 @@ const ViewProduct = () => {
   };
 
   return (
-    <>
+    <Box p={2}>
       {error && <Alert severity="error">{error}</Alert>}
 
       <Typography variant="h4" textAlign="center" gutterBottom>
@@ -177,7 +177,7 @@ const ViewProduct = () => {
           </Box>
         </Grid>
       </Grid>
-    </>
+    </Box>
   );
 };
 

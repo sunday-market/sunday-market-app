@@ -43,11 +43,12 @@ const MyOrders = () => {
         }, 5000);
       }
     })();
-  }, []);
+  }, [navigate]);
 
   return (
     <Box
       component="main"
+      p={2}
       sx={{
         flexGrow: 1,
       }}

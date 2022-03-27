@@ -106,7 +106,7 @@ const AccountsPage = () => {
       };
       fetchCurrentUser();
     }
-  }, []);
+  }, [navigate]);
 
   const editAccountDetailsHandler = () => {
     setFullNameTemp(fullName);
@@ -271,7 +271,7 @@ const AccountsPage = () => {
   };
 
   return (
-    <>
+    <Box p={2}>
       {/* General Errors  */}
       <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
 
@@ -576,7 +576,7 @@ const AccountsPage = () => {
           </Button>
         </Box>
       </Modal>
-    </>
+    </Box>
   );
 };
 

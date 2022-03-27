@@ -245,7 +245,7 @@ const EditProduct = () => {
   };
 
   return (
-    <>
+    <Box p={2}>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <Typography variant="h4" mb={1}>
           Edit Product
@@ -518,7 +518,7 @@ const EditProduct = () => {
           </Button>
         </Box>
       </Modal>
-    </>
+    </Box>
   );
 };
 
