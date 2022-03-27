@@ -10,6 +10,7 @@ import {
   Box,
   Grid,
   CircularProgress,
+  CardMedia,
 } from "@mui/material";
 
 import { priceToCurrency } from "../../utils/currency";
@@ -106,30 +107,26 @@ const Order = () => {
           <Grid
             container
             justifyContent="center"
-            alignItems="center"
-            backgroundColor="#e0e0e0"
+            alignItems="stretch"
+            backgroundColor="#f0f0f0"
+            border="solid 2px #e0e0e0"
+            borderRadius={2}
+            spacing={0}
           >
-            <Grid item xs={4} p={1}>
-              <Box
-                backgroundColor="yellow"
-                display="flex"
+            <Grid item xs={4}>
+              <CardMedia
                 component="img"
-                width={1}
-                src={
+                height="100%"
+                image={
                   order.stall.image
                     ? `${PUBLIC_FOLDER}stalls/${order.stall.image}`
                     : `${PUBLIC_FOLDER}stalls/noimage.png`
                 }
+                alt={order.stall.name}
               />
             </Grid>
 
-            <Grid
-              item
-              xs={8}
-              p={1}
-              border="solid 1px #f8f8f8"
-              alignSelf="stretch"
-            >
+            <Grid item xs={8} p={2} alignSelf="stretch">
               <Grid container direction="column" height="100%">
                 <Grid item flexGrow={1}>
                   <Typography variant="h6" gutterBottom>
@@ -152,7 +149,7 @@ const Order = () => {
                   </Typography>
                 </Grid>
                 <Grid item>
-                  <Box textAlign="right" p={2}>
+                  <Box textAlign="right">
                     <Button variant="contained" size="small">
                       Contact Stall
                     </Button>
@@ -208,7 +205,7 @@ const Order = () => {
           >
             <Grid item xs={7}>
               <Typography variant="body1">
-                <strong>Order Total:</strong>
+                <strong>Order Total</strong>
               </Typography>
             </Grid>
             <Grid item xs={5}>
