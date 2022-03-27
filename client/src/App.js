@@ -20,9 +20,21 @@ import MyStallsPage from "./pages/Stalls/MyStallsPage";
 // Products Pages
 import MyProducts from "./pages/Products/MyProducts";
 import AddProduct from "./pages/Products/AddProduct";
+import ViewProduct from "./pages/Products/ViewProduct";
+import EditProduct from "./pages/Products/EditProduct";
+
+// Message Pages
+import MessagePage from "./pages/Messages/MessagePage";
+
+// Orders Pages
+import Order from "./pages/Orders/Order";
+import MyOrders from "./pages/Orders/MyOrders";
+import ReceivedOrders from "./pages/Orders/ReceivedOrders";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
+
+import PageContainer from "./components/PageContainer";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
@@ -45,6 +57,7 @@ function App() {
             <Route path="products">
               <Route path="myproducts" element={<MyProducts />} />
               <Route path="add" element={<AddProduct />} />
+              <Route path="edit/:productId" element={<EditProduct />} />
             </Route>
 
             <Route path="stalls">
@@ -53,8 +66,13 @@ function App() {
               <Route path="viewstall/:stallID" element={<ViewStallPage />} />
             </Route>
 
-            {/* <Route path="myorders" element={<MyOrdersPage />} /> */}
-            {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
+            <Route path="orders">
+              <Route path="myorders" element={<MyOrders />} />
+              <Route path="received" element={<ReceivedOrders />} />
+              <Route path=":orderid" element={<Order />} />
+            </Route>
+
+            <Route path="messages" element={<MessagePage />}></Route>
           </Route>
         </Route>
 
@@ -73,6 +91,10 @@ function App() {
           path="/passwordreset/:resetToken"
           element={<PasswordResetPage />}
         />
+
+        <Route path="products" element={<PageContainer />}>
+          <Route path=":productId" element={<ViewProduct />} />
+        </Route>
 
         <Route path="*" element={<Error404 />} />
       </Routes>

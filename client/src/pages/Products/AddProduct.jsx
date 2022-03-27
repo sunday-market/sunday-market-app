@@ -18,7 +18,7 @@ import {
   Alert,
   Button,
   Divider,
-  Input,
+  Box,
 } from "@mui/material";
 
 import { Link, useNavigate } from "react-router-dom";
@@ -59,12 +59,16 @@ const AddProduct = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
+
     const formData = new FormData();
 
     formData.append("product_name", product.product_name);
     formData.append("product_description", product.product_description);
     formData.append("product_subcategory", product.product_subcategory);
     formData.append("product_stall", product.product_stall);
+    formData.append("product_user", decodedJWT.id);
     formData.append("product_price", product.product_price);
     formData.append("quantity_in_stock", product.quantity_in_stock);
     formData.append("image", product.image);
@@ -105,14 +109,15 @@ const AddProduct = () => {
       setProduct(0);
     }
 
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
+
     try {
-      await axios.post("/api/product/", formData).catch(function (error) {
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        setError(error);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      });
+      await axios.post("/api/product/", formData, config);
 
       handleClearForm();
 
@@ -123,10 +128,16 @@ const AddProduct = () => {
       }, 6000);
       successRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("authToken");
+        return navigate("/login");
+      }
+
       setTimeout(() => {
         setError("");
       }, 5000);
       setError(error);
+
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   };
@@ -152,6 +163,7 @@ const AddProduct = () => {
         const config = {
           headers: {
             "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         };
 
@@ -162,16 +174,20 @@ const AddProduct = () => {
 
         setUserStalls(stalls.data);
       } catch (error) {
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          navigate("/login");
+        }
         setTimeout(() => {
           setError("");
         }, 5000);
         return setError(error.response.data.error);
       }
     })();
-  }, []);
+  }, [navigate]);
 
   return (
-    <>
+    <Box p={2}>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <Typography variant="h4">Add Product</Typography>
 
@@ -323,7 +339,7 @@ const AddProduct = () => {
 
             <label htmlFor="upload-button">
               <input
-                accept="image/*"
+                accept="image/jpg, image/jpeg, image/png"
                 id="upload-button"
                 name="productImage"
                 type="file"
@@ -387,7 +403,7 @@ const AddProduct = () => {
           </Grid>
         </Grid>
       </form>
-    </>
+    </Box>
   );
 };
 

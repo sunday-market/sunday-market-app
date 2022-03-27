@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import jwtDecode from "jwt-decode";
+import { useNavigate } from "react-router";
+
 import {
   Typography,
   Grid,
@@ -11,11 +14,16 @@ import {
 } from "@mui/material";
 
 import IncDecButton from "../IncDecButton";
+import { priceToCurrency } from "../../utils/currency";
 
 const ProductCard = (props) => {
   const { product, qty } = props;
+  const [isUserProduct, setIsUserProduct] = useState(false);
   const [counter, setCounter] = useState(0);
   const [quantityInStock, setQuantityInStock] = useState(qty);
+
+  const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+  const navigate = useNavigate();
 
   const incrementQuantity = () => {
     setCounter(counter + 1);
@@ -27,12 +35,13 @@ const ProductCard = (props) => {
     setQuantityInStock(quantityInStock + 1);
   };
 
-  const priceToCurrency = (price) => {
-    return Number(price).toLocaleString("en-NZ", {
-      style: "currency",
-      currency: "NZD",
-    });
-  };
+  // Check if the current user is selling this product
+  useEffect(() => {
+    (async () => {
+      const authToken = await jwtDecode(localStorage.getItem("authToken"));
+      setIsUserProduct(authToken.id === product.product_user);
+    })();
+  }, [product.product_user]);
 
   return (
     <>
@@ -56,12 +65,16 @@ const ProductCard = (props) => {
             <CardMedia
               component="img"
               height="175"
-              image={product.image}
-              alt={product.name}
+              image={
+                product.image
+                  ? `${PUBLIC_FOLDER}products/${product.image}`
+                  : `${PUBLIC_FOLDER}products/noimage.jpg`
+              }
+              alt={product.product_name}
             />
 
             <Typography gutterBottom variant="body1" align="center">
-              <b>{product.name.toUpperCase()}</b>
+              <b>{product.product_name}</b>
             </Typography>
             <Typography
               gutterBottom
@@ -69,7 +82,7 @@ const ProductCard = (props) => {
               variant="body2"
               sx={{ backgroundColor: "#eeeeee" }}
             >
-              {product.category}
+              {product.product_subcategory}
             </Typography>
           </Box>
 
@@ -85,7 +98,7 @@ const ProductCard = (props) => {
               WebkitBoxOrient: "vertical",
             }}
           >
-            {product.description}
+            {product.product_description}
           </Typography>
         </CardContent>
         <Box sx={{ flexGrow: 1 }} />
@@ -110,9 +123,13 @@ const ProductCard = (props) => {
                 sx={{ pl: 1, fontFamily: "Tahoma" }}
                 variant="h5"
               >
-                {priceToCurrency(product.price)}
+                {priceToCurrency(product.product_price)}
               </Typography>
-              <Button>View</Button>
+              {!isUserProduct && (
+                <Button onClick={() => navigate(`/products/${product._id}`)}>
+                  View
+                </Button>
+              )}
             </Grid>
 
             <Grid
@@ -124,12 +141,33 @@ const ProductCard = (props) => {
                 alignItems: "center",
               }}
             >
-              <IncDecButton
-                counter={counter}
-                quantityInStock={quantityInStock}
-                incrementQuantity={incrementQuantity}
-                decrementQuantity={decrementQuantity}
-              />
+              {isUserProduct ? (
+                <Box sx={{ marginBottom: 2 }}>
+                  <Button
+                    variant="contained"
+                    size="small"
+                    onClick={() => navigate(`/products/${product._id}`)}
+                    sx={{ marginRight: 1 }}
+                  >
+                    View
+                  </Button>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    onClick={() => navigate(`/account/products/edit/${product._id}`)}
+                  >
+                    Edit
+                  </Button>
+                </Box>
+              ) : (
+                <IncDecButton
+                  counter={counter}
+                  quantityInStock={quantityInStock}
+                  incrementQuantity={incrementQuantity}
+                  decrementQuantity={decrementQuantity}
+                />
+              )}
+
               <Typography
                 variant="body2"
                 color={quantityInStock <= 0 ? "red" : "grey.800"}

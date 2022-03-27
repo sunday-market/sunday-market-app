@@ -1,8 +1,9 @@
 const { Product } = require("../models/Product");
 const ErrorResponse = require("../utils/errorResponse");
-
-const multer = require("multer");
+const fs = require("fs");
 const path = require("path");
+
+const mongoose = require("mongoose");
 
 // GETS
 // Get all Products
@@ -10,9 +11,31 @@ exports.getAllProducts = async (req, res, next) => {
   try {
     const products = await Product.find({});
     if (products.length === 0) {
-      return next(new ErrorResponse("No products exist"));
+      return next(new ErrorResponse("No products exist", 404));
     }
     res.status(200).json(products);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// Get All Products where the stall is Active
+exports.getAllActiveProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({}).populate({
+      path: "product_stall",
+      match: { activated: { $eq: true } },
+    });
+
+    if (products.length === 0) {
+      return next(new ErrorResponse("No active product exists", 404));
+    }
+
+    res.status(200).json(
+      products.filter((product) => {
+        return product.product_stall !== null;
+      })
+    );
   } catch (error) {
     return next(error);
   }
@@ -23,7 +46,9 @@ exports.getProductById = async (req, res, next) => {
   try {
     const product = await Product.findOne({ _id: req.params.productid });
     if (!product) {
-      return next(new ErrorResponse("No product exists with that product id"));
+      return next(
+        new ErrorResponse("No product exists with that product id", 404)
+      );
     }
     res.status(200).json(product);
   } catch (error) {
@@ -34,10 +59,30 @@ exports.getProductById = async (req, res, next) => {
 // Get all Products ascosiated to user
 exports.getUserProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ _id: req.params.userid });
+    const products = await Product.find({ product_user: req.params.userid });
     if (products.length === 0) {
-      return next(new ErrorResponse("No products exist for specified user"));
+      return next(
+        new ErrorResponse("No products exist for specified user", 404)
+      );
     }
+    // console.log(`Products: ${products}`)
+    res.status(200).json(products);
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// Get Stall Products
+exports.getStallProducts = async (req, res, next) => {
+  try {
+    const products = await Product.find({
+      product_stall: req.params.stallid,
+    });
+
+    if (products.length === 0) {
+      return next(new ErrorResponse("No product exists for that stall", 404));
+    }
+
     res.status(200).json(products);
   } catch (error) {
     return next(error);
@@ -51,6 +96,7 @@ exports.addProduct = async (req, res, next) => {
   const product_description = req.body.product_description;
   const product_subcategory = req.body.product_subcategory;
   const product_stall = req.body.product_stall;
+  const product_user = req.body.product_user;
   const product_price = req.body.product_price;
   const quantity_in_stock = req.body.quantity_in_stock;
   const image = req.file ? req.file.filename : "noimage.jpg";
@@ -60,6 +106,7 @@ exports.addProduct = async (req, res, next) => {
     product_description,
     product_subcategory,
     product_stall,
+    product_user,
     product_price,
     quantity_in_stock,
     image,
@@ -79,22 +126,34 @@ exports.addProduct = async (req, res, next) => {
 
 // PUT
 exports.updateProduct = async (req, res, next) => {
-  const productId = req.params.productid;
-  const data = req.body;
+  const product_name = req.body.product_name;
+  const product_description = req.body.product_description;
+  const product_subcategory = req.body.product_subcategory;
+  const product_stall = req.body.product_stall;
+  const product_user = req.body.product_user;
+  const product_price = req.body.product_price;
+  const quantity_in_stock = req.body.quantity_in_stock;
+  const image = req.file ? req.file.filename : "noimage.jpg";
 
-  if (Object.keys(data).length === 0) {
-    res.status(400).json({
-      success: false,
-      message: `No product data supplied`,
-    });
-  }
+  const productData = {
+    product_name,
+    product_description,
+    product_subcategory,
+    product_stall,
+    product_user,
+    product_price,
+    quantity_in_stock,
+    image,
+  };
+
+  const productId = req.params.productid;
 
   try {
-    await Product.findByIdAndUpdate(productId, data);
+    await Product.findByIdAndUpdate(productId, productData);
     res.status(200).json({
       success: true,
       message: `Product ID: ${productId} successfully updated.`,
-      data: data,
+      data: productData,
     });
   } catch (error) {
     return next(error);
@@ -106,6 +165,16 @@ exports.updateProduct = async (req, res, next) => {
 exports.deleteProduct = async (req, res, next) => {
   try {
     await Product.deleteOne({ _id: req.params.productid });
+
+    if (req.body.image !== "noimage.jpg") {
+      await fs.unlink(
+        path.resolve(`../server/public/images/products/${req.body.image}`),
+        (err) => {
+          if (err) next(err);
+        }
+      );
+    }
+
     res.status(200).json({
       success: true,
       message: `Successfully deleted product ${req.params.productid}`,

@@ -4,7 +4,7 @@ const { OrderSchema } = require("./Order");
 
 const TransactionSchema = new mongoose.Schema(
   {
-    orders: [OrderSchema],
+    orders: [orderSchema],
   },
   { timestamps: true }
 );

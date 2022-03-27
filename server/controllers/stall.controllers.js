@@ -3,7 +3,7 @@ const ErrorResponse = require("../utils/errorResponse");
 
 // GETS
 // Get All Stalls
-exports.GetAllStalls = async (req, res, next) => {
+exports.getAllStalls = async (req, res, next) => {
   try {
     const stall = await Stall.find({});
     if (stall.length === 0) {
@@ -16,7 +16,7 @@ exports.GetAllStalls = async (req, res, next) => {
 };
 
 // Get all Stalls ascosiated to user
-exports.GetMyStalls = async (req, res, next) => {
+exports.getMyStalls = async (req, res, next) => {
   try {
     const stall = await Stall.find({ user: req.params.userid });
     if (stall.length === 0) {
@@ -29,7 +29,7 @@ exports.GetMyStalls = async (req, res, next) => {
 };
 
 // Get all Stalls ascosiated to user
-exports.GetStallByID = async (req, res, next) => {
+exports.getStallByID = async (req, res, next) => {
   try {
     const stall = await Stall.find({ _id: req.params.stallid });
     if (stall.length === 0) {
@@ -43,7 +43,7 @@ exports.GetStallByID = async (req, res, next) => {
 
 // POSTS
 // Add Stall
-exports.AddNewStall = async (req, res, next) => {
+exports.addNewStall = async (req, res, next) => {
   try {
     const stall = await Stall.findOne({ stallName: req.body.stallName });
     if (stall) {
@@ -53,10 +53,21 @@ exports.AddNewStall = async (req, res, next) => {
         )
       );
     }
-    const newStall = await Stall.create(req.body);
+    const stallData = {
+      user: req.body.user,
+      stallName: req.body.stallName,
+      category: req.body.category,
+      activated: req.body.activated,
+      description: req.body.description ? req.body.description : "",
+      image_url: req.file ? req.file.filename : "noimage.png",
+      email: req.body.email ? req.body.email : "",
+      city_location: req.body.city_location,
+    };
 
+    const newStall = await Stall.create(stallData);
     res.status(200).json({
       success: true,
+      message: "Stall successfully added.",
       data: newStall,
     });
   } catch (error) {
@@ -65,9 +76,19 @@ exports.AddNewStall = async (req, res, next) => {
 };
 
 // PUT
-exports.UpdateStall = async (req, res, next) => {
+exports.updateStall = async (req, res, next) => {
   const stallID = req.params.stallid;
-  const data = req.body;
+  const stallData = {
+    user: req.body.user,
+    stallName: req.body.stallName,
+    category: req.body.category,
+    activated: req.body.activated,
+    description: req.body.description ? req.body.description : "",
+    image_url: req.file ? req.file.filename : "noimage.png",
+    email: req.body.email ? req.body.email : "",
+    city_location: req.body.city_location,
+  };
+
   try {
     // check that no stall with the same name exists
     const stall = await Stall.findOne({ stallName: req.body.stallName });
@@ -78,11 +99,11 @@ exports.UpdateStall = async (req, res, next) => {
         )
       );
     }
-    await Stall.findByIdAndUpdate(stallID, data);
+    await Stall.findByIdAndUpdate(stallID, stallData);
     res.status(200).json({
       success: true,
       message: `Stall with the ID: ${stallID}, was successfully updated.`,
-      data: data,
+      data: stallData,
     });
   } catch (error) {
     return next(error);
@@ -91,7 +112,7 @@ exports.UpdateStall = async (req, res, next) => {
 
 // DELETE
 // delete stall by stall id
-exports.DeleteStallByID = async (req, res, next) => {
+exports.deleteStallByID = async (req, res, next) => {
   try {
     await Stall.deleteOne({ _id: req.params.stallid });
     res.status(200).json({

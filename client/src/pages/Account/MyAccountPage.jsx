@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 
 import { Box, Grid, Button } from "@mui/material";
@@ -11,8 +11,43 @@ import {
   ReceiptOutlined as OrdersReceivedIcon,
 } from "@mui/icons-material";
 
+import PageContainer from "../../components/PageContainer";
+
 const AccountPage = () => {
   const navigate = useNavigate();
+  const [detailsButton, setDetailsButton] = useState("outlined");
+  const [myStallsButton, setMyStallsButton] = useState("outlined");
+  const [myProductsButton, setMyProductsButton] = useState("outlined");
+  const [myOrdersButton, setMyOrdersButton] = useState("outlined");
+  const [ordersReceivedButton, setOrdersReceivedButton] = useState("outlined");
+
+  useEffect(() => {
+    setDetailsButton(
+      window.location.pathname === "/account/myaccount"
+        ? "contained"
+        : "outlined"
+    );
+    setMyStallsButton(
+      window.location.pathname === "/account/stalls/mystalls"
+        ? "contained"
+        : "outlined"
+    );
+    setMyProductsButton(
+      window.location.pathname === "/account/products/myproducts"
+        ? "contained"
+        : "outlined"
+    );
+    setMyOrdersButton(
+      window.location.pathname === "/account/orders/myorders"
+        ? "contained"
+        : "outlined"
+    );
+    setOrdersReceivedButton(
+      window.location.pathname === "/account/orders/received"
+        ? "contained"
+        : "outlined"
+    );
+  });
 
   return (
     <>
@@ -28,9 +63,11 @@ const AccountPage = () => {
         {/* Account Details Button */}
         <Grid item display={{ xs: "none", md: "block" }}>
           <Button
-            variant="outlined"
+            variant={detailsButton}
             startIcon={<AccountDetailsIcon />}
-            onClick={() => navigate("myaccount")}
+            onClick={() => {
+              navigate("myaccount");
+            }}
           >
             Details
           </Button>
@@ -38,8 +75,10 @@ const AccountPage = () => {
         <Grid item display={{ xs: "block", md: "none" }}>
           <Button
             size="small"
-            variant="outlined"
-            onClick={() => navigate("myaccount")}
+            variant={detailsButton}
+            onClick={() => {
+              navigate("myaccount");
+            }}
           >
             <AccountDetailsIcon />
           </Button>
@@ -48,9 +87,11 @@ const AccountPage = () => {
         {/* My Stalls Button  */}
         <Grid item display={{ xs: "none", md: "block" }}>
           <Button
-            variant="outlined"
+            variant={myStallsButton}
             startIcon={<MyStallsIcon />}
-            onClick={() => navigate("stalls/mystalls")}
+            onClick={() => {
+              navigate("stalls/mystalls");
+            }}
           >
             My Stalls
           </Button>
@@ -58,8 +99,10 @@ const AccountPage = () => {
         <Grid item display={{ xs: "block", md: "none" }}>
           <Button
             size="small"
-            variant="outlined"
-            onClick={() => navigate("stalls/mystalls")}
+            variant={myStallsButton}
+            onClick={() => {
+              navigate("stalls/mystalls");
+            }}
           >
             <MyStallsIcon />
           </Button>
@@ -68,9 +111,11 @@ const AccountPage = () => {
         {/* My Products Button  */}
         <Grid item display={{ xs: "none", md: "block" }}>
           <Button
-            variant="outlined"
+            variant={myProductsButton}
             startIcon={<MyProductsIcon />}
-            onClick={() => navigate("products/myproducts")}
+            onClick={() => {
+              navigate("products/myproducts");
+            }}
           >
             My Products
           </Button>
@@ -78,8 +123,10 @@ const AccountPage = () => {
         <Grid item display={{ xs: "block", md: "none" }}>
           <Button
             size="small"
-            variant="outlined"
-            onClick={() => navigate("products/myproducts")}
+            variant={myProductsButton}
+            onClick={() => {
+              navigate("products/myproducts");
+            }}
           >
             <MyProductsIcon />
           </Button>
@@ -88,9 +135,11 @@ const AccountPage = () => {
         {/* My Orders Button  */}
         <Grid item display={{ xs: "none", md: "block" }}>
           <Button
-            variant="outlined"
+            variant={myOrdersButton}
             startIcon={<MyOrdersIcon />}
-            onClick={() => navigate("myorders")}
+            onClick={() => {
+              navigate("orders/myorders");
+            }}
           >
             My Orders
           </Button>
@@ -98,8 +147,10 @@ const AccountPage = () => {
         <Grid item display={{ xs: "block", md: "none" }}>
           <Button
             size="small"
-            variant="outlined"
-            onClick={() => navigate("myorders")}
+            variant={myOrdersButton}
+            onClick={() => {
+              navigate("orders/myorders");
+            }}
           >
             <MyOrdersIcon />
           </Button>
@@ -107,9 +158,9 @@ const AccountPage = () => {
 
         <Grid item display={{ xs: "none", md: "block" }}>
           <Button
-            variant="outlined"
+            variant={ordersReceivedButton}
             startIcon={<OrdersReceivedIcon />}
-            onClick={() => navigate("ordersreceived")}
+            onClick={() => navigate("orders/received")}
           >
             Orders Received
           </Button>
@@ -117,29 +168,17 @@ const AccountPage = () => {
         <Grid item display={{ xs: "block", md: "none" }}>
           <Button
             size="small"
-            variant="outlined"
-            onClick={() => navigate("ordersreceived")}
+            variant={ordersReceivedButton}
+            onClick={() => navigate("orders/received")}
           >
             <OrdersReceivedIcon />
           </Button>
         </Grid>
       </Grid>
 
-      <Box display="flex" justifyContent="center">
-        <Box
-          mt={3}
-          backgroundColor="white"
-          border="solid 1px #c3c3c3"
-          borderRadius="5px"
-          margin={1}
-          py={4}
-          px={{ xs: 1, sm: 3, md: 4 }}
-          width={{ xs: "100%", md: "90%" }}
-          maxWidth="1000px"
-        >
-          <Outlet />
-        </Box>
-      </Box>
+      <PageContainer>
+        <Outlet />
+      </PageContainer>
     </>
   );
 };
