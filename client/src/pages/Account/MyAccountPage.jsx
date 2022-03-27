@@ -43,7 +43,7 @@ const AccountPage = () => {
         : "outlined"
     );
     setOrdersReceivedButton(
-      window.location.pathname === "/account/orders/ordersreceived"
+      window.location.pathname === "/account/orders/received"
         ? "contained"
         : "outlined"
     );
@@ -160,7 +160,7 @@ const AccountPage = () => {
           <Button
             variant={ordersReceivedButton}
             startIcon={<OrdersReceivedIcon />}
-            onClick={() => navigate("orders/ordersreceived")}
+            onClick={() => navigate("orders/received")}
           >
             Orders Received
           </Button>
@@ -169,7 +169,7 @@ const AccountPage = () => {
           <Button
             size="small"
             variant={ordersReceivedButton}
-            onClick={() => navigate("orders/ordersreceived")}
+            onClick={() => navigate("orders/received")}
           >
             <OrdersReceivedIcon />
           </Button>

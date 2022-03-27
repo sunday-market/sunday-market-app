@@ -29,6 +29,7 @@ import MessagePage from "./pages/Messages/MessagePage";
 // Orders Pages
 import Order from "./pages/Orders/Order";
 import MyOrders from "./pages/Orders/MyOrders";
+import ReceivedOrders from "./pages/Orders/ReceivedOrders";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
@@ -67,8 +68,8 @@ function App() {
 
             <Route path="orders">
               <Route path="myorders" element={<MyOrders />} />
+              <Route path="received" element={<ReceivedOrders />} />
               <Route path=":orderid" element={<Order />} />
-              {/* <Route path="ordersreceived" element={<ReceivedOrdersPage />} /> */}
             </Route>
 
             <Route path="messages" element={<MessagePage />}></Route>
