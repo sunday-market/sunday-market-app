@@ -51,6 +51,12 @@ exports.getStallOrders = async (req, res, next) => {
   }
 };
 
+exports.getReceivedOrders = async (req, res, next) => {
+  res.status(200).json({
+    success: true,
+  });
+};
+
 // POST: Create a new Order
 exports.createOrder = async (req, res, next) => {
   try {

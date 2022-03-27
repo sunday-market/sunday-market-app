@@ -5,6 +5,7 @@ const {
   getOrderById,
   getUserOrders,
   getStallOrders,
+  getReceivedOrders,
   createOrder,
 } = require("../controllers/order.controllers");
 
@@ -15,5 +16,8 @@ router.route("/:orderId").get(protect, getOrderById);
 
 router.route("/user/:userId").get(protect, getUserOrders);
 router.route("/stall/:stallId").get(protect, getStallOrders);
+router.route("/received/:userId").get(getReceivedOrders);
+
+router.route("/");
 
 module.exports = router;
