@@ -64,8 +64,9 @@ export default function Navbar() {
           if (cart.length === 0) {
             const shoppingCartId = (await axios.post("/api/cart/", config)).data
               .data._id;
-
             localStorage.setItem("shoppingCartId", shoppingCartId);
+            const cart = await axios.get(`/api/cart/${shoppingCartId}`, config);
+            setShoppingCart(cart);
           }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
           else {
@@ -82,6 +83,8 @@ export default function Navbar() {
           const shoppingCartId = (await axios.post("/api/cart/", config)).data
             .data._id;
           localStorage.setItem("shoppingCartId", shoppingCartId);
+          const cart = await axios.get(`/api/cart/${shoppingCartId}`, config);
+          setShoppingCart(cart);
         } catch (error) {
           return error;
         }
