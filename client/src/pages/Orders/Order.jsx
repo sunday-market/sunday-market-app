@@ -64,9 +64,7 @@ const Order = () => {
               localStorage.removeItem("authToken");
               return navigate("/login");
             }
-
             setError(error.response.data.error);
-
             setTimeout(() => {
               setError("");
             }, 5000);
