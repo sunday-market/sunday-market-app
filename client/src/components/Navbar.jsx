@@ -59,13 +59,16 @@ export default function Navbar() {
       if (localStorage.getItem("shoppingCartId")) {
         try {
           const cartId = localStorage.getItem("shoppingCartId");
-          const cart = await axios.get(`/api/cart/${cartId}`, config);
+          const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
-          if (cart.length === 0) {
+          if (cart.products_selected.length === 0) {
+            await axios.delete(`/api/cart/${cartId}`, config);
             const shoppingCartId = (await axios.post("/api/cart/", config)).data
               .data._id;
             localStorage.setItem("shoppingCartId", shoppingCartId);
-            const cart = await axios.get(`/api/cart/${shoppingCartId}`, config);
+            const cart = (
+              await axios.get(`/api/cart/${shoppingCartId}`, config)
+            ).data.data;
             setShoppingCart(cart);
           }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
@@ -83,7 +86,8 @@ export default function Navbar() {
           const shoppingCartId = (await axios.post("/api/cart/", config)).data
             .data._id;
           localStorage.setItem("shoppingCartId", shoppingCartId);
-          const cart = await axios.get(`/api/cart/${shoppingCartId}`, config);
+          const cart = (await axios.get(`/api/cart/${shoppingCartId}`, config))
+            .data[0];
           setShoppingCart(cart);
         } catch (error) {
           return error;

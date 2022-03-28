@@ -21,6 +21,54 @@ import jwtDecode from "jwt-decode";
 import axios from "axios";
 
 export default function MyShoppingCartPage() {
+  const [shoppingCart, setShoppingCart] = useState(null);
+  const [shoppingCartId, setShoppingCartId] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+
+  // store shopping cart id in local storage for data preseverance,
+  // create one if not already assigned
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const getShoppingCart = async () => {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
+      // if exists try and get cart, or create new one if cart no longer exists
+      if (localStorage.getItem("shoppingCartId")) {
+        try {
+          const cartId = localStorage.getItem("shoppingCartId");
+          const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
+          // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
+          if (cart.products_selected.length === 0) {
+            await axios.delete(`/api/cart/${cartId}`, config);
+            const shoppingCartId = (await axios.post("/api/cart/", config)).data
+              .data._id;
+            localStorage.setItem("shoppingCartId", shoppingCartId);
+            const cart = (
+              await axios.get(`/api/cart/${shoppingCartId}`, config)
+            ).data.data;
+            setShoppingCart(cart);
+          }
+          // Cart has items still that haven't been erased in timeout so set the cart equal to this
+          else {
+            setShoppingCart(cart);
+          }
+        } catch (error) {
+          // error has occured
+          return error;
+        }
+      }
+    };
+    getShoppingCart();
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
   return (
     <>
       <Box p={2}>
