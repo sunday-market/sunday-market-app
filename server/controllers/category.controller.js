@@ -50,3 +50,13 @@ exports.getAllCategoriesWithSubCategories = async (req, res, next) => {
       return next(error);
     });
 };
+
+exports.getCategoryName = async (req, res, next) => {
+  await Category.findOne({ _id: req.params.categoryId })
+    .then((result) => {
+      res.status(200).send(result.category_name);
+    })
+    .catch((error) => {
+      return next(error);
+    });
+};
