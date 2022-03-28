@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Box, Grid, Alert, Typography, CircularProgress } from "@mui/material";
 
 import SadEmoji from "../../assets/emojisad.png";
-import OrderCard from "../../components/Orders/OrderCard";
+import OrderCard from "../../components/Orders/ReceivedOrderCard";
 
 const ReceivedOrders = () => {
   const [orders, setOrders] = useState([]);
@@ -16,10 +16,10 @@ const ReceivedOrders = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    (async () => {
-      let unmounted = false;
+    let unmounted = false;
+    const controller = new AbortController();
 
-      const controller = new AbortController();
+    (async () => {
       const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
       const config = {
         headers: {
@@ -56,12 +56,11 @@ const ReceivedOrders = () => {
             }, 5000);
           }
         });
-
-      return () => {
-        unmounted = true;
-        controller.abort();
-      };
     })();
+    return () => {
+      unmounted = true;
+      controller.abort();
+    };
   }, [navigate]);
 
   return (
