@@ -1,4 +1,6 @@
 const { Product } = require("../models/Product");
+const { SubCategory } = require("../models/SubCategory");
+
 const ErrorResponse = require("../utils/errorResponse");
 const fs = require("fs");
 const path = require("path");
@@ -54,6 +56,30 @@ exports.getProductById = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
+};
+
+exports.getProductsByCategory = async (req, res, next) => {
+  await SubCategory.aggregate([
+    {
+      $lookup: {
+        from: "products",
+        localField: "_id",
+        foreignField: "product_subcategory",
+        as: "products",
+      },
+    },
+    {
+      $match: {
+        category_id: mongoose.Types.ObjectId(req.params.categoryId),
+      },
+    },
+  ])
+    .then((response) => {
+      res.status(200).json(response);
+    })
+    .catch((error) => {
+      return next(error);
+    });
 };
 
 // Get all Products ascosiated to user

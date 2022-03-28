@@ -36,6 +36,7 @@ const {
   addProduct,
   updateProduct,
   deleteProduct,
+  getProductsByCategory,
 } = require("../controllers/product.contollers");
 
 router
@@ -52,6 +53,8 @@ router
   .get(getProductById)
   .put(protect, upload.single("image"), updateProduct)
   .delete(protect, deleteProduct);
+
+router.route("/category/:categoryId").get(getProductsByCategory);
 
 router.route("/user/:userid").get(protect, getUserProducts);
 
