@@ -46,10 +46,75 @@ exports.getAllProducts = async (req, res, next) => {
 // Get All Products where the stall is Active
 exports.getAllActiveProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({}).populate({
-      path: "product_stall",
-      match: { activated: { $eq: true } },
-    })
+    const products = await Product.aggregate([
+      {
+        '$lookup': {
+          'from': 'stalls', 
+          'localField': 'product_stall', 
+          'foreignField': '_id', 
+          'as': 'stall'
+        }
+      }, {
+        '$replaceRoot': {
+          'newRoot': {
+            '$mergeObjects': [
+              {
+                '$arrayElemAt': [
+                  '$stall', 0
+                ]
+              }, '$$ROOT'
+            ]
+          }
+        }
+      }, {
+        '$lookup': {
+          'from': 'subcategories', 
+          'localField': 'product_subcategory', 
+          'foreignField': '_id', 
+          'as': 'sub_category'
+        }
+      }, {
+        '$replaceRoot': {
+          'newRoot': {
+            '$mergeObjects': [
+              {
+                '$arrayElemAt': [
+                  '$sub_category', 0
+                ]
+              }, '$$ROOT'
+            ]
+          }
+        }
+      }, {
+        '$match': {
+          'activated': true
+        }
+      }, {
+        '$project': {
+          'product_name': '$product_name', 
+          'product_description': '$product_description', 
+          'product_user': '$product_user', 
+          'product_subcategory': '$product_subcategory', 
+          'subcategory_name': '$subcategory', 
+          'product_price': '$product_price', 
+          'quantity_in_stock': '$quantity_in_stock', 
+          'image': '$image', 
+          'product_stall': {
+            '_id': '$product_stall', 
+            'user': '$user', 
+            'stallName': '$stallName', 
+            'category': '$category', 
+            'activated': '$activated', 
+            'description': '$description', 
+            'image_url': '$image_url', 
+            'email': '$email', 
+            'city_location': '$city_location'
+          }, 
+          'createdAt': '$createdAt', 
+          'updatedAt': '$updatedAt'
+        }
+      }
+    ])
 
     if (products.length === 0) {
       return next(new ErrorResponse("No active product exists", 404));
