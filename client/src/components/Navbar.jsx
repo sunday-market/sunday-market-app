@@ -102,7 +102,6 @@ export default function Navbar() {
   }, []);
 
   useEffect(() => {
-    console.log(shoppingCart);
     if (shoppingCart) {
       let total = 0;
       shoppingCart.products_selected.forEach((product) => {
@@ -111,7 +110,7 @@ export default function Navbar() {
       setShoppingCartPriceTotal(total.toFixed(2));
     }
   }, [shoppingCart]);
-  console.log(shoppingCartPriceTotal);
+  
   useEffect(() => {
     function handleLoggedInStatus() {
       setUserToken(localStorage.getItem("authToken"));
