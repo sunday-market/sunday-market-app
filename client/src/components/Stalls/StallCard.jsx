@@ -33,6 +33,8 @@ export default function StallCard({
   const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
   // get current user
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getCurrentUserId = async () => {
       if (localStorage.getItem("authToken")) {
         const config = {
@@ -40,12 +42,16 @@ export default function StallCard({
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
           const decodedJWT = await jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUserId(user.data.data.id);
         } catch (error) {
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
@@ -54,6 +60,7 @@ export default function StallCard({
       }
     };
     getCurrentUserId();
+    return () => controller.abort();
   }, [navigate]);
   return (
     <>
