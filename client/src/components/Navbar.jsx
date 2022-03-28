@@ -28,6 +28,7 @@ import {
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { refType } from "@mui/utils";
 
 // IMPORTANT
 // Navbar still needs to adjust for smaller screens
@@ -40,6 +41,57 @@ export default function Navbar() {
 
   const [categories, setCategories] = useState([]);
   const [userToken, setUserToken] = useState(null);
+  const [shoppingCart, setShoppingCart] = useState(null);
+
+  // store shopping cart id in local storage for data preseverance,
+  // create one if not already assigned
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const getShoppingCart = async () => {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
+      // if exists try and get cart, or create new one if cart no longer exists
+      if (localStorage.getItem("shoppingCartId")) {
+        try {
+          const cartId = localStorage.getItem("shoppingCartId");
+          const cart = await axios.get(`/api/cart/${cartId}`, config);
+          // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
+          if (cart.length === 0) {
+            const shoppingCartId = (await axios.post("/api/cart/", config)).data
+              .data._id;
+
+            localStorage.setItem("shoppingCartId", shoppingCartId);
+          }
+          // Cart has items still that haven't been erased in timeout so set the cart equal to this
+          else {
+            setShoppingCart(cart);
+          }
+        } catch (error) {
+          // error has occured
+          return error;
+        }
+      }
+      // if shopping cart doesn't exist then create one
+      else {
+        try {
+          const shoppingCartId = (await axios.post("/api/cart/", config)).data
+            .data._id;
+          localStorage.setItem("shoppingCartId", shoppingCartId);
+        } catch (error) {
+          return error;
+        }
+      }
+    };
+    getShoppingCart();
+    return () => {
+      controller.abort();
+    };
+  }, []);
 
   useEffect(() => {
     function handleLoggedInStatus() {
