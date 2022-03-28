@@ -34,11 +34,9 @@ const Order = () => {
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+    let unmounted = false;
     (async () => {
-      let unmounted = false;
-
-      const controller = new AbortController();
-
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -74,12 +72,11 @@ const Order = () => {
             }, 5000);
           }
         });
-
-      return () => {
-        unmounted = true;
-        controller.abort();
-      };
     })();
+    return () => {
+      unmounted = true;
+      controller.abort();
+    };
   }, [orderid, navigate]);
 
   return (
