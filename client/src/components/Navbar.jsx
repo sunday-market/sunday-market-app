@@ -42,6 +42,7 @@ export default function Navbar() {
   const [categories, setCategories] = useState([]);
   const [userToken, setUserToken] = useState(null);
   const [shoppingCart, setShoppingCart] = useState();
+  const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
 
   // store shopping cart id in local storage for data preseverance,
   // create one if not already assigned
@@ -100,6 +101,17 @@ export default function Navbar() {
     };
   }, []);
 
+  useEffect(() => {
+    console.log(shoppingCart);
+    if (shoppingCart) {
+      let total = 0;
+      shoppingCart.products_selected.forEach((product) => {
+        total += product.product_price * product.quantity;
+      });
+      setShoppingCartPriceTotal(total.toFixed(2));
+    }
+  }, [shoppingCart]);
+  console.log(shoppingCartPriceTotal);
   useEffect(() => {
     function handleLoggedInStatus() {
       setUserToken(localStorage.getItem("authToken"));
@@ -378,7 +390,7 @@ export default function Navbar() {
                   margin: 0,
                 }}
               >
-                $0.00
+                ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
               </Typography>
               <ShoppingCartTwoToneIcon
                 sx={{
@@ -656,11 +668,19 @@ export default function Navbar() {
                   ? product.product_name
                   : "No name for this poduct can be found"}
               </Typography>
-              <Typography paddingLeft={2}>QTY</Typography>
-              <Typography paddingLeft={2}>$00.00</Typography>
+              <Typography paddingLeft={2}>QTY {product.quantity}</Typography>
+              <Typography paddingLeft={2}>
+                ${(product.quantity * product.product_price).toFixed(2)}
+              </Typography>
             </MenuItem>
           </Box>
         ))}
+        <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+
+        <Typography>
+          Estimated Total: $
+          {shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
+        </Typography>
         <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
         <Box
           container
@@ -719,7 +739,7 @@ export default function Navbar() {
             variant="outlined"
             sx={{
               bgcolor: "white",
-              borderRadius: 4,
+              borderRadius: 2,
               margin: 2,
               marginBottom: 0.5,
               border: 1,
@@ -732,14 +752,15 @@ export default function Navbar() {
           <Button
             variant="contained"
             sx={{
-              borderRadius: 4,
+              borderRadius: 2,
               margin: 2,
               marginBottom: 0.5,
               border: 0,
               boxShadow: 2,
             }}
+            onClick={() => navigate("/shoppingcart/myshoppingcart")}
           >
-            Place Order
+            View Cart
           </Button>
         </Box>
       </Menu>
