@@ -1,21 +1,21 @@
 import React from "react";
 import { useNavigate } from "react-router";
-import {
-  Typography,
-  Card,
-  CardMedia,
-  CardContent,
-  Box,
-  Button,
-} from "@mui/material";
+import { Typography, Card, CardContent, Box, Button } from "@mui/material";
 
-import {
-  Article as ArticleIcon,
-  Message as MessageIcon,
-} from "@mui/icons-material";
+import { Article as ArticleIcon } from "@mui/icons-material";
+
+import { priceToCurrency } from "../../utils/currency";
 
 const ReceivedOrderCard = ({ order }) => {
   const navigate = useNavigate();
+
+  const getTotalOrderPrice = () => {
+    let sum = 0;
+    for (let i = 0; i < order.products.length; i++) {
+      sum += order.products[i].quantity * order.products[i].price;
+    }
+    return priceToCurrency(sum);
+  };
 
   return (
     <Card
@@ -67,11 +67,7 @@ const ReceivedOrderCard = ({ order }) => {
                 sx={{ fontWeight: "bold" }}
                 align="center"
               >
-                {new Intl.NumberFormat("en-NZ", {
-                  style: "currency",
-                  currency: "NZD",
-                  minimumFractionDigits: 2,
-                }).format(order.total_order_price)}
+                {getTotalOrderPrice()}
               </Typography>
             </Box>
           </Box>
