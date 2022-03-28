@@ -57,6 +57,7 @@ const ReceivedOrders = () => {
           }
         });
     })();
+
     return () => {
       unmounted = true;
       controller.abort();
@@ -73,6 +74,10 @@ const ReceivedOrders = () => {
 
       <Typography variant="h4" gutterBottom>
         Received Orders
+      </Typography>
+      <Typography variant="body1" gutterBottom>
+        The order you have recieved from customers will display below. These are
+        grouped by your stall.
       </Typography>
 
       {loading ? (
@@ -123,7 +128,7 @@ const ReceivedOrders = () => {
               ) : (
                 <>
                   {stall.orders.map((order) => (
-                    <Grid item xs={12} sm={6} md={4} key={order._id}>
+                    <Grid item xs={12} sm={6} md={4} key={order._id} p={1}>
                       <OrderCard order={order} />
                     </Grid>
                   ))}
