@@ -25,7 +25,7 @@ export default function StallCard({
   const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
   const UpdateCard = async (e) => {
-    console.log("UpdateCard");
+    navigate(`/account/stalls/editstall/${cardId}`);
   };
   const CardDetails = async (e) => {
     navigate(`/account/stalls/viewstall/${cardId}`);
@@ -45,7 +45,7 @@ export default function StallCard({
           signal,
         };
         try {
-          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const decodedJWT = jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUserId(user.data.data.id);
         } catch (error) {

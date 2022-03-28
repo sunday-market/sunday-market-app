@@ -72,7 +72,7 @@ export default function AddMyStallPage() {
     if (localStorage.getItem("authToken")) {
       const getUser = async () => {
         try {
-          setCurrentUser(await jwtDecode(localStorage.getItem("authToken")));
+          setCurrentUser(jwtDecode(localStorage.getItem("authToken")));
         } catch (error) {
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
@@ -97,7 +97,7 @@ export default function AddMyStallPage() {
     const signal = controller.signal;
     const getCategorys = async () => {
       try {
-        setCategoryList(await (await axios.get("/api/category/", signal)).data);
+        setCategoryList((await axios.get("/api/category/", signal)).data);
       } catch (error) {
         if (axios.isCancel(error)) {
           return console.log("Successfully Aborted");

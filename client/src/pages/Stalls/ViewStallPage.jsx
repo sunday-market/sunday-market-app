@@ -79,7 +79,7 @@ export default function ViewStallPage() {
           signal,
         };
         try {
-          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const decodedJWT = jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUser(user.data.data);
         } catch (error) {

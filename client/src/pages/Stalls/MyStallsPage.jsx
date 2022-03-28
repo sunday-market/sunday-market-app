@@ -28,7 +28,7 @@ export default function MyStalls() {
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
           };
-          const currentUserID = await jwt(localStorage.getItem("authToken"));
+          const currentUserID = jwt(localStorage.getItem("authToken"));
           const stalls = await axios.get(
             `/api/mystalls/${currentUserID.id}`,
             config
