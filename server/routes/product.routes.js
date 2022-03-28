@@ -44,7 +44,7 @@ router
   .get(getAllProducts)
   .post(protect, upload.single("image"), addProduct);
 
-router.route("/active").get(protect, getAllActiveProducts);
+router.route("/active").get(getAllActiveProducts);
 
 router.route("/stall/:stallid").get(protect, getStallProducts);
 
