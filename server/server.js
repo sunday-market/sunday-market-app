@@ -28,7 +28,7 @@ app.use("/api", require("./routes/stall.routes"));
 app.use("/api/messages", require("./routes/message.routes"));
 app.use("/api/messagethreads", require("./routes/messageThread.routes"));
 app.use("/api/category", require("./routes/category.routes"));
-
+app.use("/api/cart", require("./routes/shoppingCart.routes"));
 app.use(errorHandler);
 
 // Start Listening to Server

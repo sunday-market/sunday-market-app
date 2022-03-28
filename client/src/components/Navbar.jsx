@@ -28,7 +28,6 @@ import {
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { useUser } from "../hooks/useUser";
 
 // IMPORTANT
 // Navbar still needs to adjust for smaller screens
@@ -38,7 +37,6 @@ import { useUser } from "../hooks/useUser";
 
 export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
-  const userData = useUser();
 
   const [categories, setCategories] = useState([]);
   const [userToken, setUserToken] = useState(null);
