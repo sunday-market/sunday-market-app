@@ -16,6 +16,9 @@ import AccountDetailsPage from "./pages/Account/AccountDetailsPage";
 
 // Stalls Pages
 import MyStallsPage from "./pages/Stalls/MyStallsPage";
+import AddMyStallPage from "./pages/Stalls/AddMyStallPage";
+import ViewStallPage from "./pages/Stalls/ViewStallPage";
+import EditMyStallPage from "./pages/Stalls/EditMyStallPage";
 
 // Products Pages
 import MyProducts from "./pages/Products/MyProducts";
@@ -39,8 +42,6 @@ import PageContainer from "./components/PageContainer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Navbar from "./components/Navbar";
-import AddMyStallPage from "./pages/Stalls/AddMyStallPage";
-import ViewStallPage from "./pages/Stalls/ViewStallPage";
 
 function App() {
   return (
@@ -64,6 +65,7 @@ function App() {
               <Route path="mystalls" element={<MyStallsPage />} />
               <Route path="addstall" element={<AddMyStallPage />} />
               <Route path="viewstall/:stallID" element={<ViewStallPage />} />
+              <Route path="editstall/:stallID" element={<EditMyStallPage />} />
             </Route>
 
             <Route path="orders">
