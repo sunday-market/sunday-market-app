@@ -2,7 +2,7 @@ const mongoose = require("mongoose");
 
 const SubCategorySchema = new mongoose.Schema(
   {
-    parent_category: {
+    category_id: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Category",
       required: [
@@ -10,7 +10,7 @@ const SubCategorySchema = new mongoose.Schema(
         "You can't add a sub catagory without a parent category.",
       ],
     },
-    sub_category_name: {
+    subcategory: {
       type: String,
       required: [true, "You need to upload a sub catagory name."],
     },
