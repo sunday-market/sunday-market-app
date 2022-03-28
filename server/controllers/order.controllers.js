@@ -58,7 +58,7 @@ exports.getReceivedOrders = async (req, res, next) => {
   const orders = await Stall.aggregate([
     {
       $match: {
-        user: new mongoose.Types.ObjectId(req.params.userId),
+        user: mongoose.Types.ObjectId(req.params.userId),
       },
     },
     {
@@ -66,7 +66,7 @@ exports.getReceivedOrders = async (req, res, next) => {
         from: "orders",
         localField: "_id",
         foreignField: "stall.id",
-        as: "Orders",
+        as: "orders",
       },
     },
   ])
