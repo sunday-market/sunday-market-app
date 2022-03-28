@@ -35,6 +35,9 @@ export default function ViewStallPage() {
 
   // Get stall info
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     if (stallid) {
       const getStall = async () => {
         try {
@@ -43,10 +46,14 @@ export default function ViewStallPage() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
+            signal: signal,
           };
           const stallData = await axios.get(`/api/stalls/${stallid}`, config);
           setStall(stallData.data);
         } catch (err) {
+          if (axios.isCancel(err)) {
+            return console.log("Successfully Aborted");
+          }
           setError("No Stall Exists with that ID");
           setTimeout(() => {
             setError("");
@@ -55,10 +62,13 @@ export default function ViewStallPage() {
       };
       getStall();
     }
+    return () => controller.abort();
   }, [stallid]);
 
   // get current user
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getCurrentUser = async () => {
       if (localStorage.getItem("authToken")) {
         const config = {
@@ -66,13 +76,16 @@ export default function ViewStallPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
           const decodedJWT = await jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUser(user.data.data);
         } catch (error) {
-          console.log(error);
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
@@ -81,10 +94,14 @@ export default function ViewStallPage() {
       }
     };
     getCurrentUser();
+    return () => controller.abort();
   }, [navigate]);
 
   // Get stall user from stall info
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let isApiSubscribed = true;
     if (stall.length !== 0) {
       const months = [
         "01",
@@ -111,12 +128,18 @@ export default function ViewStallPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
           const userID = stall[0].user;
           const userData = await axios.get(`/api/user/${userID}`, config);
-          setUser(userData.data.data);
+          if (isApiSubscribed) {
+            setUser(userData.data.data);
+          }
         } catch (err) {
+          if (axios.isCancel(err)) {
+            return console.log("Successfully Aborted");
+          }
           setError(
             "User of this Stall can't be found can be found, please contact management"
           );
@@ -127,8 +150,13 @@ export default function ViewStallPage() {
         }
       };
       getUser();
+      return () => {
+        isApiSubscribed = false;
+        controller.abort();
+      };
     }
   }, [stall, user]);
+
   useEffect(() => {
     const checkIfOwner = () => {
       if (user && currentUser) {
@@ -141,15 +169,13 @@ export default function ViewStallPage() {
   // new message
   const handleNewMessage = async (e) => {
     e.preventDefault();
-    console.log(`this is the user: ${user}`);
-    console.log(`this is the current user: ${currentUser}`);
     if (user && currentUser) {
       const messageThread = {
         stall_name: stall[0].stallName,
         send_user: currentUser.id,
         recieve_user: user.id,
       };
-      console.log(messageThread);
+      //console.log(messageThread);
       try {
         const config = {
           headers: {
@@ -172,7 +198,6 @@ export default function ViewStallPage() {
               (messageThread.send_user === mt.message_members[1] &&
                 messageThread.recieve_user === mt.message_members[0])
             ) {
-              console.log("true");
               return (stateCheck = mt);
             }
           }
@@ -180,7 +205,6 @@ export default function ViewStallPage() {
         if (stateCheck) {
           navigate("/account/messages", { state: stateCheck });
         } else {
-          console.log("pass return wtf");
           const res = await axios.post(
             "/api/messagethreads/",
             messageThread,
@@ -220,6 +244,7 @@ export default function ViewStallPage() {
         component="main"
         sx={{
           flexGrow: 1,
+          p: 2,
         }}
       >
         <Grid container spacing={0} justifyContent="center">
