@@ -41,7 +41,7 @@ export default function Navbar() {
 
   const [categories, setCategories] = useState([]);
   const [userToken, setUserToken] = useState(null);
-  const [shoppingCart, setShoppingCart] = useState(null);
+  const [shoppingCart, setShoppingCart] = useState();
 
   // store shopping cart id in local storage for data preseverance,
   // create one if not already assigned
@@ -633,7 +633,7 @@ export default function Navbar() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {Array.from(Array(5)).map((_, index) => (
+        {shoppingCart?.products_selected.map((product, index) => (
           <Box
             container
             direction={"row"}
@@ -652,7 +652,9 @@ export default function Navbar() {
                 }
               />
               <Typography paddingLeft={2} sx={{ width: "100%" }}>
-                Shopping cart details..
+                {product.product_name
+                  ? product.product_name
+                  : "No name for this poduct can be found"}
               </Typography>
               <Typography paddingLeft={2}>QTY</Typography>
               <Typography paddingLeft={2}>$00.00</Typography>
