@@ -16,7 +16,7 @@ exports.getShoppingCartByCartId = async (req, res, next) => {
 // post new shopping cart
 exports.createNewShoppingCart = async (req, res, next) => {
   try {
-    const newCart = await ShoppingCart.create();
+    const newCart = await ShoppingCart.create(new ShoppingCart());
     res.status(200).json({
       success: true,
       data: newCart,
