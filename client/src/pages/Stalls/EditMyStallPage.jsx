@@ -15,6 +15,7 @@ import {
   FormControl,
   FormControlLabel,
   FormLabel,
+  Modal,
 } from "@mui/material";
 import {
   Image as ImageIcon,
@@ -36,6 +37,22 @@ export default function EditMyStallPage() {
   const [error, setError] = useState("");
   const [user, setCurrentUser] = useState(null);
   const [currentStalls, setCurrentStalls] = useState(null);
+  const [openModal, setOpenModal] = useState(false);
+
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
+
+  const modalStyle = {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+    width: 400,
+    bgcolor: "background.paper",
+    border: "2px solid #000",
+    boxShadow: 24,
+    p: 4,
+  };
 
   // navigation
   const navigate = useNavigate();
@@ -270,7 +287,7 @@ export default function EditMyStallPage() {
       stallData.append("city_location", location);
     }
     if (sendPost) {
-      // try and post the data
+      // try and put the data
       try {
         await axios.put(`/api/stalls/${stallId}`, stallData, config);
         return navigate("/account/stalls/mystalls");
@@ -290,6 +307,31 @@ export default function EditMyStallPage() {
 
   const handleCancel = () => {
     return navigate("/account/stalls/mystalls");
+  };
+  const handleDelete = async () => {
+    try {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        data: {
+          image: image,
+        },
+      };
+      await axios.delete(`/api/stalls/${stallId}`, config);
+      navigate("/account/stalls/mystalls");
+    } catch (error) {
+      if (error.response.status === 401) {
+        localStorage.removeItem("authToken");
+        return navigate("/login");
+      }
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      return setError(error.response.data.error);
+    }
   };
   return (
     <>
@@ -470,7 +512,44 @@ export default function EditMyStallPage() {
               </Button>
             </Grid>
           </Grid>
+          <Grid container justifyContent="center">
+            <Button
+              // variant="contained"
+              startIcon={<DeleteIcon />}
+              onClick={handleOpenModal}
+              color="error"
+            >
+              Delete Stall
+            </Button>
+          </Grid>
         </Grid>
+        <Modal
+          open={openModal}
+          onClose={handleCloseModal}
+          aria-labelledby="modal-modal-title"
+          aria-describedby="modal-modal-description"
+        >
+          <Box sx={modalStyle}>
+            <Typography id="modal-modal-title" variant="h6" component="h2">
+              Delete Stall?
+            </Typography>
+            <Typography id="modal-modal-description" mt={2} mb={2}>
+              Are you sure you want to delete {stallName}? <br />
+              This action cannot be undone.
+            </Typography>
+            <Button
+              variant="contained"
+              color="error"
+              onClick={handleDelete}
+              sx={{ marginRight: 1 }}
+            >
+              Delete
+            </Button>
+            <Button variant="outlined" onClick={handleCloseModal}>
+              Cancel
+            </Button>
+          </Box>
+        </Modal>
       </Box>
     </>
   );
