@@ -12,6 +12,6 @@ router
   .route("/:cartid")
   .get(getShoppingCartByCartId)
   .put(updateShoppingCart)
-  .deleteShoppingCart(deleteShoppingCart);
+  .delete(deleteShoppingCart);
 
 module.exports = router;
