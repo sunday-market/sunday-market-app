@@ -35,6 +35,9 @@ import MyOrders from "./pages/Orders/MyOrders";
 import ReceivedOrders from "./pages/Orders/ReceivedOrders";
 import ReceivedOrder from "./pages/Orders/ReceivedOrder";
 
+// Shopping Cart Pages
+import MyShoppingCartPage from "./pages/ShoppingCartPage/MyShoppingCartPage";
+
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
 
@@ -99,7 +102,9 @@ function App() {
         <Route path="products" element={<PageContainer />}>
           <Route path=":productId" element={<ViewProduct />} />
         </Route>
-
+        <Route path="shoppingcart">
+          <Route path="myshoppingcart" element={<MyShoppingCartPage />} />
+        </Route>
         <Route path="*" element={<Error404 />} />
       </Routes>
     </Router>
