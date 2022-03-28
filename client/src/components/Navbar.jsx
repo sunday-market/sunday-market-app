@@ -25,6 +25,7 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useUser } from "../hooks/useUser";
@@ -39,13 +40,54 @@ export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const userData = useUser();
 
+  const [categories, setCategories] = useState([]);
   const [userToken, setUserToken] = useState(null);
+
   useEffect(() => {
     function handleLoggedInStatus() {
       setUserToken(localStorage.getItem("authToken"));
     }
     handleLoggedInStatus();
   });
+
+  // Get Categories Data
+  useEffect(() => {
+    const controller = new AbortController();
+    let unmounted = false;
+
+    (async () => {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+      };
+      await axios
+        .get("/api/category", config)
+        .then((response) => {
+          if (!unmounted) {
+            setCategories(response.data);
+            controller.abort();
+          }
+        })
+        .catch((error) => {
+          if (axios.isCancel(error)) {
+            return "axios request cancelled...";
+          }
+          return error;
+        });
+    })();
+
+    return () => {
+      unmounted = true;
+      controller.abort();
+    };
+  }, []);
+
+  // Category Selection Click Handler
+  const handleSelectCategory = (categoryId) => {
+    navigate(`search/category/${categoryId}`);
+  };
 
   // Shopping dropdown
   const [anchorShopping, setAnchorShopping] = useState(null);
@@ -220,7 +262,7 @@ export default function Navbar() {
             <Typography
               sx={{ fontSize: "12px", color: "white", pl: 1.5, margin: "auto" }}
             >
-              Category
+              Categories
             </Typography>
           </Grid>
           {/* Account */}
@@ -486,10 +528,14 @@ export default function Navbar() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {Array.from(Array(5)).map((_, index) => (
-          <MenuItem sx={{ color: "white" }} key={index}>
-            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
-            Category
+        {/* Categories Menu */}
+        {categories.map((category) => (
+          <MenuItem
+            sx={{ color: "white", px: 4 }}
+            key={category._id}
+            onClick={() => handleSelectCategory(category._id)}
+          >
+            {category.category_name}
           </MenuItem>
         ))}
       </Menu>

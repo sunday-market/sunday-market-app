@@ -38,6 +38,9 @@ import ReceivedOrder from "./pages/Orders/ReceivedOrder";
 // Shopping Cart Pages
 import MyShoppingCartPage from "./pages/ShoppingCartPage/MyShoppingCartPage";
 
+// Search Pages
+import Category from "./pages/Search/Category";
+
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
 
@@ -102,9 +105,15 @@ function App() {
         <Route path="products" element={<PageContainer />}>
           <Route path=":productId" element={<ViewProduct />} />
         </Route>
+
         <Route path="shoppingcart">
           <Route path="myshoppingcart" element={<MyShoppingCartPage />} />
         </Route>
+
+        <Route path="search">
+          <Route path="category/:categoryId" element={<Category />} />
+        </Route>
+
         <Route path="*" element={<Error404 />} />
       </Routes>
     </Router>
