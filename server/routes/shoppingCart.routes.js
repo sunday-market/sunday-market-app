@@ -5,6 +5,8 @@ const {
   createNewShoppingCart,
   updateShoppingCart,
   deleteShoppingCart,
+  addItemToCart,
+  removeItemInCart,
 } = require("../controllers/shoppingCart.controller");
 
 router.route("/").post(createNewShoppingCart);
@@ -14,4 +16,6 @@ router
   .put(updateShoppingCart)
   .delete(deleteShoppingCart);
 
+router.route("/additem/:cartid").post(addItemToCart);
+router.route("/removeitem/:cartid").delete(removeItemInCart);
 module.exports = router;

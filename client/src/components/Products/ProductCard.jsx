@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router";
+import axios from "axios";
 
 import {
   Typography,
@@ -11,34 +12,99 @@ import {
   Box,
   Divider,
   Button,
+  TextField,
+  InputAdornment,
+  ButtonGroup,
 } from "@mui/material";
 
-import IncDecButton from "../IncDecButton";
 import { priceToCurrency } from "../../utils/currency";
 
-const ProductCard = (props) => {
-  const { product, qty } = props;
+const ProductCard = ({ product }) => {
+  const [request, setRequest] = useState(false);
   const [isUserProduct, setIsUserProduct] = useState(false);
   const [counter, setCounter] = useState(0);
-  const [quantityInStock, setQuantityInStock] = useState(qty);
+  const [quantityInStock, setQuantityInStock] = useState(0);
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
   const navigate = useNavigate();
 
-  const incrementQuantity = () => {
-    setCounter(counter + 1);
-    setQuantityInStock(quantityInStock - 1);
+  const incrementQuantity = async () => {
+    setRequest(true);
+
+    const controller = new AbortController();
+    const cartId = localStorage.getItem("shoppingCartId");
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      signal: controller.signal,
+    };
+
+    await axios
+      .post(`/api/cart/additem/${cartId}`, product, config)
+      .then(() => {
+        setCounter(counter + 1);
+        setQuantityInStock(quantityInStock - 1);
+        controller.abort();
+      })
+      .catch((error) => {
+        if (axios.isCancel(error)) {
+          return "axios request cancelled...";
+        }
+      });
+
+    setRequest(false);
+    return () => {
+      controller.abort();
+    };
   };
 
-  const decrementQuantity = () => {
-    setCounter(counter - 1);
-    setQuantityInStock(quantityInStock + 1);
+  const decrementQuantity = async () => {
+    setRequest(true);
+    const controller = new AbortController();
+
+    const cartId = localStorage.getItem("shoppingCartId");
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      signal: controller.signal,
+      data: {
+        product,
+      },
+    };
+
+    await axios
+      .delete(`/api/cart/removeitem/${cartId}`, config)
+      .then(() => {
+        setCounter(counter - 1);
+        setQuantityInStock(quantityInStock + 1);
+        controller.abort();
+      })
+      .catch((error) => {
+        if (axios.isCancel(error)) {
+          return "axios request cancelled...";
+        }
+      });
+
+    setRequest(false);
+
+    return () => {
+      controller.abort();
+    };
   };
+
+  // Populate Product Qty
+  useEffect(() => {
+    setQuantityInStock(product.quantity_in_stock);
+  }, [product]);
 
   // Check if the current user is selling this product
   useEffect(() => {
     (async () => {
-      const authToken = await jwtDecode(localStorage.getItem("authToken"));
+      const authToken = jwtDecode(localStorage.getItem("authToken"));
       setIsUserProduct(authToken.id === product.product_user);
     })();
   }, [product.product_user]);
@@ -154,18 +220,66 @@ const ProductCard = (props) => {
                   <Button
                     variant="outlined"
                     size="small"
-                    onClick={() => navigate(`/account/products/edit/${product._id}`)}
+                    onClick={() =>
+                      navigate(`/account/products/edit/${product._id}`)
+                    }
                   >
                     Edit
                   </Button>
                 </Box>
               ) : (
-                <IncDecButton
-                  counter={counter}
-                  quantityInStock={quantityInStock}
-                  incrementQuantity={incrementQuantity}
-                  decrementQuantity={decrementQuantity}
-                />
+                <>
+                  <Grid container direction="column" align="center" p={1}>
+                    <Grid item>
+                      {counter <= 0 ? (
+                        <Button
+                          disabled={quantityInStock <= 0 || request}
+                          variant="contained"
+                          fullWidth
+                          onClick={incrementQuantity}
+                        >
+                          Add to Cart
+                        </Button>
+                      ) : (
+                        <ButtonGroup>
+                          <TextField
+                            disabled
+                            size="small"
+                            value={counter}
+                            InputProps={{
+                              endAdornment: (
+                                <InputAdornment position="end">
+                                  ea.
+                                </InputAdornment>
+                              ),
+                            }}
+                            sx={{ width: "12ch", textAlign: "center" }}
+                          >
+                            {counter}
+                          </TextField>
+                          <Button
+                            disabled={request}
+                            variant="contained"
+                            margin={1}
+                            onClick={decrementQuantity}
+                          >
+                            -
+                          </Button>
+                          <Button
+                            variant="contained"
+                            disabled={quantityInStock <= 0 || request}
+                            margin={1}
+                            onClick={incrementQuantity}
+                          >
+                            +
+                          </Button>
+                        </ButtonGroup>
+                      )}
+                    </Grid>
+
+                    <Grid item></Grid>
+                  </Grid>
+                </>
               )}
 
               <Typography

@@ -1,5 +1,8 @@
 const ShoppingCart = require("../models/ShoppingCart");
+const {Product} = require("../models/Product");
 const ErrorResponse = require("../utils/errorResponse");
+
+const mongoose = require("mongoose");
 
 // GETS
 // get all items in shopping cart by cart id
@@ -24,6 +27,56 @@ exports.createNewShoppingCart = async (req, res, next) => {
     });
   } catch (error) {
     next(error);
+  }
+};
+
+exports.addItemToCart = async (req, res, next) => {
+  if (!req.body) {
+    return next(new ErrorResponse("No product supplied", 400));
+  }
+
+  if (!req.params.cartid) {
+    return next(
+      new ErrorResponse(
+        "You haven't passed a cart id so unable to update shopping cart!",
+        400
+      )
+    );
+  }
+
+  const cart = await ShoppingCart.findById(req.params.cartid);
+
+  //Check if product already exists
+  let exists = false;
+  for (i = 0; i < cart.products_selected.length; i++) {
+    let product = cart.products_selected[i];
+    if (product._id.toString() === req.body._id) {
+      exists = true;
+      product.quantity++;
+      break;
+    }
+  }
+
+  try {
+    if (!exists) {
+      cart.products_selected.push({ ...req.body, quantity: 1 });
+    }
+
+    await cart.save();
+
+    // Update Product Quantity In Stock
+    const product = await Product.findById(req.body._id);
+    const quantity_in_stock = product.quantity_in_stock;
+    product.quantity_in_stock -= 1;
+    product.save();
+
+    res.status(200).json({
+      success: true,
+      data: cart,
+      message: "Shopping cart successfully updated",
+    });
+  } catch (error) {
+    return next(error);
   }
 };
 
@@ -75,3 +128,25 @@ exports.deleteShoppingCart = async (req, res, next) => {
     next(error);
   }
 };
+
+
+exports.removeItemInCart = async (req, res, next) => {
+  if (!req.body) {
+    return next(new ErrorResponse("No product supplied", 400));
+  }
+
+  if (!req.params.cartid) {
+    return next(
+      new ErrorResponse(
+        "You haven't passed a cart id so unable to update shopping cart!",
+        400
+      )
+    );
+  }
+
+  const cart = await ShoppingCart.findById(req.params.cartid);
+
+  
+
+
+}
