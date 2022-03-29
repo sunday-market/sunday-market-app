@@ -72,8 +72,8 @@ const ProductCard = ({ product }) => {
       },
       signal: controller.signal,
       data: {
-        product,
-      },
+        _id: product._id
+      }
     };
 
     await axios

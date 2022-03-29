@@ -1,5 +1,5 @@
 const ShoppingCart = require("../models/ShoppingCart");
-const {Product} = require("../models/Product");
+const { Product } = require("../models/Product");
 const ErrorResponse = require("../utils/errorResponse");
 
 const mongoose = require("mongoose");
@@ -57,16 +57,15 @@ exports.addItemToCart = async (req, res, next) => {
     }
   }
 
-  try {
-    if (!exists) {
-      cart.products_selected.push({ ...req.body, quantity: 1 });
-    }
+  if (!exists) {
+    cart.products_selected.push({ ...req.body, quantity: 1 });
+  }
 
+  try {
     await cart.save();
 
     // Update Product Quantity In Stock
     const product = await Product.findById(req.body._id);
-    const quantity_in_stock = product.quantity_in_stock;
     product.quantity_in_stock -= 1;
     product.save();
 
@@ -129,7 +128,6 @@ exports.deleteShoppingCart = async (req, res, next) => {
   }
 };
 
-
 exports.removeItemInCart = async (req, res, next) => {
   if (!req.body) {
     return next(new ErrorResponse("No product supplied", 400));
@@ -146,7 +144,41 @@ exports.removeItemInCart = async (req, res, next) => {
 
   const cart = await ShoppingCart.findById(req.params.cartid);
 
-  
+  // Get product index
+  let i = 0;
+  let qty = 0;
+  for (; i < cart.products_selected.length; i++) {
+    let product = cart.products_selected[i];
+    console.log("the product is: ", product);
 
+    if (product._id.toString() === req.body._id) {
+      console.log("Product Found!");
+      qty = product.quantity;
+      console.log("current qty = ", qty);
+      break;
+    }
+  }
 
-}
+  if (qty === 1) {
+    cart.products_selected.splice(i, 1);
+  } else {
+    cart.products_selected[i].quantity--;
+  }
+
+  try {
+    cart.save();
+
+    // Update Product Quantity In Stock
+    const product = await Product.findById(req.body._id);
+    product.quantity_in_stock += 1;
+    product.save();
+
+    res.status(200).json({
+      success: true,
+      data: cart,
+      message: "Shopping cart successfully updated",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
