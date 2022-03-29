@@ -24,9 +24,8 @@ export default function MessageThread({ messageThread, currentUser }) {
         setUser(res.data.data);
       } catch (error) {
         if (axios.isCancel(error)) {
-          return console.log("Successfully Aborted");
+          return "Successfully Aborted";
         }
-        console.log(error);
       }
     };
     getUser();

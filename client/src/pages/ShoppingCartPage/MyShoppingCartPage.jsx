@@ -28,6 +28,7 @@ export default function MyShoppingCartPage() {
   const [shoppingCartId, setShoppingCartId] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [error, setError] = useState("");
+  const [cartLoaded, setCartLoaded] = useState(false);
 
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   // navigation
@@ -61,10 +62,12 @@ export default function MyShoppingCartPage() {
               await axios.get(`/api/cart/${shoppingCartId}`, config)
             ).data.data;
             setShoppingCart(cart);
+            setCartLoaded(true);
           }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
           else {
             setShoppingCart(cart);
+            setCartLoaded(true);
           }
         } catch (error) {
           // error has occured
@@ -91,7 +94,11 @@ export default function MyShoppingCartPage() {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (shoppingCart) {
+    console.log(cartLoaded);
+
+    if (cartLoaded) {
+      console.log(shoppingCart);
+      console.log(shoppingCart.products_selected[0]);
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -115,22 +122,22 @@ export default function MyShoppingCartPage() {
         }
       };
       shoppingCart.products_selected.forEach((product) => {
+        console.log(product);
         setProductInfo(product.product_id);
       });
     }
     return () => {
       controller.abort();
     };
-  }, [shoppingCart]);
+  }, [cartLoaded, shoppingCart]);
 
   return (
     <>
       <Box p={2} boxShadow={1} m={2} bgcolor="grey.A200">
-        {error && (
-          <Box p={2} ref={errorRef}>
-            <Alert severity="error">{error}</Alert>
-          </Box>
-        )}
+        <Box p={2} ref={errorRef}>
+          {error && <Alert severity="error">{error}</Alert>}
+        </Box>
+
         <Typography p={3} variant="h4">
           My Shopping Cart
         </Typography>

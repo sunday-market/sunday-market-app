@@ -45,25 +45,35 @@ exports.addItemToCart = async (req, res, next) => {
   }
 
   const cart = await ShoppingCart.findById(req.params.cartid);
-
+  console.log(cart);
+  console.log(req.params.cartid);
+  console.log("Im in the route");
   //Check if product already exists
   let exists = false;
   for (i = 0; i < cart.products_selected.length; i++) {
+    console.log(`this line 52 ${cart.products_selected[i]}`);
     let product = cart.products_selected[i];
-    if (product._id.toString() === req.body._id) {
+    console.log("did i make it");
+    if (product.product_id.toString() === req.body._id) {
       exists = true;
       product.quantity++;
       break;
     }
   }
-
+  let cartItem = {
+    product_id: req.body._id,
+    product_name: req.body.product_name,
+    product_price: req.body.product_price,
+    product_description: req.body.product_description,
+  };
+  console.log("did i make it 2");
   if (!exists) {
-    cart.products_selected.push({ ...req.body, quantity: 1 });
+    cart.products_selected.push({ ...cartItem, quantity: 1 });
   }
 
   try {
     await cart.save();
-
+    console.log("did i make it 3");
     // Update Product Quantity In Stock
     const product = await Product.findById(req.body._id);
     product.quantity_in_stock -= 1;
@@ -105,6 +115,39 @@ exports.updateShoppingCart = async (req, res, next) => {
     return next(error);
   }
 };
+
+exports.clearShoppingCart = async (req, res, next) => {
+  let cartid = req.params.cartid;
+
+  try {
+    // find cart
+    const cart = (await ShoppingCart.find({ _id: cartid }))[0];
+    // console.log(cart);
+    const products_selected = cart.products_selected;
+    // check length for products
+    if (products_selected.length !== 0) {
+      // loop through each product and take quantity and id append new quantity to the product
+      products_selected.forEach(async (product) => {
+        //console.log(product);
+        let productId = product.product_id.toString();
+        //console.log(productId);
+        let qty = product.quantity;
+        const updateProduct = await Product.findById({ _id: productId });
+        //console.log(`before save ${updateProduct}`);
+        updateProduct.quantity_in_stock += qty;
+        updateProduct.save();
+        // console.log(`after save ${updateProduct}`);
+      });
+    }
+    cart.products_selected = [];
+    cart.save();
+    // return the cart
+    res.status(200).json(cart);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // DELETE
 exports.deleteShoppingCart = async (req, res, next) => {
   let cartid;
@@ -150,7 +193,7 @@ exports.removeItemInCart = async (req, res, next) => {
   for (; i < cart.products_selected.length; i++) {
     let product = cart.products_selected[i];
 
-    if (product._id.toString() === req.body._id) {
+    if (product.product_id.toString() === req.body._id) {
       qty = product.quantity;
       break;
     }

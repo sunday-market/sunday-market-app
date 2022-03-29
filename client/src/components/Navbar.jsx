@@ -44,6 +44,7 @@ export default function Navbar() {
   const [shoppingCart, setShoppingCart] = useState();
   const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
   const [selectedItems, setSelectedItems] = useState([]);
+  const [cartLoaded, setCartLoaded] = useState(false);
 
   // store shopping cart id in local storage for data preseverance,
   // create one if not already assigned
@@ -72,10 +73,12 @@ export default function Navbar() {
               await axios.get(`/api/cart/${shoppingCartId}`, config)
             ).data.data;
             setShoppingCart(cart);
+            setCartLoaded(true);
           }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
           else {
             setShoppingCart(cart);
+            setCartLoaded(true);
           }
         } catch (error) {
           // error has occured
@@ -91,6 +94,7 @@ export default function Navbar() {
           const cart = (await axios.get(`/api/cart/${shoppingCartId}`, config))
             .data[0];
           setShoppingCart(cart);
+          setCartLoaded(true);
         } catch (error) {
           return error;
         }
@@ -104,7 +108,7 @@ export default function Navbar() {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    if (shoppingCart) {
+    if (cartLoaded) {
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -126,7 +130,7 @@ export default function Navbar() {
     return () => {
       controller.abort();
     };
-  }, [shoppingCart]);
+  }, [cartLoaded, shoppingCart]);
 
   useEffect(() => {
     if (shoppingCart) {
@@ -261,6 +265,15 @@ export default function Navbar() {
     if (e.key === "Enter") {
       console.log(`Search submit`);
       console.log(e.target.value);
+    }
+  };
+
+  // Handle cart clear
+  const handleCartClear = async () => {
+    try {
+      await axios.put("api/cart/clearcart/" + shoppingCart._id);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -771,6 +784,7 @@ export default function Navbar() {
               border: 1,
               boxShadow: 2,
             }}
+            onClick={handleCartClear}
           >
             Clear
           </Button>
