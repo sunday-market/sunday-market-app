@@ -123,9 +123,11 @@ export default function Navbar() {
           return;
         }
       };
-      shoppingCart.products_selected.forEach((product) => {
-        setProductInfo(product.product_id);
-      });
+      if (shoppingCart?.products_selected?.length > 0) {
+        shoppingCart.products_selected.forEach((product) => {
+          setProductInfo(product.product_id);
+        });
+      }
     }
     return () => {
       controller.abort();
@@ -271,7 +273,12 @@ export default function Navbar() {
   // Handle cart clear
   const handleCartClear = async () => {
     try {
-      await axios.put("api/cart/clearcart/" + shoppingCart._id);
+      console.log("clear cart");
+      await axios.put("/api/cart/clearcart/" + shoppingCart._id);
+      setCartLoaded(false);
+      setShoppingCart();
+      setShoppingCartPriceTotal();
+      setSelectedItems([]);
     } catch (error) {
       console.log(error);
     }

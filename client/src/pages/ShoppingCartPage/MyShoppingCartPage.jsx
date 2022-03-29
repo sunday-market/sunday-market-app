@@ -97,8 +97,6 @@ export default function MyShoppingCartPage() {
     console.log(cartLoaded);
 
     if (cartLoaded) {
-      console.log(shoppingCart);
-      console.log(shoppingCart.products_selected[0]);
       const config = {
         headers: {
           "Content-Type": "application/json",
@@ -121,15 +119,31 @@ export default function MyShoppingCartPage() {
           return setError(error.response.data.error);
         }
       };
-      shoppingCart.products_selected.forEach((product) => {
-        console.log(product);
-        setProductInfo(product.product_id);
-      });
+      if (shoppingCart?.products_selected?.length > 0) {
+        shoppingCart.products_selected.forEach((product) => {
+          console.log(product);
+          setProductInfo(product.product_id);
+        });
+      }
     }
     return () => {
       controller.abort();
     };
   }, [cartLoaded, shoppingCart]);
+
+  // Handle cart clear
+  const handleCartClear = async () => {
+    try {
+      console.log("clear cart");
+      await axios.put("/api/cart/clearcart/" + shoppingCart._id);
+      setCartLoaded(false);
+      setShoppingCart();
+      setShoppingCartPriceTotal();
+      setSelectedItems([]);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -358,7 +372,7 @@ export default function MyShoppingCartPage() {
               alignContent={"center"}
               justifyContent="center"
             >
-              <Button variant="outlined" fullWidth>
+              <Button variant="outlined" fullWidth onClick={handleCartClear}>
                 Clear
               </Button>
             </Grid>
