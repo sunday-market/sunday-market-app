@@ -33,6 +33,7 @@ const {
   getUserProducts,
   getAllActiveProducts,
   getStallProducts,
+  getRecentlyAddedProducts,
   addProduct,
   updateProduct,
   deleteProduct,
@@ -54,6 +55,7 @@ router
   .put(protect, upload.single("image"), updateProduct)
   .delete(protect, deleteProduct);
 
+router.route("/recent").get(getRecentlyAddedProducts);
 router.route("/category/:categoryId").get(getProductsByCategory);
 
 router.route("/user/:userid").get(protect, getUserProducts);

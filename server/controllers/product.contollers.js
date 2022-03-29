@@ -259,6 +259,63 @@ exports.getStallProducts = async (req, res, next) => {
   }
 };
 
+exports.getRecentlyAddedProducts = async (req, res, next) => {
+  await Product.aggregate([
+    {
+      $lookup: {
+        from: "subcategories",
+        localField: "product_subcategory",
+        foreignField: "_id",
+        as: "scategory",
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            {
+              $arrayElemAt: ["$scategory", 0],
+            },
+            "$$ROOT",
+          ],
+        },
+      },
+    },
+    {
+      $lookup: {
+        from: "categories",
+        localField: "category_id",
+        foreignField: "_id",
+        as: "main_category",
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            {
+              $arrayElemAt: ["$main_category", 0],
+            },
+            "$$ROOT",
+          ],
+        },
+      },
+    },
+    {
+      $sort: {
+        createdAt: -1,
+      },
+    },
+    { $limit: 8 },
+  ])
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      return next(error);
+    });
+};
+
 // POSTS
 // Add Product
 exports.addProduct = async (req, res, next) => {
