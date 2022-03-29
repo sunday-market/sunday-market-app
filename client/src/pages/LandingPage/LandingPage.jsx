@@ -54,7 +54,7 @@ export default function LandingPage() {
           bgcolor: "#f5f5f5",
         }}
       >
-        {windowSize && <Carousel Cards={CardArray} />}
+        {/* {windowSize && <Carousel Cards={CardArray} />} */}
         <Typography
           sx={{
             margin: "auto",
