@@ -24,8 +24,15 @@ import axios from "axios";
 
 export default function MyShoppingCartPage() {
   const [shoppingCart, setShoppingCart] = useState(null);
+  const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
   const [shoppingCartId, setShoppingCartId] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
+  const [error, setError] = useState("");
+
+  const PF = process.env.REACT_APP_PUBLIC_FOLDER;
+  // navigation
+  const navigate = useNavigate();
+  const errorRef = useRef(null);
 
   // store shopping cart id in local storage for data preseverance,
   // create one if not already assigned
@@ -73,8 +80,33 @@ export default function MyShoppingCartPage() {
 
   useEffect(() => {
     if (shoppingCart) {
-      shoppingCart.products_selected.forEach((selectedProduct) => {
-        console.log("test");
+      let total = 0;
+      shoppingCart.products_selected.forEach((product) => {
+        total += product.product_price * product.quantity;
+      });
+      setShoppingCartPriceTotal(total.toFixed(2));
+    }
+  }, [shoppingCart]);
+
+  useEffect(() => {
+    if (shoppingCart) {
+      const setProductInfo = async (productID) => {
+        try {
+          const res = await axios.get("/api/product/" + productID);
+          setSelectedItems((prev) => [...prev, res.data]);
+        } catch (error) {
+          setTimeout(() => {
+            setError("");
+          }, 5000);
+          errorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          return setError(error.response.data.error);
+        }
+      };
+      shoppingCart.products_selected.forEach((product) => {
+        setProductInfo(product.product_id);
       });
     }
   }, [shoppingCart]);
@@ -82,99 +114,117 @@ export default function MyShoppingCartPage() {
   return (
     <>
       <Box p={2} boxShadow={1} m={2} bgcolor="grey.A200">
+        {error && (
+          <Box p={2} ref={errorRef}>
+            <Alert severity="error">{error}</Alert>
+          </Box>
+        )}
         <Typography p={3} variant="h4">
           My Shopping Cart
         </Typography>
         {/* Grid item is shopping cart item */}
         <Grid container direction={"column"} spacing={0}>
-          <Grid
-            container
-            item
-            xs={12}
-            sm={12}
-            md={12}
-            lg={12}
-            p={1.5}
-            mr={2}
-            mb={2}
-            spacing={0}
-            boxShadow={2}
-            bgcolor="blueGrey.50"
-          >
-            <Grid
-              container
-              item
-              xs={12}
-              sm={12}
-              md={12}
-              lg={12}
-              justifyContent="center"
-              alignContent={"center"}
-            >
-              <Typography>Product</Typography>
-            </Grid>
-            <Grid container item xs={6} sm={4} md={2.5} alignContent={"center"}>
-              <Box
-                component="img"
-                height={"100%"}
-                width={"100%"}
-                src="https://randomwordgenerator.com/img/picture-generator/53e1d04a4c5aa414f1dc8460962e33791c3ad6e04e5074417c2b79d59448cc_640.jpg"
-              />
-            </Grid>
-            <Grid
-              container
-              item
-              order={{ xs: 2, md: 1 }}
-              xs={12}
-              md={7.5}
-              alignContent={"center"}
-            >
-              <Typography
-                color="textPrimary"
-                variant="body2"
-                p={1}
-                sx={{
-                  textOverflow: "ellipsis",
-                  overflow: "hidden",
-                  display: "-webkit-box !important",
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: "vertical",
-                }}
-              >
-                Product Description Lorem ipsum dolor sit amet consectetur
-                adipisicing elit. Quaerat, in tenetur! Aperiam sint temporibus
-                explicabo quasi adipisci expedita quam nostrum enim, incidunt
-                molestias nesciunt ab, est perferendis voluptatum cum provident?
-              </Typography>
-            </Grid>
-            <Grid
-              container
-              item
-              order={{ xs: 1, md: 2 }}
-              xs={6}
-              md={2}
-              alignContent={"center"}
-              flexGrow={1}
-              justifyContent={"flex-end"}
-              justifySelf={"end"}
-            >
-              <Typography
-                p={{ xs: 0.5, md: 3 }}
-                color="textPrimary"
-                variant="body2"
-              >
-                QTY: 20
-              </Typography>
+          {selectedItems !== [] &&
+            selectedItems.length === shoppingCart?.products_selected.length &&
+            shoppingCart?.products_selected.map((product, index) => {
+              return (
+                <Grid
+                  container
+                  item
+                  xs={12}
+                  sm={12}
+                  md={12}
+                  lg={12}
+                  p={1.5}
+                  mr={2}
+                  mb={2}
+                  spacing={0}
+                  boxShadow={2}
+                  bgcolor="blueGrey.50"
+                >
+                  <Grid
+                    container
+                    item
+                    xs={12}
+                    sm={12}
+                    md={12}
+                    lg={12}
+                    justifyContent="center"
+                    alignContent={"center"}
+                  >
+                    <Typography variant="h5">{product.product_name}</Typography>
+                  </Grid>
+                  <Grid
+                    container
+                    item
+                    xs={6}
+                    sm={4}
+                    md={2.5}
+                    alignContent={"center"}
+                  >
+                    <Box
+                      component="img"
+                      height={"100%"}
+                      width={"100%"}
+                      src={`${PF}products/${selectedItems[index].image}`}
+                      alt={""}
+                    />
+                  </Grid>
+                  <Grid
+                    container
+                    item
+                    order={{ xs: 2, md: 1 }}
+                    xs={12}
+                    md={7.5}
+                    alignContent={"center"}
+                  >
+                    <Typography
+                      color="textPrimary"
+                      variant="body2"
+                      p={1}
+                      sx={{
+                        textOverflow: "ellipsis",
+                        overflow: "hidden",
+                        display: "-webkit-box !important",
+                        WebkitLineClamp: 3,
+                        WebkitBoxOrient: "vertical",
+                      }}
+                    >
+                      {product.product_description
+                        ? product.product_description
+                        : "No Description for this product"}
+                    </Typography>
+                  </Grid>
+                  <Grid
+                    container
+                    item
+                    order={{ xs: 1, md: 2 }}
+                    xs={6}
+                    md={2}
+                    alignContent={"center"}
+                    flexGrow={1}
+                    justifyContent={"flex-end"}
+                    justifySelf={"end"}
+                  >
+                    <Typography
+                      p={{ xs: 0.5, lg: 3 }}
+                      color="textPrimary"
+                      variant="body2"
+                    >
+                      QTY: {product.quantity}
+                    </Typography>
 
-              <Typography
-                p={{ xs: 0.5, md: 3 }}
-                color="textPrimary"
-                variant="body2"
-              >
-                $1000.00
-              </Typography>
-            </Grid>
-          </Grid>
+                    <Typography
+                      p={{ xs: 0.5, lg: 3 }}
+                      color="textPrimary"
+                      variant="body2"
+                    >
+                      ${(product.product_price * product.quantity).toFixed(2)}
+                    </Typography>
+                  </Grid>
+                </Grid>
+              );
+            })}
         </Grid>
         <Grid container justifyContent={"flex-end"} spacing={0}>
           <Grid
@@ -260,7 +310,9 @@ export default function MyShoppingCartPage() {
               justifyContent={"flex-end"}
               justifySelf={"end"}
             >
-              <Typography textAlign="end">$2000000.00</Typography>
+              <Typography textAlign="end">
+                ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
+              </Typography>
             </Grid>
           </Grid>
           <Grid

@@ -43,6 +43,7 @@ export default function Navbar() {
   const [userToken, setUserToken] = useState(null);
   const [shoppingCart, setShoppingCart] = useState();
   const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
+  const [selectedItems, setSelectedItems] = useState([]);
 
   // store shopping cart id in local storage for data preseverance,
   // create one if not already assigned
@@ -100,6 +101,21 @@ export default function Navbar() {
       controller.abort();
     };
   }, []);
+  useEffect(() => {
+    if (shoppingCart) {
+      const setProductInfo = async (productID) => {
+        try {
+          const res = await axios.get("/api/product/" + productID);
+          setSelectedItems((prev) => [...prev, res.data]);
+        } catch (error) {
+          return error;
+        }
+      };
+      shoppingCart.products_selected.forEach((product) => {
+        setProductInfo(product.product_id);
+      });
+    }
+  }, [shoppingCart]);
 
   useEffect(() => {
     if (shoppingCart) {
@@ -110,7 +126,7 @@ export default function Navbar() {
       setShoppingCartPriceTotal(total.toFixed(2));
     }
   }, [shoppingCart]);
-  
+
   useEffect(() => {
     function handleLoggedInStatus() {
       setUserToken(localStorage.getItem("authToken"));
@@ -644,36 +660,36 @@ export default function Navbar() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {shoppingCart?.products_selected.map((product, index) => (
-          <Box
-            container
-            direction={"row"}
-            justifyContent="center"
-            alignContent={"center"}
-            width={"100%"}
-            key={index}
-          >
-            <MenuItem sx={{ color: "white" }} width={"100%"}>
-              <Box
-                component={"img"}
-                sx={{ maxHeight: 60, maxWidth: 80 }}
-                alt={"This product image of the shopping cart"}
-                src={
-                  "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
-                }
-              />
-              <Typography paddingLeft={2} sx={{ width: "100%" }}>
-                {product.product_name
-                  ? product.product_name
-                  : "No name for this poduct can be found"}
-              </Typography>
-              <Typography paddingLeft={2}>QTY {product.quantity}</Typography>
-              <Typography paddingLeft={2}>
-                ${(product.quantity * product.product_price).toFixed(2)}
-              </Typography>
-            </MenuItem>
-          </Box>
-        ))}
+        {selectedItems !== [] &&
+          selectedItems.length === shoppingCart?.products_selected.length &&
+          shoppingCart?.products_selected.map((product, index) => (
+            <Box
+              container
+              direction={"row"}
+              justifyContent="center"
+              alignContent={"center"}
+              width={"100%"}
+              key={index}
+            >
+              <MenuItem sx={{ color: "white" }} width={"100%"}>
+                <Box
+                  component={"img"}
+                  sx={{ maxHeight: 60, maxWidth: 80 }}
+                  alt={"This product image of the shopping cart"}
+                  src={`${PF}products/${selectedItems[index].image}`}
+                />
+                <Typography paddingLeft={2} sx={{ width: "100%" }}>
+                  {product.product_name
+                    ? product.product_name
+                    : "No name for this poduct can be found"}
+                </Typography>
+                <Typography paddingLeft={2}>QTY {product.quantity}</Typography>
+                <Typography paddingLeft={2}>
+                  ${(product.quantity * product.product_price).toFixed(2)}
+                </Typography>
+              </MenuItem>
+            </Box>
+          ))}
         <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
 
         <Typography>
