@@ -114,10 +114,9 @@ export default function Navbar() {
       const setProductInfo = async (productID) => {
         try {
           const res = await axios.get("/api/product/" + productID, config);
-
           setSelectedItems((prev) => [...prev, res.data[0]]);
         } catch (error) {
-          return error;
+          return;
         }
       };
       shoppingCart.products_selected.forEach((product) => {
