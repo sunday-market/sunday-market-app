@@ -4,7 +4,7 @@ import axios from "axios";
 
 import { Alert, Button, Typography, Divider, CardMedia } from "@mui/material";
 import { Box, Grid } from "@mui/material";
-import IncDecButton from "../../components/IncDecButton";
+import AddToCartButton from "../../components/AddToCartButton";
 
 import { priceToCurrency } from "../../utils/currency";
 
@@ -164,16 +164,7 @@ const ViewProduct = () => {
                   {priceToCurrency(product.product_price)}
                 </Typography>
 
-                {/* TODO: Implement Add to Cart Logic  */}
-                <IncDecButton
-                  counter={counter}
-                  quantityInStock={quantityInStock}
-                  incrementQuantity={incrementQuantity}
-                  decrementQuantity={decrementQuantity}
-                />
-                <Typography align="center">
-                  Remaining Stock: {quantityInStock}
-                </Typography>
+                <AddToCartButton product={product} />
               </Box>
             </Box>
           </Box>
