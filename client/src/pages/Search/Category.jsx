@@ -132,7 +132,12 @@ const Category = () => {
                   </Grid>
                   {category.products.map((product) => (
                     <Grid item xs={12} sm={6} md={4} p={1} key={product._id}>
-                      <ProductCard product={product} />
+                      <ProductCard
+                        product={{
+                          ...product,
+                          subcategory: category.subcategory,
+                        }}
+                      />
                     </Grid>
                   ))}
                 </Grid>

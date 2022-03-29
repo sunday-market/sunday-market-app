@@ -149,12 +149,9 @@ exports.removeItemInCart = async (req, res, next) => {
   let qty = 0;
   for (; i < cart.products_selected.length; i++) {
     let product = cart.products_selected[i];
-    console.log("the product is: ", product);
 
     if (product._id.toString() === req.body._id) {
-      console.log("Product Found!");
       qty = product.quantity;
-      console.log("current qty = ", qty);
       break;
     }
   }

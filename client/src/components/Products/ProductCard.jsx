@@ -72,8 +72,8 @@ const ProductCard = ({ product }) => {
       },
       signal: controller.signal,
       data: {
-        _id: product._id
-      }
+        _id: product._id,
+      },
     };
 
     await axios
@@ -139,16 +139,17 @@ const ProductCard = ({ product }) => {
               alt={product.product_name}
             />
 
-            <Typography gutterBottom variant="body1" align="center">
-              <b>{product.product_name}</b>
-            </Typography>
             <Typography
               gutterBottom
               align="center"
               variant="body2"
               sx={{ backgroundColor: "#eeeeee" }}
             >
-              {product.product_subcategory}
+              {product.subcategory || ""}
+            </Typography>
+
+            <Typography variant="body1" align="center">
+              <b>{product.product_name}</b>
             </Typography>
           </Box>
 

@@ -48,73 +48,76 @@ exports.getAllActiveProducts = async (req, res, next) => {
   try {
     const products = await Product.aggregate([
       {
-        '$lookup': {
-          'from': 'stalls', 
-          'localField': 'product_stall', 
-          'foreignField': '_id', 
-          'as': 'stall'
-        }
-      }, {
-        '$replaceRoot': {
-          'newRoot': {
-            '$mergeObjects': [
+        $lookup: {
+          from: "stalls",
+          localField: "product_stall",
+          foreignField: "_id",
+          as: "stall",
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
               {
-                '$arrayElemAt': [
-                  '$stall', 0
-                ]
-              }, '$$ROOT'
-            ]
-          }
-        }
-      }, {
-        '$lookup': {
-          'from': 'subcategories', 
-          'localField': 'product_subcategory', 
-          'foreignField': '_id', 
-          'as': 'sub_category'
-        }
-      }, {
-        '$replaceRoot': {
-          'newRoot': {
-            '$mergeObjects': [
+                $arrayElemAt: ["$stall", 0],
+              },
+              "$$ROOT",
+            ],
+          },
+        },
+      },
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "product_subcategory",
+          foreignField: "_id",
+          as: "sub_category",
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
               {
-                '$arrayElemAt': [
-                  '$sub_category', 0
-                ]
-              }, '$$ROOT'
-            ]
-          }
-        }
-      }, {
-        '$match': {
-          'activated': true
-        }
-      }, {
-        '$project': {
-          'product_name': '$product_name', 
-          'product_description': '$product_description', 
-          'product_user': '$product_user', 
-          'product_subcategory': '$product_subcategory', 
-          'subcategory_name': '$subcategory', 
-          'product_price': '$product_price', 
-          'quantity_in_stock': '$quantity_in_stock', 
-          'image': '$image', 
-          'product_stall': {
-            '_id': '$product_stall', 
-            'user': '$user', 
-            'stallName': '$stallName', 
-            'category': '$category', 
-            'activated': '$activated', 
-            'description': '$description', 
-            'image_url': '$image_url', 
-            'email': '$email', 
-            'city_location': '$city_location'
-          }, 
-          'createdAt': '$createdAt', 
-          'updatedAt': '$updatedAt'
-        }
-      }
-    ])
+                $arrayElemAt: ["$sub_category", 0],
+              },
+              "$$ROOT",
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          activated: true,
+        },
+      },
+      {
+        $project: {
+          product_name: "$product_name",
+          product_description: "$product_description",
+          product_user: "$product_user",
+          product_subcategory: "$product_subcategory",
+          subcategory: "$subcategory",
+          product_price: "$product_price",
+          quantity_in_stock: "$quantity_in_stock",
+          image: "$image",
+          product_stall: {
+            _id: "$product_stall",
+            user: "$user",
+            stallName: "$stallName",
+            category: "$category",
+            activated: "$activated",
+            description: "$description",
+            image_url: "$image_url",
+            email: "$email",
+            city_location: "$city_location",
+          },
+          createdAt: "$createdAt",
+          updatedAt: "$updatedAt",
+        },
+      },
+    ]);
 
     if (products.length === 0) {
       return next(new ErrorResponse("No active product exists", 404));
@@ -133,7 +136,34 @@ exports.getAllActiveProducts = async (req, res, next) => {
 // Get Product by productId
 exports.getProductById = async (req, res, next) => {
   try {
-    const product = await Product.findOne({ _id: req.params.productid });
+    const product = await Product.aggregate([
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "product_subcategory",
+          foreignField: "_id",
+          as: "subcat",
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                $arrayElemAt: ["$subcat", 0],
+              },
+              "$$ROOT",
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(req.params.productid),
+        },
+      },
+    ]);
+
     if (!product) {
       return next(
         new ErrorResponse("No product exists with that product id", 404)
@@ -172,13 +202,40 @@ exports.getProductsByCategory = async (req, res, next) => {
 // Get all Products ascosiated to user
 exports.getUserProducts = async (req, res, next) => {
   try {
-    const products = await Product.find({ product_user: req.params.userid });
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "product_subcategory",
+          foreignField: "_id",
+          as: "subcat",
+        },
+      },
+      {
+        $replaceRoot: {
+          newRoot: {
+            $mergeObjects: [
+              {
+                $arrayElemAt: ["$subcat", 0],
+              },
+              "$$ROOT",
+            ],
+          },
+        },
+      },
+      {
+        $match: {
+          product_user: mongoose.Types.ObjectId(req.params.userid),
+        },
+      },
+    ]);
+
     if (products.length === 0) {
       return next(
         new ErrorResponse("No products exist for specified user", 404)
       );
     }
-    // console.log(`Products: ${products}`)
+
     res.status(200).json(products);
   } catch (error) {
     return next(error);

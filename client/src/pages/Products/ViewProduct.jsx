@@ -35,13 +35,13 @@ const ViewProduct = () => {
           `/api/product/${productId}`,
           config
         );
-        setProduct(productData.data);
+        setProduct(productData.data[0]);
 
         setQuantityInStock(productData.data.quantity_in_stock);
 
         // Get Stall Information
         const stallData = await axios.get(
-          `/api/stalls/${productData.data.product_stall}`
+          `/api/stalls/${productData.data[0].product_stall}`
         );
         setStall(stallData.data[0]);
       } catch (error) {
@@ -92,7 +92,7 @@ const ViewProduct = () => {
           <Typography variant="body1">
             <strong>{product.product_name}</strong>
           </Typography>
-          <Typography variant="body2">{product.product_subcategory}</Typography>
+          <Typography variant="body2">{product.subcategory}</Typography>
 
           <Divider />
 
@@ -163,6 +163,8 @@ const ViewProduct = () => {
                 <Typography variant="h4" textAlign="center">
                   {priceToCurrency(product.product_price)}
                 </Typography>
+
+                {/* TODO: Implement Add to Cart Logic  */}
                 <IncDecButton
                   counter={counter}
                   quantityInStock={quantityInStock}
