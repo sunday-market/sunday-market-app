@@ -102,11 +102,20 @@ export default function Navbar() {
     };
   }, []);
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     if (shoppingCart) {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
       const setProductInfo = async (productID) => {
         try {
-          const res = await axios.get("/api/product/" + productID);
-          setSelectedItems((prev) => [...prev, res.data]);
+          const res = await axios.get("/api/product/" + productID, config);
+
+          setSelectedItems((prev) => [...prev, res.data[0]]);
         } catch (error) {
           return error;
         }
@@ -115,6 +124,9 @@ export default function Navbar() {
         setProductInfo(product.product_id);
       });
     }
+    return () => {
+      controller.abort();
+    };
   }, [shoppingCart]);
 
   useEffect(() => {

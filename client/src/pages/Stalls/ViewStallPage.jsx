@@ -168,14 +168,13 @@ export default function ViewStallPage() {
 
   // new message
   const handleNewMessage = async (e) => {
-    e.preventDefault();
     if (user && currentUser) {
       const messageThread = {
         stall_name: stall[0].stallName,
         send_user: currentUser.id,
         recieve_user: user.id,
       };
-      //console.log(messageThread);
+
       try {
         const config = {
           headers: {
