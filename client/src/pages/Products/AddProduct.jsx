@@ -254,7 +254,7 @@ const AddProduct = () => {
   };
 
   return (
-    <Box p={4}>
+    <Box p={{ xs: 0, sm: 4, md: 8 }}>
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <Typography variant="h4">Add Product</Typography>
 
@@ -354,7 +354,6 @@ const AddProduct = () => {
             <InputLabel required>Product Category</InputLabel>
 
             <Select
-              id="select_subcategory"
               name="product_subcategory"
               disabled={request}
               variant="outlined"

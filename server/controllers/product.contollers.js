@@ -352,7 +352,9 @@ exports.addProduct = async (req, res, next) => {
 };
 
 // PUT
+// Update Product
 exports.updateProduct = async (req, res, next) => {
+  console.log("updateProduct controller called");
   const product_name = req.body.product_name;
   const product_description = req.body.product_description;
   const product_subcategory = req.body.product_subcategory;
@@ -360,7 +362,14 @@ exports.updateProduct = async (req, res, next) => {
   const product_user = req.body.product_user;
   const product_price = req.body.product_price;
   const quantity_in_stock = req.body.quantity_in_stock;
-  const image = req.file ? req.file.filename : "noimage.jpg";
+
+  let image = "noimage.jpg";
+
+  if (req.file) {
+    image = req.file.filename;
+  } else if (req.body.sameimage) {
+    image = req.body.sameimage;
+  }
 
   const productData = {
     product_name,
