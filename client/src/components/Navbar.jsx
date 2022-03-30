@@ -65,13 +65,13 @@ export default function Navbar() {
           const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
           if (cart.products_selected.length === 0) {
-            await axios.delete(`/api/cart/${cartId}`, config);
+            await axios.delete(`/api/cart/${cartId}`);
             const shoppingCartId = (await axios.post("/api/cart/", config)).data
               .data._id;
             localStorage.setItem("shoppingCartId", shoppingCartId);
             const cart = (
               await axios.get(`/api/cart/${shoppingCartId}`, config)
-            ).data.data;
+            ).data[0];
             setShoppingCart(cart);
             setCartLoaded(true);
           }
@@ -123,10 +123,13 @@ export default function Navbar() {
           return;
         }
       };
-      if (shoppingCart?.products_selected?.length > 0) {
+      const loopThroughCart = () => {
         shoppingCart.products_selected.forEach((product) => {
           setProductInfo(product.product_id);
         });
+      };
+      if (shoppingCart?.products_selected?.length > 0) {
+        loopThroughCart();
       }
     }
     return () => {

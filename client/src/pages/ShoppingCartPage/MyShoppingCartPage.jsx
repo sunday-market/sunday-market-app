@@ -21,6 +21,7 @@ import {
 } from "@mui/material";
 import jwtDecode from "jwt-decode";
 import axios from "axios";
+import { useCountdown } from "../../hooks/useCountdown";
 
 export default function MyShoppingCartPage() {
   const [shoppingCart, setShoppingCart] = useState(null);
@@ -29,15 +30,19 @@ export default function MyShoppingCartPage() {
   const [selectedItems, setSelectedItems] = useState([]);
   const [error, setError] = useState("");
   const [cartLoaded, setCartLoaded] = useState(false);
+  const [futureDate, setFutureDate] = useState(
+    new Date().getTime() + 5 * 60000
+  );
 
+  const [days, hours, minutes, seconds] = useCountdown(futureDate);
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   // navigation
   const navigate = useNavigate();
   const errorRef = useRef(null);
+  const timerRef = useRef(null);
 
-  // store shopping cart id in local storage for data preseverance,
-  // create one if not already assigned
   useEffect(() => {
+    let minutesToAdd = 0.2;
     const controller = new AbortController();
     const signal = controller.signal;
     const getShoppingCart = async () => {
@@ -52,15 +57,23 @@ export default function MyShoppingCartPage() {
         try {
           const cartId = localStorage.getItem("shoppingCartId");
           const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
+
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
-          if (cart.products_selected.length === 0) {
-            await axios.delete(`/api/cart/${cartId}`, config);
-            const shoppingCartId = (await axios.post("/api/cart/", config)).data
-              .data._id;
-            localStorage.setItem("shoppingCartId", shoppingCartId);
-            const cart = (
-              await axios.get(`/api/cart/${shoppingCartId}`, config)
-            ).data.data;
+          if (cart?.products_selected.length === 0 || !cart) {
+            await axios.delete(`/api/cart/${cartId}`);
+            const newCartId = (await axios.post("/api/cart/", config)).data.data
+              ._id;
+            setShoppingCartId(newCartId);
+            localStorage.setItem("shoppingCartId", newCartId);
+            const cart = (await axios.get(`/api/cart/${newCartId}`, config))
+              .data[0];
+            // set current date to time the cart was last updated
+            const currentDate = new Date(cart.updatedAt);
+            // set countdown date
+            setFutureDate(
+              new Date(currentDate.getTime() + minutesToAdd * 60000)
+            );
+            // set shopping cart and load time
             setShoppingCart(cart);
             setCartLoaded(true);
           }
@@ -68,10 +81,46 @@ export default function MyShoppingCartPage() {
           else {
             setShoppingCart(cart);
             setCartLoaded(true);
+            console.log(cart.updatedAt);
+            console.log(
+              `this is update at: ${new Date(
+                cart.updatedAt
+              ).getTime()}, this is new date: ${new Date().getTime()}`
+            );
+            const currentDate =
+              new Date(cart.updatedAt).getTime() +
+              minutesToAdd * 60000 -
+              new Date().getTime();
+            console.log(`this is the new date minus cart date: ${currentDate}`);
+
+            if (currentDate <= 0) {
+              console.log("Timer has ran out and needs to be deleted");
+              await axios.put("/api/cart/clearcart/" + cartId);
+              setCartLoaded(false);
+              setShoppingCart();
+              setShoppingCartPriceTotal();
+              setSelectedItems([]);
+              let minutesToAdd = 30;
+              const currentDate = new Date();
+              setFutureDate(
+                new Date(currentDate.getTime() + minutesToAdd * 60000)
+              );
+            } else {
+              console.log("Timer still has time left");
+              setFutureDate(
+                new Date(cart.updatedAt).getTime() + minutesToAdd * 60000
+              );
+            }
           }
         } catch (error) {
-          // error has occured
-          return error;
+          setTimeout(() => {
+            setError("");
+          }, 5000);
+          errorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          return setError(error.response.data.error);
         }
       }
     };
@@ -80,6 +129,66 @@ export default function MyShoppingCartPage() {
       controller.abort();
     };
   }, []);
+  const [createCart, setCreateCart] = useState(false);
+  useEffect(() => {
+    const checkTimer = async () => {
+      if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
+        let cartid = localStorage.getItem("shoppingCartId");
+        await axios.put("/api/cart/clearcart/" + cartid);
+        await axios.delete(`/api/cart/${cartid}`);
+        setShoppingCartId("");
+        setCartLoaded(false);
+        setShoppingCart(null);
+        setShoppingCartPriceTotal(null);
+        setSelectedItems([]);
+        localStorage.removeItem("shoppingCartId");
+        setCreateCart(true);
+      } else if (minutes >= 0 && minutes <= 10) {
+        timerRef.current.style.color = "red";
+      } else if (minutes >= 10) {
+        timerRef.current.style.color = "green";
+      } else if (minutes + seconds < 0) {
+        console.log("shouldnt be here");
+      }
+    };
+    checkTimer();
+  }, [minutes, seconds]);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const recreateCart = async () => {
+      if (!localStorage.getItem("shoppingCartId") && createCart) {
+        let minutesToAdd = 1;
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          signal,
+        };
+        const newCartId = await (
+          await axios.post("/api/cart/", config)
+        ).data.data._id;
+        const cart = await (
+          await axios.get(`/api/cart/${newCartId}`, config)
+        ).data[0];
+        // set current date to time the cart was last updated
+        const currentDate = new Date(cart.updatedAt);
+        // set countdown date
+        setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
+        // set shopping cart and load time
+        setShoppingCart(cart);
+        setCartLoaded(true);
+        setShoppingCartId(newCartId);
+        localStorage.setItem("shoppingCartId", newCartId);
+        setCreateCart(false);
+      }
+    };
+    recreateCart();
+    return () => {
+      controller.abort();
+    };
+  }, [createCart]);
 
   useEffect(() => {
     if (shoppingCart) {
@@ -94,42 +203,47 @@ export default function MyShoppingCartPage() {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    console.log(cartLoaded);
-
-    if (cartLoaded) {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal,
-      };
-      const setProductInfo = async (productID) => {
-        try {
-          const res = await axios.get("/api/product/" + productID, config);
-
-          setSelectedItems((prev) => [...prev, res.data[0]]);
-        } catch (error) {
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          return setError(error.response.data.error);
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal,
+    };
+    const setProductInfo = async (productID) => {
+      try {
+        console.log(productID);
+        const res = await axios.get("/api/product/" + productID, config);
+        console.log(res.data[0]);
+        setSelectedItems((prev) => [...prev, res.data[0]]);
+      } catch (error) {
+        if (axios.isCancel(error)) {
+          console.log(error);
+          return console.log("Successfully Aborted");
         }
-      };
-      if (shoppingCart?.products_selected?.length > 0) {
-        shoppingCart.products_selected.forEach((product) => {
-          console.log(product);
-          setProductInfo(product.product_id);
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
         });
+        return setError(error.response.data.error);
       }
+    };
+    const loopThroughCart = () => {
+      shoppingCart.products_selected.forEach((product) => {
+        console.log(`this is ${product.product_id}`);
+        setProductInfo(product.product_id);
+      });
+    };
+    if (shoppingCart?.products_selected?.length > 0) {
+      loopThroughCart();
     }
+
     return () => {
       controller.abort();
     };
-  }, [cartLoaded, shoppingCart]);
+  }, [shoppingCart]);
 
   // Handle cart clear
   const handleCartClear = async () => {
@@ -140,8 +254,34 @@ export default function MyShoppingCartPage() {
       setShoppingCart();
       setShoppingCartPriceTotal();
       setSelectedItems([]);
+      let minutesToAdd = 30;
+      const currentDate = new Date();
+      setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
     } catch (error) {
       console.log(error);
+    }
+  };
+
+  const handleRefresh = async () => {
+    console.log("test");
+    let minutesToAdd = 30;
+    try {
+      const cartId = localStorage.getItem("shoppingCartId");
+      const cart = (await axios.get(`/api/cart/${cartId}`)).data[0];
+      console.log(cart);
+      const res = await axios.put(`/api/cart/${cartId}`, cart);
+      const currentDate = new Date(res.data.data[0].updatedAt);
+      setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
+      console.log(res);
+    } catch (error) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return setError(error.response.data.error);
     }
   };
 
@@ -274,6 +414,8 @@ export default function MyShoppingCartPage() {
             flexShrink={1}
             justifyContent="center"
             bgcolor="blueGrey.50"
+            ref={timerRef}
+            color="green"
           >
             <Grid
               item
@@ -282,7 +424,7 @@ export default function MyShoppingCartPage() {
               ml={1}
               alignContent={"center"}
             >
-              <IconButton>
+              <IconButton onClick={handleRefresh}>
                 <Replay30Icon fontSize="large" />
               </IconButton>
             </Grid>
@@ -295,7 +437,9 @@ export default function MyShoppingCartPage() {
               alignContent={"center"}
               justifyContent="start"
             >
-              <Typography>Time Remaining: 00.00.00</Typography>
+              <Typography>
+                Time Remaining: {minutes}min.{seconds}sec
+              </Typography>
             </Grid>
           </Grid>
           <Grid
