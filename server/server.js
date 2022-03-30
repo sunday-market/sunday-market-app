@@ -46,4 +46,4 @@ process.on("unhandledRejection", (err, promise) => {
 function clearOldCarts() {
   console.log("Clensing Database started");
 }
-setTimeout(clearOldCarts, 1500);
+setInterval(clearOldCarts, 1500);
