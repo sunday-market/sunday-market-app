@@ -40,6 +40,7 @@ import MyShoppingCartPage from "./pages/ShoppingCartPage/MyShoppingCartPage";
 
 // Search Pages
 import Category from "./pages/Search/Category";
+import Results from "./pages/Search/Results";
 
 // Error Pages
 import Error404 from "./pages/Errors/Error404";
@@ -112,6 +113,7 @@ function App() {
 
         <Route path="search">
           <Route path="category/:categoryId" element={<Category />} />
+          <Route path="category/results" element={<Results />} />
         </Route>
 
         <Route path="*" element={<Error404 />} />

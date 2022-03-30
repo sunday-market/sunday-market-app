@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 
-const useSendMessage = (receiverId, room) => {
+const useSendMessage = (user, stall) => {
   const [sender, setSender] = useState();
   const [receiver, setReceiver] = useState();
   const [messageThread, setMessageThread] = useState({});
@@ -27,7 +27,7 @@ const useSendMessage = (receiverId, room) => {
   }, [error, controller]);
 
   // Confirm that the Receiver exists
-  if (!receiverId) {
+  if (!user) {
     setError("Reciever id not supplied");
   }
 
@@ -42,10 +42,10 @@ const useSendMessage = (receiverId, room) => {
 
     (async () => {
       await axios
-        .get(`/api/user/exists/${receiverId}`, config)
+        .get(`/api/user/exists/${user}`, config)
         .then((exists) => {
           if (exists) {
-            setReceiver(receiverId);
+            setReceiver(user);
           } else {
             setError("Receiver does not exist");
           }
@@ -54,7 +54,7 @@ const useSendMessage = (receiverId, room) => {
           setError(error.message);
         });
     })();
-  }, [receiverId, controller.signal]);
+  }, [user, controller.signal]);
 };
 
 export default useSendMessage;

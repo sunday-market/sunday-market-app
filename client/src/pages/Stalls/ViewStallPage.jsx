@@ -189,25 +189,37 @@ export default function ViewStallPage() {
           config
         );
 
+        // Returns: every message thread that is found with the current user (inc send/rec)
+
         mesCheck = mesCheck.data;
         let stateCheck = null;
 
+        // Check if the sender (current user) and receiver already exists
         mesCheck.forEach((mt) => {
+          // does the stall name in the message thread match
           if (messageThread.stall_name === mt.stall_name) {
             if (
+              // checks if user is sender or receiver
+              // and if user is the sender, then sender will become the receiver
               (messageThread.send_user === mt.message_members[0] &&
                 messageThread.recieve_user === mt.message_members[1]) ||
               (messageThread.send_user === mt.message_members[1] &&
                 messageThread.recieve_user === mt.message_members[0])
             ) {
+
               return (stateCheck = mt);
             }
           }
         });
 
+        
         if (stateCheck) {
+          // Message Thread exists, send message using existing thread
+          // KEY HAS TO BE CALLED STATE
           navigate("/account/messages", { state: stateCheck });
         } else {
+
+          // no message thread exists, create NEW message thread 
           const res = await axios.post(
             "/api/messagethreads/",
             messageThread,
