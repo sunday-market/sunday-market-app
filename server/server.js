@@ -42,9 +42,3 @@ process.on("unhandledRejection", (err, promise) => {
   console.log(`Server Error ${err}`);
   server.close(() => process.exit(1));
 });
-
-// loop through and delete all unused carts function
-function clearOldCarts() {
-  console.log("Clensing Database started");
-}
-setInterval(clearOldCarts, 1500);

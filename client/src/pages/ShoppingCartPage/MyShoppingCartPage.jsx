@@ -29,9 +29,10 @@ export default function MyShoppingCartPage() {
   const [shoppingCartId, setShoppingCartId] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [error, setError] = useState("");
+  const [createCart, setCreateCart] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
   const [futureDate, setFutureDate] = useState(
-    new Date().getTime() + 5 * 60000
+    new Date().getTime() + 30 * 60000
   );
 
   const [days, hours, minutes, seconds] = useCountdown(futureDate);
@@ -42,7 +43,7 @@ export default function MyShoppingCartPage() {
   const timerRef = useRef(null);
 
   useEffect(() => {
-    let minutesToAdd = 0.2;
+    let minutesToAdd = 30;
     const controller = new AbortController();
     const signal = controller.signal;
     const getShoppingCart = async () => {
@@ -56,26 +57,14 @@ export default function MyShoppingCartPage() {
       if (localStorage.getItem("shoppingCartId")) {
         try {
           const cartId = localStorage.getItem("shoppingCartId");
-          const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
+          const cart = await (
+            await axios.get(`/api/cart/${cartId}`, config)
+          ).data[0];
 
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
           if (cart?.products_selected.length === 0 || !cart) {
             await axios.delete(`/api/cart/${cartId}`);
-            const newCartId = (await axios.post("/api/cart/", config)).data.data
-              ._id;
-            setShoppingCartId(newCartId);
-            localStorage.setItem("shoppingCartId", newCartId);
-            const cart = (await axios.get(`/api/cart/${newCartId}`, config))
-              .data[0];
-            // set current date to time the cart was last updated
-            const currentDate = new Date(cart.updatedAt);
-            // set countdown date
-            setFutureDate(
-              new Date(currentDate.getTime() + minutesToAdd * 60000)
-            );
-            // set shopping cart and load time
-            setShoppingCart(cart);
-            setCartLoaded(true);
+            createNewCart();
           }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
           else {
@@ -94,17 +83,7 @@ export default function MyShoppingCartPage() {
             console.log(`this is the new date minus cart date: ${currentDate}`);
 
             if (currentDate <= 0) {
-              console.log("Timer has ran out and needs to be deleted");
-              await axios.put("/api/cart/clearcart/" + cartId);
-              setCartLoaded(false);
-              setShoppingCart();
-              setShoppingCartPriceTotal();
-              setSelectedItems([]);
-              let minutesToAdd = 30;
-              const currentDate = new Date();
-              setFutureDate(
-                new Date(currentDate.getTime() + minutesToAdd * 60000)
-              );
+              deleteCart();
             } else {
               console.log("Timer still has time left");
               setFutureDate(
@@ -129,65 +108,71 @@ export default function MyShoppingCartPage() {
       controller.abort();
     };
   }, []);
-  const [createCart, setCreateCart] = useState(false);
+
+  const deleteCart = async () => {
+    let cartid = localStorage.getItem("shoppingCartId");
+    await axios.put("/api/cart/clearcart/" + cartid);
+    await axios.delete(`/api/cart/${cartid}`);
+    setShoppingCartId("");
+    setCartLoaded(false);
+    setShoppingCart(null);
+    setShoppingCartPriceTotal(null);
+    setSelectedItems([]);
+    localStorage.removeItem("shoppingCartId");
+    setCreateCart(true);
+  };
+
+  const createNewCart = async () => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let minutesToAdd = 30;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal,
+    };
+    const newCartId = await (
+      await axios.post("/api/cart/", config)
+    ).data.data._id;
+    const cart = await (
+      await axios.get(`/api/cart/${newCartId}`, config)
+    ).data[0];
+    // set current date to time the cart was last updated
+    const currentDate = new Date(cart.updatedAt);
+    // set countdown date
+    setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
+    // set shopping cart and load time
+    setShoppingCart(cart);
+    setCartLoaded(true);
+    setShoppingCartId(newCartId);
+    localStorage.setItem("shoppingCartId", newCartId);
+    setCreateCart(false);
+    controller.abort();
+  };
+
   useEffect(() => {
     const checkTimer = async () => {
       if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
-        let cartid = localStorage.getItem("shoppingCartId");
-        await axios.put("/api/cart/clearcart/" + cartid);
-        await axios.delete(`/api/cart/${cartid}`);
-        setShoppingCartId("");
-        setCartLoaded(false);
-        setShoppingCart(null);
-        setShoppingCartPriceTotal(null);
-        setSelectedItems([]);
-        localStorage.removeItem("shoppingCartId");
-        setCreateCart(true);
+        deleteCart();
       } else if (minutes >= 0 && minutes <= 10) {
         timerRef.current.style.color = "red";
       } else if (minutes >= 10) {
         timerRef.current.style.color = "green";
       } else if (minutes + seconds < 0) {
-        console.log("shouldnt be here");
+        deleteCart();
       }
     };
     checkTimer();
   }, [minutes, seconds]);
 
   useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
     const recreateCart = async () => {
       if (!localStorage.getItem("shoppingCartId") && createCart) {
-        let minutesToAdd = 1;
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          signal,
-        };
-        const newCartId = await (
-          await axios.post("/api/cart/", config)
-        ).data.data._id;
-        const cart = await (
-          await axios.get(`/api/cart/${newCartId}`, config)
-        ).data[0];
-        // set current date to time the cart was last updated
-        const currentDate = new Date(cart.updatedAt);
-        // set countdown date
-        setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
-        // set shopping cart and load time
-        setShoppingCart(cart);
-        setCartLoaded(true);
-        setShoppingCartId(newCartId);
-        localStorage.setItem("shoppingCartId", newCartId);
-        setCreateCart(false);
+        createNewCart();
       }
     };
     recreateCart();
-    return () => {
-      controller.abort();
-    };
   }, [createCart]);
 
   useEffect(() => {
