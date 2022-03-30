@@ -30,6 +30,24 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
+exports.userExists = async (req, res, next) => {
+  if (!req.params.userId) {
+    res.status(400).send("User not supplied");
+  }
+
+  await User.findById(req.params.userId)
+    .then((result) => {
+      if (result) {
+        res.status(200).send(true);
+      } else {
+        res.status(200).send(false);
+      }
+    })
+    .catch((error) => {
+      return next(error);
+    });
+};
+
 exports.deleteUser = async (req, res, next) => {
   const { userId } = req.params;
 

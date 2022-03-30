@@ -182,13 +182,16 @@ export default function ViewStallPage() {
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
         };
+
         // check for messages already existing
         let mesCheck = await axios.get(
           `/api/messagethreads/${currentUser.id}`,
           config
         );
+
         mesCheck = mesCheck.data;
         let stateCheck = null;
+
         mesCheck.forEach((mt) => {
           if (messageThread.stall_name === mt.stall_name) {
             if (
@@ -201,6 +204,7 @@ export default function ViewStallPage() {
             }
           }
         });
+
         if (stateCheck) {
           navigate("/account/messages", { state: stateCheck });
         } else {
