@@ -49,15 +49,15 @@ router.route("/active").get(getAllActiveProducts);
 
 router.route("/stall/:stallid").get(protect, getStallProducts);
 
+router.route("/recent").get(getRecentlyAddedProducts);
+
+router.route("/category/:categoryId").get(getProductsByCategory);
+
+router.route("/user/:userid").get(protect, getUserProducts);
 router
   .route("/:productid")
   .get(getProductById)
   .put(protect, upload.single("image"), updateProduct)
   .delete(protect, deleteProduct);
-
-router.route("/recent").get(getRecentlyAddedProducts);
-router.route("/category/:categoryId").get(getProductsByCategory);
-
-router.route("/user/:userid").get(protect, getUserProducts);
 
 module.exports = router;
