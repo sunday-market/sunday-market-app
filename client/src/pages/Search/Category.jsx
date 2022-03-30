@@ -3,7 +3,14 @@ import { useParams } from "react-router";
 
 import axios from "axios";
 
-import { Alert, Typography, Box, Grid, CircularProgress } from "@mui/material";
+import {
+  Alert,
+  Typography,
+  Box,
+  Grid,
+  CircularProgress,
+  CardMedia,
+} from "@mui/material";
 
 import ProductCard from "../../components/Products/ProductCard";
 
@@ -96,7 +103,11 @@ const Category = () => {
   }, [categoryId]);
 
   return (
-    <Box p={{ xs: 1, sm: 2, md: 4 }} backgroundColor="white">
+    <Box
+      py={{ xs: 1, sm: 2, md: 4 }}
+      px={{ xs: 2, sm: 4, md: 8, lg: 20 }}
+      backgroundColor="white"
+    >
       {error && (
         <Box p={2}>
           <Alert severity="error">{error}</Alert>
@@ -106,6 +117,15 @@ const Category = () => {
       <Typography variant="h4" align="center" color="grey.800" gutterBottom>
         <strong>{categoryName}</strong>
       </Typography>
+
+      <CardMedia
+        component="img"
+        height="250px"
+        image="https://exchange4media.gumlet.io/news-photo/95923-imagica.jpg?format=webp&w=750&dpr=1.0"
+        src="Advertisment for eating vegetables"
+        border="solid 1px #f0f0f0"
+      />
+      <Typography textAlign="center">Advertisment</Typography>
 
       {loading ? (
         <>
@@ -124,9 +144,14 @@ const Category = () => {
                     xs={12}
                     p={1}
                     mt={1}
-                    sx={{ backgroundColor: "#01a9f4", color: "white" }}
+                    // sx={{ backgroundColor: "#01a9f4", color: "white" }}
                   >
-                    <Typography variant="h5" align="center">
+                    <Typography
+                      variant="h5"
+                      mt={6}
+                      align="left"
+                      sx={{ fontWeight: "bold" }}
+                    >
                       {category.subcategory}
                     </Typography>
                   </Grid>
