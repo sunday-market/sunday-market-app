@@ -145,7 +145,15 @@ const ViewProduct = () => {
                 </Typography>
 
                 <Box display="flex" justifyContent="center" p={2}>
-                  <Button variant="contained" sx={{ marginRight: 1 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ marginRight: 1 }}
+                    onClick={() =>
+                      navigate(
+                        `/account/stalls/viewstall/${product.product_stall}`
+                      )
+                    }
+                  >
                     View
                   </Button>
                   <Button variant="outlined">Contact</Button>
