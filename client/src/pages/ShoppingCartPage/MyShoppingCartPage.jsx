@@ -62,13 +62,14 @@ export default function MyShoppingCartPage() {
           )?.data[0];
           if (cart === undefined || cart === null) {
             localStorage.removeItem("shoppingCartId");
-            createNewCart();
+            return createNewCart();
           }
 
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
           if (cart?.products_selected.length === 0 || !cart) {
-            await axios.delete(`/api/cart/${cartId}`);
-            createNewCart();
+            let res = await axios.delete(`/api/cart/${cartId}`);
+            console.log(res);
+            return createNewCart();
           }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
           else {
@@ -114,7 +115,26 @@ export default function MyShoppingCartPage() {
   }, []);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const checkTimer = async () => {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
+      // check for cart still existing in the database
+      const cartId = localStorage.getItem("shoppingCartId");
+      const cart = await (
+        await axios.get(`/api/cart/${cartId}`, config)
+      )?.data[0];
+      if (cart === undefined || cart === null) {
+        // if null or undefined the cart no longer exists
+        console.log("creating cart in timer");
+        localStorage.removeItem("shoppingCartId");
+      }
+      // timer check
       if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
         deleteCart();
       } else if (minutes >= 0 && minutes <= 10) {
@@ -126,6 +146,9 @@ export default function MyShoppingCartPage() {
       }
     };
     checkTimer();
+    return () => {
+      controller.abort();
+    };
   }, [minutes, seconds]);
 
   useEffect(() => {

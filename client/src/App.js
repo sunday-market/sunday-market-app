@@ -72,7 +72,6 @@ function App() {
             <Route path="stalls">
               <Route path="mystalls" element={<MyStallsPage />} />
               <Route path="addstall" element={<AddMyStallPage />} />
-              <Route path="viewstall/:stallID" element={<ViewStallPage />} />
               <Route path="editstall/:stallID" element={<EditMyStallPage />} />
             </Route>
 
@@ -105,6 +104,10 @@ function App() {
 
         <Route path="products" element={<PageContainer />}>
           <Route path=":productId" element={<ViewProduct />} />
+        </Route>
+
+        <Route path="stalls" element={<PageContainer />}>
+          <Route path="viewstall/:stallID" element={<ViewStallPage />} />
         </Route>
 
         <Route path="shoppingcart">
