@@ -22,10 +22,11 @@ const ProductCard = ({ product }) => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    (async () => {
-      const authToken = jwtDecode(localStorage.getItem("authToken"));
-      setIsUserProduct(authToken.id === product.product_user);
-    })();
+    const authToken = localStorage.getItem("authToken");
+    if (authToken) {
+      const jwt = jwtDecode(localStorage.getItem("authToken"));
+      setIsUserProduct(jwt.id === product.product_user);
+    }
   }, [product.product_user]);
 
   return (
