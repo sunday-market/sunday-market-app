@@ -149,14 +149,6 @@ export default function MyShoppingCartPage() {
         signal,
       };
       const loadUserIdToCart = async () => {
-        const controller = new AbortController();
-        const signal = controller.signal;
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-          },
-          signal,
-        };
         // get auth token and check if valid
         const jwt = jwtDecode(localStorage.getItem("authToken"));
         console.log(jwt);
@@ -175,7 +167,11 @@ export default function MyShoppingCartPage() {
               shoppingCart,
             };
             console.log(shoppingCartId);
-            res = await axios.put(`/api/cart/${shoppingCartId}`, newCartData);
+            res = await axios.put(
+              `/api/cart/${shoppingCartId}`,
+              newCartData,
+              config
+            );
             // user doesn't exist
           } else if (res === false) {
             setTimeout(() => {
@@ -205,6 +201,9 @@ export default function MyShoppingCartPage() {
       };
       loadUserIdToCart();
     }
+    return () => {
+      controller.abort();
+    };
   }, [cartLoaded, navigate, shoppingCart, shoppingCartId]);
 
   async function deleteCart() {
