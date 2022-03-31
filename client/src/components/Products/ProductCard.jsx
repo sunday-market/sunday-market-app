@@ -90,48 +90,48 @@ const ProductCard = ({ product }) => {
         </CardContent>
         <Box sx={{ flexGrow: 1 }} />
         <Divider margin={1} />
-        <Box sx={{ p: 2 }}>
-          <Grid
-            container
-            direction="column"
-            spacing={2}
-            sx={{ justifyContent: "center" }}
-          >
-            <Grid
-              item
-              sx={{
-                alignItems: "center",
-                display: "flex",
-                justifyContent: "space-between",
-              }}
-            >
-              <Typography
-                color="grey.800"
-                sx={{ pl: 1, fontFamily: "Tahoma" }}
-                variant="h5"
-              >
-                {priceToCurrency(product.product_price)}
-              </Typography>
-              {!isUserProduct && (
-                <Button onClick={() => navigate(`/products/${product._id}`)}>
-                  View
-                </Button>
-              )}
-            </Grid>
 
-            <Grid
-              item
-              sx={{
-                display: "flex",
-                flexDirection: "column",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
+        <Grid
+          container
+          direction="column"
+          // spacing={2}
+          sx={{ justifyContent: "center" }}
+        >
+          <Grid
+            item
+            sx={{
+              alignItems: "center",
+              display: "flex",
+              justifyContent: "space-between",
+            }}
+          >
+            <Typography
+              color="grey.800"
+              sx={{ p: 1, ml: 2, fontFamily: "Tahoma" }}
+              variant="h5"
             >
-              <AddToCartButton product={product} />
-            </Grid>
+              {priceToCurrency(product.product_price)}
+            </Typography>
+            {!isUserProduct && (
+              <Button onClick={() => navigate(`/products/${product._id}`)}>
+                View
+              </Button>
+            )}
           </Grid>
-        </Box>
+
+          <Grid
+            item
+            width="100%"
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "center",
+              alignItems: "center",
+            }}
+          >
+            <AddToCartButton product={product} />
+          </Grid>
+        </Grid>
       </Card>
     </>
   );

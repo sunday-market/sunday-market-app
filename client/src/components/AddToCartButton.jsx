@@ -116,26 +116,28 @@ const AddToCartButton = ({ product }) => {
         }}
       >
         {isUserProduct ? (
-          <Box sx={{ marginBottom: 2 }}>
-            <Button
-              variant="contained"
-              size="small"
-              onClick={() => navigate(`/products/${product._id}`)}
-              sx={{ marginRight: 1 }}
-            >
-              View
-            </Button>
-            <Button
-              variant="outlined"
-              size="small"
-              onClick={() => navigate(`/account/products/edit/${product._id}`)}
-            >
-              Edit
-            </Button>
-          </Box>
+          <Grid container direction="column" align="center">
+            <Grid item>
+              <Button
+                variant="contained"
+                onClick={() => navigate(`/products/${product._id}`)}
+                sx={{ marginRight: 1 }}
+              >
+                View
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() =>
+                  navigate(`/account/products/edit/${product._id}`)
+                }
+              >
+                Edit
+              </Button>
+            </Grid>
+          </Grid>
         ) : (
           <>
-            <Grid container direction="column" align="center" p={1}>
+            <Grid container direction="column" align="center">
               <Grid item>
                 {counter <= 0 ? (
                   <Button
@@ -157,14 +159,13 @@ const AddToCartButton = ({ product }) => {
                           <InputAdornment position="end">ea.</InputAdornment>
                         ),
                       }}
-                      sx={{ width: "12ch", textAlign: "center" }}
+                      sx={{ width: "10ch", textAlign: "center" }}
                     >
                       {counter}
                     </TextField>
                     <Button
                       disabled={request}
                       variant="contained"
-                      margin={1}
                       onClick={decrementQuantity}
                     >
                       -
@@ -172,7 +173,6 @@ const AddToCartButton = ({ product }) => {
                     <Button
                       variant="contained"
                       disabled={quantityInStock <= 0 || request}
-                      margin={1}
                       onClick={incrementQuantity}
                     >
                       +
@@ -181,16 +181,17 @@ const AddToCartButton = ({ product }) => {
                 )}
               </Grid>
             </Grid>
-            <Typography
-              variant="body2"
-              color={quantityInStock <= 0 ? "red" : "grey.800"}
-            >
-              {quantityInStock <= 0
-                ? "Out of Stock"
-                : `Stock Remaining: ${quantityInStock}`}
-            </Typography>
           </>
         )}
+        <Typography
+          variant="body2"
+          p={1}
+          color={quantityInStock <= 0 ? "red" : "grey.800"}
+        >
+          {quantityInStock <= 0
+            ? "Out of Stock"
+            : `Stock Remaining: ${quantityInStock}`}
+        </Typography>
       </Grid>
     </>
   );
