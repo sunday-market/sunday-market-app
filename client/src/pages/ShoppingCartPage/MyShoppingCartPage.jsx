@@ -59,7 +59,11 @@ export default function MyShoppingCartPage() {
           const cartId = localStorage.getItem("shoppingCartId");
           const cart = await (
             await axios.get(`/api/cart/${cartId}`, config)
-          ).data[0];
+          )?.data[0];
+          if (cart === undefined || cart === null) {
+            localStorage.removeItem("shoppingCartId");
+            createNewCart();
+          }
 
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
           if (cart?.products_selected.length === 0 || !cart) {
@@ -109,7 +113,101 @@ export default function MyShoppingCartPage() {
     };
   }, []);
 
-  const deleteCart = async () => {
+  useEffect(() => {
+    const checkTimer = async () => {
+      if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
+        deleteCart();
+      } else if (minutes >= 0 && minutes <= 10) {
+        timerRef.current.style.color = "red";
+      } else if (minutes >= 10) {
+        timerRef.current.style.color = "green";
+      } else if (minutes + seconds < 0) {
+        deleteCart();
+      }
+    };
+    checkTimer();
+  }, [minutes, seconds]);
+
+  useEffect(() => {
+    const recreateCart = async () => {
+      if (!localStorage.getItem("shoppingCartId") && createCart) {
+        createNewCart();
+      }
+    };
+    recreateCart();
+  }, [createCart]);
+
+  // is user logged in and has a shopping cart
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (localStorage.getItem("authToken") && cartLoaded) {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
+      const loadUserIdToCart = async () => {
+        const controller = new AbortController();
+        const signal = controller.signal;
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          signal,
+        };
+        // get auth token and check if valid
+        const jwt = jwtDecode(localStorage.getItem("authToken"));
+        console.log(jwt);
+        try {
+          let res = await axios.get(`/api/user/exists/${jwt.id}`);
+          // if shopping cart === undefined then no user has been added to this shopping cart - if res is true procceed else if res is false delete token
+          if (
+            (shoppingCart.user === undefined || shoppingCart.user === null) &&
+            res &&
+            shoppingCartId
+          ) {
+            console.log("im attempting to load user into the cart");
+            // put user in data
+            const newCartData = {
+              user: jwt.id,
+              shoppingCart,
+            };
+            console.log(shoppingCartId);
+            res = await axios.put(`/api/cart/${shoppingCartId}`, newCartData);
+            // user doesn't exist
+          } else if (res === false) {
+            setTimeout(() => {
+              setError("");
+              localStorage.removeItem("authToken");
+              controller.abort();
+              return navigate("/login");
+            }, 5000);
+            errorRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+            return setError(
+              "Bad Authentication! your user doesn't appear to exist, you'll be redirected to login, please login and try again!"
+            );
+          }
+        } catch (error) {
+          setTimeout(() => {
+            setError("");
+          }, 5000);
+          errorRef.current.scrollIntoView({
+            behavior: "smooth",
+            block: "start",
+          });
+          return setError(error.response.data.error);
+        }
+      };
+      loadUserIdToCart();
+    }
+  }, [cartLoaded, navigate, shoppingCart, shoppingCartId]);
+
+  async function deleteCart() {
     let cartid = localStorage.getItem("shoppingCartId");
     await axios.put("/api/cart/clearcart/" + cartid);
     await axios.delete(`/api/cart/${cartid}`);
@@ -120,7 +218,7 @@ export default function MyShoppingCartPage() {
     setSelectedItems([]);
     localStorage.removeItem("shoppingCartId");
     setCreateCart(true);
-  };
+  }
 
   const createNewCart = async () => {
     const controller = new AbortController();
@@ -145,35 +243,12 @@ export default function MyShoppingCartPage() {
     // set shopping cart and load time
     setShoppingCart(cart);
     setCartLoaded(true);
+    console.log(`this is the new cart id ${newCartId}`);
     setShoppingCartId(newCartId);
     localStorage.setItem("shoppingCartId", newCartId);
     setCreateCart(false);
     controller.abort();
   };
-
-  useEffect(() => {
-    const checkTimer = async () => {
-      if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
-        deleteCart();
-      } else if (minutes >= 0 && minutes <= 10) {
-        timerRef.current.style.color = "red";
-      } else if (minutes >= 10) {
-        timerRef.current.style.color = "green";
-      } else if (minutes + seconds < 0) {
-        deleteCart();
-      }
-    };
-    checkTimer();
-  }, [minutes, seconds]);
-
-  useEffect(() => {
-    const recreateCart = async () => {
-      if (!localStorage.getItem("shoppingCartId") && createCart) {
-        createNewCart();
-      }
-    };
-    recreateCart();
-  }, [createCart]);
 
   useEffect(() => {
     if (shoppingCart) {

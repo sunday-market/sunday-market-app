@@ -36,6 +36,7 @@ export default function MessagePage(props) {
   useEffect(() => {
     socket.current = io("ws://localhost:8900");
     socket.current.on("getMessage", (data) => {
+      console.log(data);
       setArrivalMessage({
         send_user: data.senderId,
         message: data.sentMessage,
