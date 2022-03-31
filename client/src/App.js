@@ -113,7 +113,7 @@ function App() {
 
         <Route path="search">
           <Route path="category/:categoryId" element={<Category />} />
-          <Route path="category/results" element={<Results />} />
+          <Route path="results/" element={<Results />} />
         </Route>
 
         <Route path="*" element={<Error404 />} />
