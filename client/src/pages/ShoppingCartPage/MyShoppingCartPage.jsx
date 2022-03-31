@@ -344,6 +344,23 @@ export default function MyShoppingCartPage() {
     }
   };
 
+  const handlePurchase = async () => {
+    console.log("Purchase Pressed");
+    // check local storage id
+
+    // check id returns a valid cart
+
+    // update cart to avoid any possible deletion
+
+    // check user logged in - log user in if not
+
+    // if user logged in complete purchase creation (new transaction document)
+
+    // delete shopping cart and keep product qtys the same and minused
+
+    // navigate the user to a purchase complete page
+  };
+
   return (
     <>
       <Box p={2} boxShadow={1} m={2} bgcolor="grey.A200">
@@ -589,7 +606,7 @@ export default function MyShoppingCartPage() {
               justifyContent="center"
               alignContent={"center"}
             >
-              <Button variant="contained" fullWidth>
+              <Button variant="contained" fullWidth onClick={handlePurchase}>
                 Purchase
               </Button>
             </Grid>
