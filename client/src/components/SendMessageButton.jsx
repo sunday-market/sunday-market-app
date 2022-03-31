@@ -12,14 +12,14 @@ const SendMessageButton = (props) => {
 
   const navigate = useNavigate();
 
-  // Set Stall Button
+  // Set Default Message Button Text
   useEffect(() => {
-    if (stall) {
-      return setButtonName("Message Stall");
-    }
-
     if (user) {
       return setButtonName("Message User");
+    }
+
+    if (stall) {
+      return setButtonName("Message Stall");
     }
   }, [stall, user]);
 
@@ -88,7 +88,7 @@ const SendMessageButton = (props) => {
       signal: controller.signal,
     };
 
-    //Send message to a Stall
+    //Send message to/from a Stall
     if (stall) {
       let stalls;
 
