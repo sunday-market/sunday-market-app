@@ -9,8 +9,6 @@ import {
   Button,
 } from "@mui/material";
 
-import jwtDecode from "jwt-decode";
-
 import { Article as ArticleIcon } from "@mui/icons-material";
 
 import SendMessageButton from "../SendMessageButton";

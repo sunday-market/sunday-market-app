@@ -13,9 +13,14 @@ import {
   CardMedia,
 } from "@mui/material";
 
+import SendMessageButton from "../../components/SendMessageButton";
+
 import { priceToCurrency } from "../../utils/currency";
 const ReceivedOrder = () => {
   const [order, setOrder] = useState({});
+  const [user, setUser] = useState({});
+  const [stall, setStall] = useState({});
+
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -75,6 +80,19 @@ const ReceivedOrder = () => {
       controller.abort();
     };
   }, [orderid, navigate]);
+
+  // Set User and Stall data to correct format
+  // for SendMessageButton component
+  useEffect(() => {
+    setUser({
+      _id: order?.customer?.id,
+    });
+
+    setStall({
+      _id: order?.stall?.id,
+      stallName: order?.stall?.name,
+    });
+  }, [order]);
 
   return (
     <Box p={{ xs: 1, sm: 2, md: 4 }}>
@@ -156,9 +174,9 @@ const ReceivedOrder = () => {
                 </Grid>
                 <Grid item>
                   <Box textAlign="right" pt={2}>
-                    <Button variant="contained" size="small">
+                    <SendMessageButton stall={stall} user={user}>
                       Contact Customer
-                    </Button>
+                    </SendMessageButton>
                   </Box>
                 </Grid>
               </Grid>

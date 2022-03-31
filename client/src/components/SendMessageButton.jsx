@@ -7,21 +7,9 @@ import { Button } from "@mui/material";
 
 const SendMessageButton = (props) => {
   const { children, variant, user, stall } = props;
-  const [buttonName, setButtonName] = useState("Message");
   const [currentUser, setCurrentUser] = useState(undefined);
 
   const navigate = useNavigate();
-
-  // Set Default Message Button Text
-  useEffect(() => {
-    if (stall && user) {
-      setButtonName("Message User");
-    } else if (!stall) {
-      setButtonName("Message User");
-    } else {
-      setButtonName("Message Stall");
-    }
-  }, [stall, user]);
 
   // Set Current User
   useEffect(() => {
@@ -151,7 +139,7 @@ const SendMessageButton = (props) => {
         variant={variant || "contained"}
         onClick={(e) => handleOnClick(e)}
       >
-        {children || buttonName}
+        {children || "Message"}
       </Button>
     </>
   );
