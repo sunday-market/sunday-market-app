@@ -7,19 +7,19 @@ import { Button } from "@mui/material";
 
 const SendMessageButton = (props) => {
   const { children, variant, user, stall } = props;
-  const [buttonName, setButtonName] = useState();
+  const [buttonName, setButtonName] = useState("Message");
   const [currentUser, setCurrentUser] = useState(undefined);
 
   const navigate = useNavigate();
 
   // Set Default Message Button Text
   useEffect(() => {
-    if (user) {
-      return setButtonName("Message User");
-    }
-
-    if (stall) {
-      return setButtonName("Message Stall");
+    if (stall && user) {
+      setButtonName("Message User");
+    } else if (!stall) {
+      setButtonName("Message User");
+    } else {
+      setButtonName("Message Stall");
     }
   }, [stall, user]);
 
@@ -121,7 +121,6 @@ const SendMessageButton = (props) => {
             return new Error(error.message);
           });
       } else {
-
         // User has messaged the stall previsouly
         // Get the previous thread
         const threads = stalls.filter((thread) => {
