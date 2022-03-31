@@ -5,6 +5,7 @@ import axios from "axios";
 import { Alert, Button, Typography, Divider, CardMedia } from "@mui/material";
 import { Box, Grid } from "@mui/material";
 import AddToCartButton from "../../components/AddToCartButton";
+import SendMessageButton from "../../components/SendMessageButton";
 
 import { priceToCurrency } from "../../utils/currency";
 
@@ -12,9 +13,6 @@ const ViewProduct = () => {
   const [product, setProduct] = useState([]);
   const [stall, setStall] = useState([]);
   const [error, setError] = useState("");
-
-  const [counter, setCounter] = useState(0);
-  const [quantityInStock, setQuantityInStock] = useState(0);
 
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -37,8 +35,6 @@ const ViewProduct = () => {
         );
         setProduct(productData.data[0]);
 
-        setQuantityInStock(productData.data.quantity_in_stock);
-
         // Get Stall Information
         const stallData = await axios.get(
           `/api/stalls/${productData.data[0].product_stall}`
@@ -53,16 +49,6 @@ const ViewProduct = () => {
       }
     })();
   }, [navigate, productId]);
-
-  const incrementQuantity = () => {
-    setCounter(counter + 1);
-    setQuantityInStock(quantityInStock - 1);
-  };
-
-  const decrementQuantity = () => {
-    setCounter(counter - 1);
-    setQuantityInStock(quantityInStock + 1);
-  };
 
   return (
     <Box p={2}>
@@ -156,7 +142,7 @@ const ViewProduct = () => {
                   >
                     View
                   </Button>
-                  <Button variant="outlined">Contact</Button>
+                  <SendMessageButton stall={stall} />
                 </Box>
               </Box>
 
