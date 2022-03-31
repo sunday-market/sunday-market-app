@@ -22,13 +22,14 @@ import {
   InputAdornment,
   Menu,
   MenuItem,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
+import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
 import { useNavigate, NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { refType } from "@mui/utils";
+import React, { useEffect, useState } from "react";
 
 // IMPORTANT
 // Navbar still needs to adjust for smaller screens
@@ -45,6 +46,8 @@ export default function Navbar() {
   const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
   const [selectedItems, setSelectedItems] = useState([]);
   const [cartLoaded, setCartLoaded] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
 
   // store shopping cart id in local storage for data preseverance,
   // create one if not already assigned
@@ -253,23 +256,38 @@ export default function Navbar() {
   };
 
   const navigateToOrdersRecieved = () => {
-    navigate("/account/ordersrecieved");
+    navigate("/account/orders/received");
   };
 
   const navigateToMyOrders = () => {
-    navigate("/accounts/myorders");
+    navigate("/account/orders/myorders");
   };
 
   const navigateToMyProducts = () => {
     navigate("/account/products/myproducts");
   };
 
+  const [searchError, setSearchError] = useState("");
+  const [openSearchError, setOpenSearchError] = useState(false);
+
+  const handleSearchErrorClose = () => {
+    setOpenSearchError(false);
+  };
+
+  const ErrorAlert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
   // Search submit
-  const onSearchSubmit = (e) => {
-    console.log(e.key);
+  const onSearchSubmit = async (e) => {
     if (e.key === "Enter") {
-      console.log(`Search submit`);
-      console.log(e.target.value);
+      if (searchQuery.trim().length < 2) {
+        setSearchError("Search term must be at least 2 characters");
+        setOpenSearchError(true);
+        return setSearchQuery(searchQuery.trim());
+      }
+
+      navigate(`/search/results/?q=${searchQuery.trim()}`);
     }
   };
 
@@ -305,6 +323,21 @@ export default function Navbar() {
           flexDirection: "row",
         }}
       >
+        <Snackbar
+          open={openSearchError}
+          autoHideDuration={6000}
+          onClose={handleSearchErrorClose}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <ErrorAlert
+            onClose={handleSearchErrorClose}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {searchError}
+          </ErrorAlert>
+        </Snackbar>
+
         <Grid
           container
           direction={"row"}
@@ -350,8 +383,10 @@ export default function Navbar() {
                   ),
                 }}
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={onSearchSubmit}
-              ></TextField>
+              />
             </Grid>
           )}
           {/* Icon menu */}
