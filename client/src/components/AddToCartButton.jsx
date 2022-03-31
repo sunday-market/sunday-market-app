@@ -97,8 +97,10 @@ const AddToCartButton = ({ product }) => {
   // Check if the current user is selling this product
   useEffect(() => {
     (async () => {
-      const authToken = jwtDecode(localStorage.getItem("authToken"));
-      setIsUserProduct(authToken.id === product.product_user);
+      if (localStorage.getItem("authToken")) {
+        const authToken = jwtDecode(localStorage.getItem("authToken"));
+        setIsUserProduct(authToken.id === product.product_user);
+      }
     })();
   }, [product.product_user]);
 
