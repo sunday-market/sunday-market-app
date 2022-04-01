@@ -1,5 +1,6 @@
 import PrivateRoute from "./Routing/PrivateRoute";
 import LandingPage from "./pages/LandingPage/LandingPage";
+import Support from "./pages/Support";
 
 // Authentication Pages
 import RegisterPage from "./pages/Authentication/RegisterPage";
@@ -118,6 +119,9 @@ function App() {
           <Route path="category/:categoryId" element={<Category />} />
           <Route path="results/" element={<Results />} />
         </Route>
+
+        <Route path="/support" element={<Support />} /> 
+
 
         <Route path="*" element={<Error404 />} />
       </Routes>

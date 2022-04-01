@@ -9,6 +9,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import ProductionQuantityLimitsOutlinedIcon from "@mui/icons-material/ProductionQuantityLimitsOutlined"; // This is for when a timer on the cart is going to run out
 import ShoppingCartTwoToneIcon from "@mui/icons-material/ShoppingCartTwoTone";
+
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+
 import PersonIcon from "@mui/icons-material/Person";
 import FilterAltRoundedIcon from "@mui/icons-material/FilterAltRounded";
 import { useIsMobileScreen } from "../hooks/useIsMobileScreen";
@@ -435,7 +438,7 @@ export default function Navbar() {
               <AccountCircleRoundedIcon
                 sx={{
                   transform: "scale(2)",
-                  color: "#eceff1",
+                  color: "white",
                   margin: "auto",
                 }}
               />
@@ -444,6 +447,19 @@ export default function Navbar() {
               sx={{ fontSize: "12px", color: "white", pl: 1.5, margin: "auto" }}
             >
               Account
+            </Typography>
+          </Grid>
+
+          {/* Help Icon  */}
+          <Grid
+            item
+            p={1}
+            justifyContent="center"
+            alignItems="center"
+          >
+            <HelpOutlineIcon style={{ fontSize: 55, color: "white" }} />
+            <Typography variant="body2" color="white">
+              Support
             </Typography>
           </Grid>
 
