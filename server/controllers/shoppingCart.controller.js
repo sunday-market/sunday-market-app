@@ -95,6 +95,7 @@ exports.updateShoppingCart = async (req, res, next) => {
   }
 
   try {
+    console.log(req.body);
     await ShoppingCart.findByIdAndUpdate(cartid, req.body);
     const updatedShoppingCart = await ShoppingCart.find({ _id: cartid });
     res.status(200).json({

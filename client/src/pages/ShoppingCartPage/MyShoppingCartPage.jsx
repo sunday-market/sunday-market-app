@@ -124,15 +124,18 @@ export default function MyShoppingCartPage() {
         },
         signal,
       };
+      let cartId;
+      let cart;
       // check for cart still existing in the database
-      const cartId = localStorage.getItem("shoppingCartId");
-      const cart = await (
-        await axios.get(`/api/cart/${cartId}`, config)
-      )?.data[0];
+      if (localStorage.getItem("shoppingCartId")) {
+        cartId = localStorage.getItem("shoppingCartId");
+        cart = await (await axios.get(`/api/cart/${cartId}`, config))?.data[0];
+      }
       if (cart === undefined || cart === null) {
         // if null or undefined the cart no longer exists
         console.log("creating cart in timer");
         localStorage.removeItem("shoppingCartId");
+        createNewCart();
       }
       // timer check
       if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
@@ -177,6 +180,7 @@ export default function MyShoppingCartPage() {
         console.log(jwt);
         try {
           let res = await axios.get(`/api/user/exists/${jwt.id}`);
+          console.log(shoppingCart);
           // if shopping cart === undefined then no user has been added to this shopping cart - if res is true procceed else if res is false delete token
           if (
             (shoppingCart.user === undefined || shoppingCart.user === null) &&
@@ -368,20 +372,88 @@ export default function MyShoppingCartPage() {
   };
 
   const handlePurchase = async () => {
+    let cart;
+    let cartId;
     console.log("Purchase Pressed");
     // check local storage id
-
+    if (!localStorage.getItem("shoppingCartId")) {
+      console.log("no cart id exists");
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return setError("Your Cart doesn't appear to exist anymore.");
+    }
     // check id returns a valid cart
+    else {
+      cartId = localStorage.getItem("shoppingCartId");
+      try {
+        cart = await (await axios.get(`/api/cart/${cartId}`)).data[0];
+      } catch (error) {
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        return setError(error.response.data.error);
+      }
+    }
+    if (!cart) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return setError(
+        "Your Cart ID doesn't Match any cart in the database try refreshing your page or add items to the cart, if the problem persists please contact the support team"
+      );
+    }
+    console.log(cart);
 
+    // check cart length
+    if (cart.products_selected.length === 0) {
+      setTimeout(() => {
+        setError("");
+      }, 5000);
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return setError("Your Cart doesn't have any items in it!");
+    }
     // update cart to avoid any possible deletion
+    await axios.put(`/api/cart/${cartId}`, cart);
 
     // check user logged in - log user in if not
-
+    if (!localStorage.getItem("authToken")) {
+      // user has no auth token so not logged in
+      setTimeout(() => {
+        setError("");
+        navigate("/login");
+      }, 5000);
+      errorRef.current.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+      return setError(
+        "You are not logged in! Redirecting you to the Login Page, don't worry your cart is safe and valid for another 30minutes."
+      );
+    }
     // if user logged in complete purchase creation (new transaction document)
-
-    // delete shopping cart and keep product qtys the same and minused
-
-    // navigate the user to a purchase complete page
+    else {
+      // TODO
+      // delete shopping cart and keep product qtys the same and minused
+      // await axios.delete(`/api/cart/${cartId}`);
+      // navigate the user to a purchase complete page
+      return console.log("purchase successful");
+    }
   };
 
   return (
@@ -588,7 +660,7 @@ export default function MyShoppingCartPage() {
               justifySelf={"end"}
             >
               <Typography textAlign="end">
-                ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
+                ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "0.00"}
               </Typography>
             </Grid>
           </Grid>
