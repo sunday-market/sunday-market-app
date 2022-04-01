@@ -48,12 +48,10 @@ exports.getTransactionsByUserId = async (req, res, next) => {
       )
     );
   }
-  console.log(req.params.userId);
   try {
     const transactions = await Transaction.find({
       customer_id: req.params.userId,
     });
-    console.log(transactions);
     if (!transactions) {
       return next(new ErrorResponse(`No Transactions Exists for this user `));
     }
@@ -67,7 +65,6 @@ exports.getTransactionsByUserId = async (req, res, next) => {
 // Post new Transaction
 exports.createNewTransaction = async (req, res, next) => {
   try {
-    console.log(req.body);
     const transaction = await Transaction.create(req.body);
     res.status(200).json({
       success: true,

@@ -215,6 +215,9 @@ exports.removeItemInCart = async (req, res, next) => {
   }
 };
 
+
+
+
 // loop through and delete all unused carts function
 async function clearOldCarts() {
   console.log("Clensing Database started");
