@@ -31,7 +31,7 @@ import {
 } from "@mui/material";
 import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
-import { useNavigate, NavLink } from "react-router-dom";
+import { useNavigate, NavLink, Outlet } from "react-router-dom";
 import React, { useEffect, useState } from "react";
 
 // IMPORTANT
@@ -451,13 +451,11 @@ export default function Navbar() {
           </Grid>
 
           {/* Help Icon  */}
-          <Grid
-            item
-            p={1}
-            justifyContent="center"
-            alignItems="center"
-          >
-            <HelpOutlineIcon style={{ fontSize: 55, color: "white" }} />
+          <Grid item p={1} justifyContent="center" alignItems="center">
+            <HelpOutlineIcon
+              style={{ fontSize: 55, color: "white" }}
+              onClick={() => navigate("/support")}
+            />
             <Typography variant="body2" color="white">
               Support
             </Typography>
@@ -865,6 +863,7 @@ export default function Navbar() {
           </Button>
         </Box>
       </Menu>
+      <Outlet />
     </>
   );
 }
