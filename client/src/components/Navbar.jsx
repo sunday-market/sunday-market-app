@@ -863,7 +863,7 @@ export default function Navbar() {
           </Button>
         </Box>
       </Menu>
-      <Outlet />
+      {/* <Outlet /> */}
     </>
   );
 }

@@ -164,7 +164,7 @@ const LandingPage = () => {
             </Grid>
 
             {Array.from(Array(12)).map((_, index) => (
-              <Grid item sm={4} md={3} lg={2} p={3}>
+              <Grid item sm={4} md={3} lg={2} p={3} key={index}>
                 <CategoryAvatars />
               </Grid>
             ))}

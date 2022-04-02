@@ -50,20 +50,20 @@ import PageContainer from "./components/PageContainer";
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import Site from "./pages/Site";
 import Navbar from "./components/Navbar";
 
 function App() {
   return (
     <Router>
       <Routes>
-        <Route element={<Navbar />}>
+        <Route element={<Site />}>
           {/* Private Routes  */}
           <Route element={<PrivateRoute />}>
             <Route path="account" element={<MyAccountPage />}>
               <Route path="/account" element={<AccountDetailsPage />} />
               <Route path="myaccount" element={<AccountDetailsPage />} />
 
-              {/* Products Pages  */}
               <Route path="products">
                 <Route path="myproducts" element={<MyProducts />} />
                 <Route path="add" element={<AddProduct />} />

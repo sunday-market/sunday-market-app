@@ -4,13 +4,12 @@ const PageLoading = () => {
   return (
     <Box
       display="flex"
-      direction="row"
       justifyContent="center"
       alignItems="center"
       height="50vh"
       width="100%"
     >
-      <CircularProgress/>
+      <CircularProgress />
     </Box>
   );
 };
