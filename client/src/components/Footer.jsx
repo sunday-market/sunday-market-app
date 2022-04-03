@@ -1,32 +1,11 @@
-import React, { useEffect, useState } from "react";
+import { useContext } from "react";
 import { Link } from "react-router-dom";
 import { Box, Grid, Typography } from "@mui/material";
-import axios from "axios";
 
-const Footer = ({ setError }) => {
-  const [categories, setCategories] = useState();
+import DataContext from "../context/DataContext";
 
-  useEffect(() => {
-    const controller = new AbortController();
-
-    if (!categories) {
-      (async () => {
-        await axios
-          .get("/api/category")
-          .then((result) => {
-            setCategories(result.data);
-          })
-          .catch((error) => {
-            setError(error.response.data.error);
-            controller.abort();
-          });
-      })();
-    }
-
-    return () => {
-      controller.abort();
-    };
-  }, [categories, setError]);
+const Footer = () => {
+  const { categories } = useContext(DataContext);
 
   return (
     <Box component="footer" sx={{ backgroundColor: "#0288d1", color: "white" }}>

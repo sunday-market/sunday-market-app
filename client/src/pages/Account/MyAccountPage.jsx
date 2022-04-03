@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 
-import { Box, Grid, Button } from "@mui/material";
+import { Grid, Button } from "@mui/material";
 
 import {
   PersonOutlined as AccountDetailsIcon,
@@ -15,6 +15,7 @@ import PageContainer from "../../components/PageContainer";
 
 const AccountPage = () => {
   const navigate = useNavigate();
+
   const [detailsButton, setDetailsButton] = useState("outlined");
   const [myStallsButton, setMyStallsButton] = useState("outlined");
   const [myProductsButton, setMyProductsButton] = useState("outlined");

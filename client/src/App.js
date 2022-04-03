@@ -51,84 +51,87 @@ import PageContainer from "./components/PageContainer";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
 import Site from "./pages/Site";
-import Navbar from "./components/Navbar";
+
+import { DataProvider } from "./context/DataContext";
 
 function App() {
   return (
-    <Router>
-      <Routes>
-        <Route element={<Site />}>
-          {/* Private Routes  */}
-          <Route element={<PrivateRoute />}>
-            <Route path="account" element={<MyAccountPage />}>
-              <Route path="/account" element={<AccountDetailsPage />} />
-              <Route path="myaccount" element={<AccountDetailsPage />} />
+    <DataProvider>
+      <Router>
+        <Routes>
+          <Route element={<Site />}>
+            {/* Private Routes  */}
+            <Route element={<PrivateRoute />}>
+              <Route path="account" element={<MyAccountPage />}>
+                <Route path="/account" element={<AccountDetailsPage />} />
+                <Route path="myaccount" element={<AccountDetailsPage />} />
 
-              <Route path="products">
-                <Route path="myproducts" element={<MyProducts />} />
-                <Route path="add" element={<AddProduct />} />
-                <Route path="edit/:productId" element={<EditProduct />} />
+                <Route path="products">
+                  <Route path="myproducts" element={<MyProducts />} />
+                  <Route path="add" element={<AddProduct />} />
+                  <Route path="edit/:productId" element={<EditProduct />} />
+                </Route>
+
+                <Route path="stalls">
+                  <Route path="mystalls" element={<MyStallsPage />} />
+                  <Route path="addstall" element={<AddMyStallPage />} />
+                  <Route
+                    path="editstall/:stallID"
+                    element={<EditMyStallPage />}
+                  />
+                </Route>
+
+                <Route path="orders">
+                  <Route path="myorders" element={<MyOrders />} />
+                  <Route path="received" element={<ReceivedOrders />} />
+                  <Route path="received/:orderid" element={<ReceivedOrder />} />
+                  <Route path=":orderid" element={<Order />} />
+                </Route>
+
+                <Route path="messages" element={<MessagePage />}></Route>
               </Route>
-
-              <Route path="stalls">
-                <Route path="mystalls" element={<MyStallsPage />} />
-                <Route path="addstall" element={<AddMyStallPage />} />
-                <Route
-                  path="editstall/:stallID"
-                  element={<EditMyStallPage />}
-                />
-              </Route>
-
-              <Route path="orders">
-                <Route path="myorders" element={<MyOrders />} />
-                <Route path="received" element={<ReceivedOrders />} />
-                <Route path="received/:orderid" element={<ReceivedOrder />} />
-                <Route path=":orderid" element={<Order />} />
-              </Route>
-
-              <Route path="messages" element={<MessagePage />}></Route>
             </Route>
+
+            {/* Public Routes  */}
+            <Route path="/" element={<LandingPage />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+            <Route
+              path="/verify/:verificationToken"
+              element={<AccountConfirmTokenPage />}
+            />
+            <Route path="/accountverify" element={<AccountVerifyPage />} />
+            <Route path="/accountdeleted" element={<AccountDeletedPage />} />
+            <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
+            <Route
+              path="/passwordreset/:resetToken"
+              element={<PasswordResetPage />}
+            />
+
+            <Route path="products" element={<PageContainer />}>
+              <Route path=":productId" element={<ViewProduct />} />
+            </Route>
+
+            <Route path="stalls" element={<PageContainer />}>
+              <Route path="viewstall/:stallID" element={<ViewStallPage />} />
+            </Route>
+
+            <Route path="shoppingcart">
+              <Route path="myshoppingcart" element={<MyShoppingCartPage />} />
+            </Route>
+
+            <Route path="search">
+              <Route path="category/:categoryId" element={<Category />} />
+              <Route path="results/" element={<Results />} />
+            </Route>
+
+            <Route path="/support" element={<Support />} />
+
+            <Route path="*" element={<Error404 />} />
           </Route>
-
-          {/* Public Routes  */}
-          <Route path="/" element={<LandingPage />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/register" element={<RegisterPage />} />
-          <Route
-            path="/verify/:verificationToken"
-            element={<AccountConfirmTokenPage />}
-          />
-          <Route path="/accountverify" element={<AccountVerifyPage />} />
-          <Route path="/accountdeleted" element={<AccountDeletedPage />} />
-          <Route path="/forgotpassword" element={<ForgotPasswordPage />} />
-          <Route
-            path="/passwordreset/:resetToken"
-            element={<PasswordResetPage />}
-          />
-
-          <Route path="products" element={<PageContainer />}>
-            <Route path=":productId" element={<ViewProduct />} />
-          </Route>
-
-          <Route path="stalls" element={<PageContainer />}>
-            <Route path="viewstall/:stallID" element={<ViewStallPage />} />
-          </Route>
-
-          <Route path="shoppingcart">
-            <Route path="myshoppingcart" element={<MyShoppingCartPage />} />
-          </Route>
-
-          <Route path="search">
-            <Route path="category/:categoryId" element={<Category />} />
-            <Route path="results/" element={<Results />} />
-          </Route>
-
-          <Route path="/support" element={<Support />} />
-
-          <Route path="*" element={<Error404 />} />
-        </Route>
-      </Routes>
-    </Router>
+        </Routes>
+      </Router>
+    </DataProvider>
   );
 }
 

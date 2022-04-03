@@ -1,5 +1,5 @@
 import { Grid } from "@mui/material";
-import React from "react";
+import { useContext } from "react";
 import { useNavigate } from "react-router";
 
 // Navigation Icons
@@ -17,7 +17,10 @@ import { TextField, Typography, InputAdornment } from "@mui/material";
 import Logo from "../../assets/logo-transparent.png";
 import { Box } from "@mui/system";
 
+import DataContext from "../../context/DataContext";
+
 const Navigation = () => {
+  const { categories, loggedInUser, shoppingCart } = useContext(DataContext);
   const navigate = useNavigate();
 
   return (
@@ -64,33 +67,40 @@ const Navigation = () => {
         {/* Categories */}
         <Grid item xs={1}>
           <FilterAltRoundedIcon
-            style={{ fontSize: 50, color: "white" }}
+            style={{ fontSize: 45, color: "white" }}
             onClick={() => navigate("/support")}
           />
-          <Typography variant="body1" color="white">
+          <Typography variant="body2" color="white">
             Categories
           </Typography>
         </Grid>
 
         {/* Account */}
         <Grid item xs={1}>
-          <AccountCircleRoundedIcon style={{ fontSize: 50, color: "white" }} />
-          <Typography variant="body1" color="white">
-            Account
+          <AccountCircleRoundedIcon style={{ fontSize: 45, color: "white" }} />
+          <Typography variant="body2" color="white">
+            {loggedInUser ? loggedInUser.username : "Account"}
+            <br />
+            {loggedInUser && loggedInUser.fullname}
           </Typography>
         </Grid>
 
         {/* Help */}
         <Grid item xs={1}>
-          <HelpOutlineIcon style={{ fontSize: 50, color: "white" }} />
-          <Typography variant="body1" color="white">
+          <HelpOutlineIcon style={{ fontSize: 45, color: "white" }} />
+          <Typography variant="body2" color="white">
             Support
           </Typography>
         </Grid>
 
         {/* Categories */}
         <Grid item xs={1}>
-          Shopping Cart
+          <Typography variant="body2" color="white">
+            Shopping Cart
+          </Typography>
+          <Typography variant="body2" color="white">
+            Total Items: {shoppingCart?.products_selected.length}
+          </Typography>
         </Grid>
       </Grid>
 

@@ -14,16 +14,7 @@ exports.getUserById = async (req, res, next) => {
 
     res.status(200).json({
       success: true,
-      data: {
-        id: user._id,
-        username: user.username,
-        fullname: user.fullname,
-        email: user.email,
-        addressLine1: user.address_line1,
-        addressLine2: user.address_line2,
-        addressLine3: user.address_line3,
-        phone: user.phone,
-      },
+      data: user,
     });
   } catch (error) {
     return next(error);
@@ -64,20 +55,9 @@ exports.deleteUser = async (req, res, next) => {
 
 exports.updateUser = async (req, res, next) => {
   const { userId } = req.params;
-  const data = req.body;
 
   try {
-    await User.updateOne(
-      { _id: userId },
-      {
-        fullname: data.fullname,
-        address_line1: data.address_line1,
-        address_line2: data.address_line2,
-        address_line3: data.address_line3,
-        phone: data.phone,
-        email: data.email,
-      }
-    );
+    await User.updateOne({ _id: userId }, { ...req.body });
 
     res.status(200).json({
       success: true,
