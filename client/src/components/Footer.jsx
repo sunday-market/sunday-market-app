@@ -8,7 +8,11 @@ const Footer = () => {
   const { categories } = useContext(DataContext);
 
   return (
-    <Box component="footer" sx={{ backgroundColor: "#0288d1", color: "white" }}>
+    <Box
+      component="footer"
+      mt={3}
+      sx={{ backgroundColor: "#0288d1", color: "white" }}
+    >
       <Grid container justifyContent="center" pt={4} textAlign="center">
         <Grid item xs={5} md={2} p={2} py={3}>
           <Typography variant="body1" sx={{ fontWeight: "bold" }}>

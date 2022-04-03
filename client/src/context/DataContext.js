@@ -46,7 +46,7 @@ export const DataProvider = ({ children }) => {
             setLoggedInUser(user.data.data);
           })
           .catch((error) => {
-            setError(error.response.data.error);
+            setError(error);
           });
       })();
     }
@@ -60,7 +60,10 @@ export const DataProvider = ({ children }) => {
       setLoading(true);
 
       if (localStorage.getItem("shoppingCartId")) {
-        console.log(localStorage.getItem("shoppingCartId"));
+        console.log(
+          "DataContext: Shopping Cart Id:",
+          localStorage.getItem("shoppingCartId")
+        );
         const config = {
           headers: {
             "Content-Type": "application/json",
@@ -76,7 +79,7 @@ export const DataProvider = ({ children }) => {
             controller.abort();
           })
           .catch((error) => {
-            setError(error.response.data);
+            setError(error);
           });
       }
     })();
@@ -107,7 +110,7 @@ export const DataProvider = ({ children }) => {
             setCategories(result.data);
           })
           .catch((error) => {
-            setError(error.response.data.error);
+            setError(error);
             controller.abort();
           });
       })();
