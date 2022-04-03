@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import axios from "axios";
 
@@ -7,6 +7,8 @@ import { Box, Paper, Button, Typography } from "@mui/material";
 import AccountVerifiedImage from "../../assets/accountverified.svg";
 import ErrorImage from "../../assets/error.svg";
 
+import DataContext from "../../context/DataContext";
+
 const AccountConfirmTokenPage = () => {
   const [verified, setVerified] = useState(false);
   const [fullName, setFullName] = useState("John");
@@ -14,25 +16,39 @@ const AccountConfirmTokenPage = () => {
   const navigate = useNavigate();
   const params = useParams();
 
+  const { setError, setLoading } = useContext(DataContext);
+
   useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+
     const confirmToken = async () => {
       try {
         const verificationToken = params.verificationToken;
-
         const user = await axios.put(`/api/auth/verify/${verificationToken}`, {
           headers: {
             "Content-Type": "application/json",
           },
+          signal: controller.signal,
         });
 
         setFullName(user.data.data.fullName);
         setVerified(true);
+        setLoading(false);
       } catch (error) {
+        setLoading(false);
+        if (axios.isCancel(error)) return;
         setVerified(false);
+        setError(error.response.data.error);
       }
     };
+
     confirmToken();
-  }, [params]);
+    setLoading(false);
+    return () => {
+      controller.abort();
+    };
+  }, [params, setLoading, setError]);
 
   return (
     <Box px={{ xs: 1, sm: 4, md: 8, lg: 20 }} py={4}>

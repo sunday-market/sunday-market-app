@@ -21,10 +21,12 @@ const Site = () => {
       {/* Outlet  */}
       <Box flex={1}>
         {error && (
-          <Alert severity="error">
-            <AlertTitle>Error</AlertTitle>
-            {error?.response?.data.error || error}
-          </Alert>
+          <>
+            <Alert severity="error">
+              <AlertTitle>Error</AlertTitle>
+              {error?.response?.data.error || error}
+            </Alert>
+          </>
         )}
 
         {success && (

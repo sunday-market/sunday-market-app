@@ -49,11 +49,8 @@ export const DataProvider = ({ children }) => {
             setLoggedInUser(user.data.data);
           })
           .catch((error) => {
+            if (axios.isCancel(error)) return;
             setError(error);
-            if (axios.isCancel(error)) {
-              return "Request Cancelled";
-            }
-            controller.abort();
           });
       })();
     }
@@ -87,15 +84,11 @@ export const DataProvider = ({ children }) => {
           .then((result) => {
             setShoppingCart(result.data[0]);
             console.log("DataContext: Shopping Cart", result.data[0]);
-            controller.abort();
           })
           .catch((error) => {
-            setError(error);
+            if (axios.isCancel(error)) return;
+            setError(error.response.data.error);
             setUpdateCart(false);
-            if (axios.isCancel(error)) {
-              return "Request Cancelled";
-            }
-            controller.abort();
           });
       }
     })();
@@ -127,10 +120,9 @@ export const DataProvider = ({ children }) => {
             setCategories(result.data);
           })
           .catch((error) => {
-            setError(error);
-            if (axios.isCancel(error)) {
-              return "Request Cancelled";
-            }
+            if (axios.isCancel(error)) return;
+            setError(error.response.data.error);
+
             controller.abort();
           });
       })();
@@ -156,6 +148,8 @@ export const DataProvider = ({ children }) => {
         setLoggedInUser,
         shoppingCart,
         setShoppingCart,
+        updateCart,
+        setUpdateCart,
       }}
     >
       {children}

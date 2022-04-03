@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router";
 import {
@@ -14,20 +14,26 @@ import {
 
 import { priceToCurrency } from "../../utils/currency";
 import AddToCartButton from "../../components/AddToCartButton";
+import DataContext from "../../context/DataContext";
 
 const ProductCard = ({ product }) => {
   const [isUserProduct, setIsUserProduct] = useState(false);
+  const { setError } = useContext(DataContext);
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
   const navigate = useNavigate();
 
   useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
-    if (authToken) {
-      const jwt = jwtDecode(localStorage.getItem("authToken"));
-      setIsUserProduct(jwt.id === product.product_user);
+    try {
+      const authToken = localStorage.getItem("authToken");
+      if (authToken) {
+        const jwt = jwtDecode(localStorage.getItem("authToken"));
+        setIsUserProduct(jwt.id === product.product_user);
+      }
+    } catch (error) {
+      setError(error.response.data.error);
     }
-  }, [product.product_user]);
+  }, [product.product_user, setError]);
 
   return (
     <>

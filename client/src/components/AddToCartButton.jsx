@@ -62,19 +62,15 @@ const AddToCartButton = ({ product }) => {
         setCounter(counter + 1);
         setQuantityInStock(quantityInStock - 1);
         setUpdateCart(true);
-        controller.abort();
       })
       .catch((error) => {
-        if (axios.isCancel(error)) {
-          return "axios request cancelled...";
-        }
-        setError(error);
+        if (axios.isCancel(error)) return;
+        setRequest(false);
+        setError(error.response.data.error);
       });
 
     setRequest(false);
-    return () => {
-      controller.abort();
-    };
+    return controller.abort();
   };
 
   const decrementQuantity = async () => {
@@ -99,20 +95,16 @@ const AddToCartButton = ({ product }) => {
         setCounter(counter - 1);
         setQuantityInStock(quantityInStock + 1);
         setUpdateCart(true);
-        controller.abort();
       })
       .catch((error) => {
-        if (axios.isCancel(error)) {
-          return "axios request cancelled...";
-        }
-        setError(error);
+        if (axios.isCancel(error)) return;
+        setRequest(false);
+        setError(error.response.data.error);
       });
 
     setRequest(false);
 
-    return () => {
-      controller.abort();
-    };
+    return controller.abort();
   };
 
   // Populate Product Qty
@@ -122,12 +114,10 @@ const AddToCartButton = ({ product }) => {
 
   // Check if the current user is selling this product
   useEffect(() => {
-    (async () => {
-      if (localStorage.getItem("authToken")) {
-        const authToken = jwtDecode(localStorage.getItem("authToken"));
-        setIsUserProduct(authToken.id === product.product_user);
-      }
-    })();
+    if (localStorage.getItem("authToken")) {
+      const authToken = jwtDecode(localStorage.getItem("authToken"));
+      setIsUserProduct(authToken.id === product.product_user);
+    }
   }, [product.product_user]);
 
   return (
