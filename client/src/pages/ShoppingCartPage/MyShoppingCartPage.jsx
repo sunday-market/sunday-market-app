@@ -173,7 +173,7 @@ export default function MyShoppingCartPage() {
           let res = await axios.get(`/api/user/exists/${jwt.id}`);
           // if shopping cart === undefined then no user has been added to this shopping cart - if res is true procceed else if res is false delete token
           if (
-            (shoppingCart.user === undefined || shoppingCart.user === null) &&
+            (shoppingCart?.user === undefined || shoppingCart?.user === null) &&
             res &&
             shoppingCartId
           ) {
@@ -204,6 +204,10 @@ export default function MyShoppingCartPage() {
             );
           }
         } catch (error) {
+          if (axios.isCancel(error)) {
+            console.log(error);
+            return console.log("Successfully Aborted");
+          }
           setTimeout(() => {
             setError("");
           }, 5000);
@@ -530,7 +534,7 @@ export default function MyShoppingCartPage() {
       localStorage.removeItem("shoppingCartId");
 
       // navigate the user to a my order page
-      return navigate("/account/orders/myorders")
+      return navigate("/account/orders/myorders");
     }
   };
 
