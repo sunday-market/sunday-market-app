@@ -25,14 +25,16 @@ export default function StallCard({
   const [currentUserId, setCurrentUserId] = useState(null);
   const navigate = useNavigate();
   const UpdateCard = async (e) => {
-    console.log("UpdateCard");
+    navigate(`/account/stalls/editstall/${cardId}`);
   };
   const CardDetails = async (e) => {
-    navigate(`/account/stalls/viewstall/${cardId}`);
+    navigate(`/stalls/viewstall/${cardId}`);
   };
   const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
   // get current user
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getCurrentUserId = async () => {
       if (localStorage.getItem("authToken")) {
         const config = {
@@ -40,12 +42,16 @@ export default function StallCard({
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
-          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const decodedJWT = jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
-          setCurrentUserId(user.data.data.id);
+          setCurrentUserId(user.data.data._id);
         } catch (error) {
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
@@ -54,6 +60,7 @@ export default function StallCard({
       }
     };
     getCurrentUserId();
+    return () => controller.abort();
   }, [navigate]);
   return (
     <>
@@ -127,7 +134,7 @@ export default function StallCard({
               gutterBottom
               align="center"
               variant="body2"
-              sx={{ backgroundColor: "#eeeeee" }}
+              sx={{ fontWeight: "bold" }}
             >
               {cardCategory}
             </Typography>
@@ -173,7 +180,7 @@ export default function StallCard({
                       pt: 0.5,
                       pb: 0.5,
                       margin: 0.5,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       fontFamily: "Tahoma",
                     }}
                     onClick={CardDetails}
@@ -188,7 +195,7 @@ export default function StallCard({
                       pt: 0.5,
                       pb: 0.5,
                       margin: 0.5,
-                      borderRadius: 2,
+                      borderRadius: 1,
                       fontFamily: "Tahoma",
                     }}
                     onClick={UpdateCard}
@@ -205,7 +212,7 @@ export default function StallCard({
                     pt: 0.5,
                     pb: 0.5,
                     margin: 0.5,
-                    borderRadius: 2,
+                    borderRadius: 1,
                     fontFamily: "Tahoma",
                   }}
                   onClick={CardDetails}

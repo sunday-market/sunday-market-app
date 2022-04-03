@@ -9,6 +9,7 @@ let users = [];
 
 // add user
 const addUser = (userId, socketId) => {
+  console.log(`This is socket ID: ${socketId}`);
   !users.some((user) => user.userId === userId) &&
     users.push({ userId, socketId });
 };

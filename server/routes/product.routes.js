@@ -33,9 +33,11 @@ const {
   getUserProducts,
   getAllActiveProducts,
   getStallProducts,
+  getRecentlyAddedProducts,
   addProduct,
   updateProduct,
   deleteProduct,
+  getProductsByCategory,
 } = require("../controllers/product.contollers");
 
 router
@@ -43,16 +45,19 @@ router
   .get(getAllProducts)
   .post(protect, upload.single("image"), addProduct);
 
-router.route("/active").get(protect, getAllActiveProducts);
+router.route("/active").get(getAllActiveProducts);
 
 router.route("/stall/:stallid").get(protect, getStallProducts);
 
+router.route("/recent").get(getRecentlyAddedProducts);
+
+router.route("/category/:categoryId").get(getProductsByCategory);
+
+router.route("/user/:userid").get(protect, getUserProducts);
 router
   .route("/:productid")
   .get(getProductById)
   .put(protect, upload.single("image"), updateProduct)
   .delete(protect, deleteProduct);
-
-router.route("/user/:userid").get(protect, getUserProducts);
 
 module.exports = router;

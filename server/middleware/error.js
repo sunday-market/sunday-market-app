@@ -17,11 +17,12 @@ const errorHandler = (err, erq, res, next) => {
     error = new ErrorResponse(message, 400);
   }
 
-  console.log("ERROR MIDDLEWARE: ", err.message);
+  console.log(`(${err.statusCode}) Server Error: `, err.message);
 
   res.status(error.statusCode || 500).json({
     success: false,
-    error: error.message || "Server Error",
+    error:
+      `(${error.statusCode}) Server Error: ${error.message}` || "Server Error",
   });
 };
 

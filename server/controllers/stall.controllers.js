@@ -1,5 +1,7 @@
 const Stall = require("../models/Stall");
 const ErrorResponse = require("../utils/errorResponse");
+const fs = require("fs");
+const path = require("path");
 
 // GETS
 // Get All Stalls
@@ -90,15 +92,6 @@ exports.updateStall = async (req, res, next) => {
   };
 
   try {
-    // check that no stall with the same name exists
-    const stall = await Stall.findOne({ stallName: req.body.stallName });
-    if (stall && stall._id.toString() !== stallID) {
-      return next(
-        new ErrorResponse(
-          "Stall with this name already exists!, please try another name."
-        )
-      );
-    }
     await Stall.findByIdAndUpdate(stallID, stallData);
     res.status(200).json({
       success: true,
@@ -115,6 +108,14 @@ exports.updateStall = async (req, res, next) => {
 exports.deleteStallByID = async (req, res, next) => {
   try {
     await Stall.deleteOne({ _id: req.params.stallid });
+    if (req.body.image !== "noimage.jpg") {
+      await fs.unlink(
+        path.resolve(`../server/public/images/stalls/${req.body.image}`),
+        (err) => {
+          if (err) next(err);
+        }
+      );
+    }
     res.status(200).json({
       success: true,
       message: `Successfullt removed stall with stall id: ${req.params.stallid}`,

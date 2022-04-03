@@ -6,6 +6,7 @@ import MailIcon from "@mui/icons-material/Mail";
 import { useParams } from "react-router-dom";
 import BuildIcon from "@mui/icons-material/Build";
 import jwt from "jwt-decode";
+import SendMessageButton from "../../components/SendMessageButton";
 
 export default function ViewStallPage() {
   const [currentUser, setCurrentUser] = useState(null);
@@ -24,7 +25,7 @@ export default function ViewStallPage() {
 
   // handle update button click
   const update = () => {
-    console.log("update clicked");
+    navigate(`/account/stalls/editstall/${stallid}`);
   };
 
   // error ref for scrolling
@@ -35,6 +36,9 @@ export default function ViewStallPage() {
 
   // Get stall info
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+
     if (stallid) {
       const getStall = async () => {
         try {
@@ -43,10 +47,14 @@ export default function ViewStallPage() {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
+            signal: signal,
           };
           const stallData = await axios.get(`/api/stalls/${stallid}`, config);
           setStall(stallData.data);
         } catch (err) {
+          if (axios.isCancel(err)) {
+            return console.log("Successfully Aborted");
+          }
           setError("No Stall Exists with that ID");
           setTimeout(() => {
             setError("");
@@ -55,10 +63,13 @@ export default function ViewStallPage() {
       };
       getStall();
     }
+    return () => controller.abort();
   }, [stallid]);
 
   // get current user
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getCurrentUser = async () => {
       if (localStorage.getItem("authToken")) {
         const config = {
@@ -66,25 +77,34 @@ export default function ViewStallPage() {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
-          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const decodedJWT = jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUser(user.data.data);
         } catch (error) {
-          console.log(error);
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
           }
         }
+      } else {
+        setCurrentUser(null);
       }
     };
     getCurrentUser();
+    return () => controller.abort();
   }, [navigate]);
 
   // Get stall user from stall info
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    let isApiSubscribed = true;
     if (stall.length !== 0) {
       const months = [
         "01",
@@ -105,30 +125,45 @@ export default function ViewStallPage() {
       const yearDate = new Date(stall[0].createdAt).getFullYear();
       setDate(`${dayDate}/${months[monthDate]}/${yearDate}`);
       const getUser = async (e) => {
-        // Set header for Axios requests
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        };
-        try {
-          const userID = stall[0].user;
-          const userData = await axios.get(`/api/user/${userID}`, config);
-          setUser(userData.data.data);
-        } catch (err) {
-          setError(
-            "User of this Stall can't be found can be found, please contact management"
-          );
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
+        if (localStorage.getItem("authToken")) {
+          // Set header for Axios requests
+          const config = {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+            },
+            signal,
+          };
+          try {
+            const userID = stall[0].user;
+            const userData = await axios.get(`/api/user/${userID}`, config);
+
+            if (isApiSubscribed) {
+              setUser(userData.data.data);
+            }
+          } catch (err) {
+            if (axios.isCancel(err)) {
+              return console.log("Successfully Aborted");
+            }
+            setError(
+              "User of this Stall can't be found can be found, please contact management"
+            );
+            errorRef.current.scrollIntoView({
+              behavior: "smooth",
+              block: "start",
+            });
+          }
         }
       };
+
       getUser();
     }
-  }, [stall, user]);
+    return () => {
+      controller.abort();
+      isApiSubscribed = false;
+    };
+  }, [stall]);
+
   useEffect(() => {
     const checkIfOwner = () => {
       if (user && currentUser) {
@@ -138,81 +173,6 @@ export default function ViewStallPage() {
     checkIfOwner();
   }, [user, currentUser]);
 
-  // new message
-  const handleNewMessage = async (e) => {
-    e.preventDefault();
-    console.log(`this is the user: ${user}`);
-    console.log(`this is the current user: ${currentUser}`);
-    if (user && currentUser) {
-      const messageThread = {
-        stall_name: stall[0].stallName,
-        send_user: currentUser.id,
-        recieve_user: user.id,
-      };
-      console.log(messageThread);
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        };
-        // check for messages already existing
-        let mesCheck = await axios.get(
-          `/api/messagethreads/${currentUser.id}`,
-          config
-        );
-        mesCheck = mesCheck.data;
-        let stateCheck = null;
-        mesCheck.forEach((mt) => {
-          if (messageThread.stall_name === mt.stall_name) {
-            if (
-              (messageThread.send_user === mt.message_members[0] &&
-                messageThread.recieve_user === mt.message_members[1]) ||
-              (messageThread.send_user === mt.message_members[1] &&
-                messageThread.recieve_user === mt.message_members[0])
-            ) {
-              console.log("true");
-              return (stateCheck = mt);
-            }
-          }
-        });
-        if (stateCheck) {
-          navigate("/account/messages", { state: stateCheck });
-        } else {
-          console.log("pass return wtf");
-          const res = await axios.post(
-            "/api/messagethreads/",
-            messageThread,
-            config
-          );
-          return navigate("/account/messages", { state: res.data });
-        }
-      } catch (error) {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          return navigate("/login");
-        }
-        setError("Unable to send new message.");
-        setTimeout(() => {
-          setError("");
-        }, 15000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-      }
-    } else {
-      setError(
-        "You are either not logged in or this stall has no user assigned to it, please contact management."
-      );
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }
-  };
-
   const stallLengthBool = stall.length > 0;
   return (
     <>
@@ -220,6 +180,7 @@ export default function ViewStallPage() {
         component="main"
         sx={{
           flexGrow: 1,
+          p: 2,
         }}
       >
         <Grid container spacing={0} justifyContent="center">
@@ -295,7 +256,7 @@ export default function ViewStallPage() {
                 alignItems: "center",
               }}
             >
-              {user && (
+              {user.length > 0 && (
                 <Typography
                   align="center"
                   color="textPrimary"
@@ -307,7 +268,7 @@ export default function ViewStallPage() {
                   Stall User:
                 </Typography>
               )}
-              {user && (
+              {user.length > 0 && (
                 <Typography align="center" color="textPrimary" variant="body2">
                   {user.username
                     ? user.username
@@ -416,22 +377,7 @@ export default function ViewStallPage() {
                     &nbsp;Update
                   </Button>
                 ) : (
-                  <Button
-                    variant="contained"
-                    sx={{
-                      pl: 1,
-                      pr: 1,
-                      pt: 0.5,
-                      pb: 0.5,
-                      margin: "auto",
-                      borderRadius: 1,
-                      fontFamily: "Tahoma",
-                    }}
-                    onClick={handleNewMessage}
-                  >
-                    <MailIcon />
-                    &nbsp;Instant Message
-                  </Button>
+                  <SendMessageButton stall={stall[0]} />
                 )}
               </Box>
             </Box>

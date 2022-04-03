@@ -16,7 +16,7 @@ router.route("/:orderId").get(protect, getOrderById);
 
 router.route("/user/:userId").get(protect, getUserOrders);
 router.route("/stall/:stallId").get(protect, getStallOrders);
-router.route("/received/:userId").get(getReceivedOrders);
+router.route("/received/:userId").get(protect, getReceivedOrders);
 
 router.route("/");
 

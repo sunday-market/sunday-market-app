@@ -1,6 +1,6 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router-dom";
-import jwt from "jwt-decode";
+import jwtDecode from "jwt-decode";
 import axios from "axios";
 
 import { Cancel, Delete, Edit, Save } from "@mui/icons-material";
@@ -17,41 +17,31 @@ import {
   Divider,
 } from "@mui/material";
 
+import DataContext from "../../context/DataContext";
+
 const AccountsPage = () => {
+  const { setLoading, error, setError, setSuccess } = useContext(DataContext);
+
+  const [tempUser, setTempUser] = useState({});
+
   const [username, setUsername] = useState("");
-
-  const [fullName, setFullName] = useState("");
-  const [fullNameTemp, setFullNameTemp] = useState("");
-
-  const [phone, setPhone] = useState("");
-  const [phoneTemp, setPhoneTemp] = useState("");
-
-  const [addressLine1, setAddressLine1] = useState("");
-  const [addressLine1Temp, setAddressLine1Temp] = useState("");
-  const [addressLine2, setAddressLine2] = useState("");
-  const [addressLine2Temp, setAddressLine2Temp] = useState("");
-  const [addressLine3, setAddressLine3] = useState("");
-  const [addressLine3Temp, setAddressLine3Temp] = useState("");
-
-  const [accountDetailsEdit, setAccountDetailsEdit] = useState(false);
-  const [accountDetailsError, setAccountDetailsError] = useState("");
-
+  const [fullname, setFullName] = useState("");
   const [email, setEmail] = useState("");
-  const [emailTemp, setEmailTemp] = useState("");
+  const [phone, setPhone] = useState("");
+  const [addressLine1, setAddressLine1] = useState("");
+  const [addressLine2, setAddressLine2] = useState("");
+  const [addressLine3, setAddressLine3] = useState("");
+
   const [newPassword, setNewPassword] = useState("");
   const [currentPassword, setCurrentPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const [changePasswordError, setChangePasswordError] = useState("");
-
-  const [success, setSuccess] = useState("");
-  const [passwordChangeSuccess, setPasswordChangeSuccess] = useState("");
-  const [error, setError] = useState("");
+  const [editAccount, setEditAccount] = useState(false);
 
   // Delete Account Modal State
-  const [openDeleteModal, setOpenDeleteModal] = useState(false);
-  const handleOpenDeleteModal = () => setOpenDeleteModal(true);
-  const handleCloseDeleteModal = () => setOpenDeleteModal(false);
+  const [openModal, setOpenModal] = useState(false);
+  const handleOpenModal = () => setOpenModal(true);
+  const handleCloseModal = () => setOpenModal(false);
 
   const modalStyle = {
     position: "absolute",
@@ -67,163 +57,166 @@ const AccountsPage = () => {
 
   const navigate = useNavigate();
 
+  // Get the User
   useEffect(() => {
-    if (localStorage.getItem("authToken")) {
-      const fetchCurrentUser = async () => {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        };
+    const controller = new AbortController();
+    setLoading(true);
 
-        try {
-          const decodedJWT = await jwt(localStorage.getItem("authToken"));
-          const currentUser = await axios.get(
-            `/api/user/${decodedJWT.id}`,
-            config
-          );
-
-          const user = currentUser.data.data;
-
-          setUsername(user.username || "");
-          setFullName(user.fullname || "");
-          setEmail(user.email || "");
-          setAddressLine1(user.addressLine1 || "");
-          setAddressLine2(user.addressLine2 || "");
-          setAddressLine3(user.addressLine3 || "");
-          setPhone(user.phone || "");
-        } catch (error) {
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            navigate("/login");
-          }
-          setError(error.response.data.error);
-
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-        }
+    (async () => {
+      const decodedJWT = jwtDecode(localStorage.getItem("authToken"));
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        signal: controller.signal,
       };
-      fetchCurrentUser();
-    }
-  }, [navigate]);
 
-  const editAccountDetailsHandler = () => {
-    setFullNameTemp(fullName);
-    setEmailTemp(email);
-    setAddressLine1Temp(addressLine1);
-    setAddressLine2Temp(addressLine2);
-    setAddressLine3Temp(addressLine3);
-    setPhoneTemp(phone);
+      await axios
+        .get(`/api/user/${decodedJWT.id}`, config)
+        .then((result) => {
+          const user = result.data.data;
 
-    setAccountDetailsEdit(!accountDetailsEdit);
+          setUsername(user?.username);
+          setFullName(user?.fullname);
+          setEmail(user?.email);
+          setPhone(user?.phone);
+          setAddressLine1(user?.address_line1);
+          setAddressLine2(user?.address_line2);
+          setAddressLine3(user?.address_line3);
+        })
+        .catch((error) => {
+          setError(error);
+          if (axios.isCancel(error)) {
+            return "Request Cancelled";
+          }
+        });
+    })();
+
+    setLoading(false);
+
+    return () => {
+      controller.abort();
+    };
+  }, [setError, setLoading]);
+
+  const handleCancel = () => {
+    setFullName(tempUser.fullname);
+    setEmail(tempUser.email);
+    setPhone(tempUser.phone);
+    setAddressLine1(tempUser.address_line1);
+    setAddressLine2(tempUser.address_line2);
+    setAddressLine3(tempUser.address_line3);
+    setEditAccount(false);
   };
 
-  const cancelAccountDetailsHandler = () => {
-    setFullName(fullNameTemp);
-    setEmail(emailTemp);
-    setAddressLine1(addressLine1Temp);
-    setAddressLine2(addressLine2Temp);
-    setAddressLine3(addressLine3Temp);
-    setPhone(phoneTemp);
-
-    setAccountDetailsEdit(!accountDetailsEdit);
+  const handleEdit = () => {
+    setTempUser({
+      fullname,
+      email,
+      phone,
+      address_line1: addressLine1,
+      address_line2: addressLine2,
+      address_line3: addressLine3,
+    });
+    setEditAccount(true);
   };
 
-  const saveAccountDetailsHandler = async () => {
-    setTimeout(() => {
-      setAccountDetailsError("");
-    }, 5000);
+  const handleSave = async () => {
+    const controller = new AbortController();
+    setLoading(true);
 
     // Check input is valid
-    if (!fullName) return setAccountDetailsError("Full Name is required");
-    if (!email) return setAccountDetailsError("Email is required");
+    if (!fullname) {
+      setLoading(false);
+      return setError("Full Name is required");
+    }
 
-    //Clear Temporary Storage
-    setFullNameTemp("");
-    setEmailTemp("");
-    setAddressLine1Temp("");
-    setAddressLine2Temp("");
-    setAddressLine3Temp("");
-    setPhoneTemp("");
+    if (!email) {
+      setLoading(false);
+      return setError("Email is required");
+    }
+
+    setTempUser({});
 
     const config = {
       headers: {
         "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
+      signal: controller.signal,
     };
 
-    try {
-      const decodedJWT = await jwt(localStorage.getItem("authToken"));
+    const decodedJWT = jwtDecode(localStorage.getItem("authToken"));
 
-      //Update User account in database
-      await axios.put(
+    await axios
+      .put(
         `/api/user/${decodedJWT.id}`,
         {
-          fullname: fullName,
-          email: email,
+          fullname,
+          email,
+          phone,
           address_line1: addressLine1,
           address_line2: addressLine2,
           address_line3: addressLine3,
-          phone,
         },
         config
-      );
+      )
+      .then((result) => {
+        setSuccess("Account details successfully updated");
+        setLoading(false);
+      })
+      .catch((error) => {
+        setError(error.response.data.error);
+        setLoading(false);
+        setEditAccount(!editAccount);
 
-      // Success Alert
-      setSuccess("Account details successfully updated");
-      setTimeout(() => {
-        setSuccess("");
-      }, 5000);
-    } catch (error) {
-      setAccountDetailsError(error.response.data.error);
-      setTimeout(() => {
-        setAccountDetailsError("");
-      }, 5000);
-    }
+        if (axios.isCancel(error)) {
+          return "Request Cancelled";
+        }
+      });
 
-    setAccountDetailsEdit(!accountDetailsEdit);
+    return controller.abort();
   };
 
-  const changePasswordHandler = async () => {
+  const handleChangePassword = async () => {
+    const controller = new AbortController();
+    setLoading(true);
+
     if (!currentPassword) {
-      setTimeout(() => {
-        setChangePasswordError("");
-      }, 5000);
-      return setChangePasswordError(
-        "Please enter your current (existing) password"
-      );
+      setLoading(false);
+      controller.abort();
+      return setError("Please enter your current (existing) password");
     }
 
     if (!newPassword) {
-      setTimeout(() => {
-        setChangePasswordError("");
-      }, 5000);
-      return setChangePasswordError("Please enter your new password");
+      setLoading(false);
+      controller.abort();
+      return setError("Please enter your new password");
     }
 
     // Check new passwords match
     if (newPassword !== confirmPassword) {
       setNewPassword("");
       setConfirmPassword("");
-      setTimeout(() => {
-        setChangePasswordError("");
-      }, 5000);
-      return setChangePasswordError("Passwords do not match");
+      setLoading(false);
+      controller.abort();
+      return setError("Passwords do not match");
     }
 
-    try {
-      const decodedJWT = await jwt(localStorage.getItem("authToken"));
+    const decodedJWT = jwtDecode(localStorage.getItem("authToken"));
 
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-      };
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      signal: controller.signal,
+    };
 
-      // Update Password Credentials in Database
-      await axios.put(
+    // Update Password Credentials in Database
+    await axios
+      .put(
         "/api/auth/changepassword",
         {
           userId: decodedJWT.id,
@@ -231,51 +224,57 @@ const AccountsPage = () => {
           newPassword,
         },
         config
-      );
-
-      // Display Success Message
-      setPasswordChangeSuccess(
-        "Password Changed.  You will be redirected to login shortly"
-      );
-
-      // Redirect user to login after 3 seconds
-      setTimeout(() => {
-        setPasswordChangeSuccess("");
+      )
+      .then(() => {
+        setSuccess("Password Successfully Changed");
         localStorage.removeItem("authToken");
-        navigate("/login");
-      }, 3000);
-    } catch (error) {
-      setChangePasswordError(error.response.data.error);
-      setTimeout(() => {
-        setChangePasswordError("");
-      }, 5000);
-    }
+      })
+      .catch((error) => {
+        setError(error);
+        setLoading(false);
+        if (axios.isCancel(error)) {
+          return "Request Cancelled";
+        }
+        controller.abort();
+      });
+
+    setLoading(false);
+    return controller.abort();
   };
 
   const deleteAccountHandler = async () => {
-    // Delete account in database if user selects yes
+    const controller = new AbortController();
+    setLoading(true);
+
     const config = {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
+      signal: controller.abort,
     };
 
-    const decodedJWT = await jwt(localStorage.getItem("authToken"));
-    await axios.delete(`/api/user/${decodedJWT.id}`, config);
+    const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
+    await axios
+      .delete(`/api/user/${decodedJWT.id}`, config)
+      .then(() => {
+        localStorage.removeItem("authToken");
+      })
+      .catch((error) => {
+        setError(error);
+        setLoading(false);
+        controller.abort();
+      });
 
-    // Remove auth token
-    localStorage.removeItem("authToken");
+    setLoading(false);
 
-    // redirect to account deleted page
-    navigate("/accountdeleted");
+    controller.abort();
+
+    return navigate("/accountdeleted");
   };
 
   return (
     <Box px={{ xs: 2, sm: 8, md: 22 }} py={4}>
-      {/* General Errors  */}
-      <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
-
       {/* Account Details  */}
       <Grid container direction="column">
         <Grid item>
@@ -300,12 +299,13 @@ const AccountsPage = () => {
         <Grid item p={1} py={3}>
           <InputLabel required>Name</InputLabel>
           <TextField
-            disabled={!accountDetailsEdit}
+            name="fullname"
+            disabled={!editAccount}
             variant="outlined"
             fullWidth
             size="small"
             type="text"
-            value={fullName}
+            value={fullname}
             onChange={(e) => setFullName(e.target.value)}
             placeholder="Joe Bloggs"
             sx={{ background: "white" }}
@@ -317,12 +317,13 @@ const AccountsPage = () => {
           <InputLabel>Username</InputLabel>
 
           <TextField
+            name="username"
             disabled={true}
             fullWidth
             variant="outlined"
             size="small"
             type="text"
-            value={username.toLowerCase()}
+            value={username ?? ""}
             onChange={(e) => setUsername(e.target.value)}
             placeholder="Username"
             sx={{ background: "white" }}
@@ -333,6 +334,7 @@ const AccountsPage = () => {
         <Grid item p={1}>
           <InputLabel required>Email Address</InputLabel>
           <TextField
+            name="email"
             disabled
             variant="outlined"
             fullWidth
@@ -349,7 +351,8 @@ const AccountsPage = () => {
         <Grid item p={1}>
           <InputLabel>Phone Number</InputLabel>
           <TextField
-            disabled={!accountDetailsEdit}
+            name="phone"
+            disabled={!editAccount}
             variant="outlined"
             size="small"
             type="text"
@@ -366,7 +369,8 @@ const AccountsPage = () => {
         <Grid item px={1}>
           <InputLabel>Address</InputLabel>
           <TextField
-            disabled={!accountDetailsEdit}
+            name="address_line1"
+            disabled={!editAccount}
             variant="outlined"
             fullWidth
             size="small"
@@ -380,7 +384,8 @@ const AccountsPage = () => {
 
         <Grid item p={1}>
           <TextField
-            disabled={!accountDetailsEdit}
+            name="address_line2"
+            disabled={!editAccount}
             variant="outlined"
             fullWidth
             size="small"
@@ -394,7 +399,8 @@ const AccountsPage = () => {
 
         <Grid item px={1}>
           <TextField
-            disabled={!accountDetailsEdit}
+            name="address_line3"
+            disabled={!editAccount}
             variant="outlined"
             fullWidth
             size="small"
@@ -406,32 +412,24 @@ const AccountsPage = () => {
           />
         </Grid>
 
-        {/* Alert Messages  */}
-        <Grid item>
-          {success && <Alert severity="success">{success}</Alert>}
-          {accountDetailsError && (
-            <Alert severity="error">{accountDetailsError}</Alert>
-          )}
-        </Grid>
-
         {/* Update Account Details Button */}
         <Grid item textAlign={"right"} m={0} p={2}>
-          {!accountDetailsEdit ? (
+          {!editAccount ? (
             <Button
               variant="contained"
               startIcon={<Edit />}
-              onClick={editAccountDetailsHandler}
+              onClick={handleEdit}
             >
               Edit
             </Button>
           ) : (
             <>
               <Button
-                disabled={!accountDetailsEdit}
+                disabled={!editAccount}
                 color="success"
                 variant="contained"
                 startIcon={<Save />}
-                onClick={saveAccountDetailsHandler}
+                onClick={handleSave}
                 sx={{ marginRight: 1 }}
               >
                 Save
@@ -439,7 +437,7 @@ const AccountsPage = () => {
               <Button
                 variant="outlined"
                 startIcon={<Cancel />}
-                onClick={cancelAccountDetailsHandler}
+                onClick={handleCancel}
                 style={{ color: "grey", borderColor: "grey" }}
               >
                 Cancel
@@ -468,7 +466,7 @@ const AccountsPage = () => {
               fullWidth
               size="small"
               type="password"
-              value={currentPassword}
+              value={currentPassword ?? ""}
               onChange={(e) => setCurrentPassword(e.target.value)}
               autoComplete="current-password"
               sx={{ background: "white" }}
@@ -482,7 +480,7 @@ const AccountsPage = () => {
               fullWidth
               size="small"
               type="password"
-              value={newPassword}
+              value={newPassword ?? ""}
               onChange={(e) => setNewPassword(e.target.value)}
               autoComplete="new-password"
               sx={{ background: "white" }}
@@ -497,33 +495,22 @@ const AccountsPage = () => {
               fullWidth
               size="small"
               type="password"
-              value={confirmPassword}
+              value={confirmPassword ?? ""}
               onChange={(e) => setConfirmPassword(e.target.value)}
               autoComplete="new-password"
               sx={{ background: "white" }}
             />
           </Grid>
 
-          {/* Update Successful Message  */}
-          <Grid item>
-            {passwordChangeSuccess && (
-              <Alert severity="success">{passwordChangeSuccess}</Alert>
-            )}
-          </Grid>
-
           {/* Change Password Errors  */}
-          <Grid item>
-            {changePasswordError && (
-              <Alert severity="error">{changePasswordError}</Alert>
-            )}
-          </Grid>
+          <Grid item>{error && <Alert severity="error">{error}</Alert>}</Grid>
 
           {/* Change Password Button */}
           <Grid item textAlign={"center"}>
             <Button
               variant="contained"
               size="small"
-              onClick={changePasswordHandler}
+              onClick={handleChangePassword}
             >
               Change Password
             </Button>
@@ -550,7 +537,7 @@ const AccountsPage = () => {
           <Button
             startIcon={<Delete />}
             color="error"
-            onClick={handleOpenDeleteModal}
+            onClick={handleOpenModal}
           >
             Delete Account
           </Button>
@@ -561,8 +548,8 @@ const AccountsPage = () => {
       </Grid>
 
       <Modal
-        open={openDeleteModal}
-        onClose={handleCloseDeleteModal}
+        open={openModal}
+        onClose={handleCloseModal}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -580,7 +567,7 @@ const AccountsPage = () => {
             size="large"
             variant="contained"
             sx={{ mr: 1 }}
-            onClick={handleCloseDeleteModal}
+            onClick={handleCloseModal}
           >
             Cancel
           </Button>

@@ -36,6 +36,7 @@ export default function MessagePage(props) {
   useEffect(() => {
     socket.current = io("ws://localhost:8900");
     socket.current.on("getMessage", (data) => {
+      console.log(data);
       setArrivalMessage({
         send_user: data.senderId,
         message: data.sentMessage,
@@ -53,13 +54,15 @@ export default function MessagePage(props) {
     if (currentUser) {
       socket.current.emit("addUser", currentUser.id);
       socket.current.on("getUsers", (users) => {
-        console.log(users);
+        console.log(users); // for testing that users are connected could be used to display online
       });
     }
   }, [currentUser]);
 
   // get current user
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getCurrentUser = async () => {
       if (localStorage.getItem("authToken")) {
         const config = {
@@ -67,12 +70,16 @@ export default function MessagePage(props) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
-          const decodedJWT = await jwt(localStorage.getItem("authToken"));
+          const decodedJWT = jwt(localStorage.getItem("authToken"));
           const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
           setCurrentUser(user.data.data);
         } catch (error) {
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
@@ -89,10 +96,15 @@ export default function MessagePage(props) {
       }
     };
     getCurrentUser();
+    return () => {
+      controller.abort();
+    };
   }, [navigate]);
 
   // get messagethreads
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getMessageThreads = async () => {
       if (currentUser) {
         const config = {
@@ -100,6 +112,7 @@ export default function MessagePage(props) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         try {
           const res = await axios.get(
@@ -108,6 +121,9 @@ export default function MessagePage(props) {
           );
           setMessageThread(res.data);
         } catch (error) {
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
@@ -126,16 +142,20 @@ export default function MessagePage(props) {
     getMessageThreads();
     if (state && currentMessage === null) {
       messageThreads.forEach((m) => {
-        console.log(m);
         if (m._id === state._id) {
           setCurrentMessage(m);
         }
       });
     }
+    return () => {
+      controller.abort();
+    };
   }, [currentUser, messageThreads, navigate, currentMessage, state]);
 
   // get messages
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getMesssages = async () => {
       if (currentMessage) {
         try {
@@ -144,6 +164,7 @@ export default function MessagePage(props) {
               "Content-Type": "application/json",
               Authorization: `Bearer ${localStorage.getItem("authToken")}`,
             },
+            signal,
           };
           const res = await axios(
             `/api/messages/${currentMessage?._id}`,
@@ -151,6 +172,9 @@ export default function MessagePage(props) {
           );
           setMessages(res.data);
         } catch (error) {
+          if (axios.isCancel(error)) {
+            return console.log("Successfully Aborted");
+          }
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
             return navigate("/login");
@@ -165,6 +189,9 @@ export default function MessagePage(props) {
           });
         }
       }
+      return () => {
+        controller.abort();
+      };
     };
 
     getMesssages();
@@ -229,6 +256,7 @@ export default function MessagePage(props) {
         component="main"
         sx={{
           flexGrow: 1,
+          p: 2,
         }}
       >
         <Grid container spacing={1} alignItems="center" justifyContent="center">
@@ -278,82 +306,29 @@ export default function MessagePage(props) {
                   mb: 2,
                 }}
               >
-                {state !== null ? (
-                  <>
-                    {messageThreads?.map((m) => (
-                      <>
-                        {m._id === state._id ? (
-                          <Box
-                            pl={2}
-                            pr={2}
-                            m={1}
-                            borderRadius={1}
-                            bgcolor={
-                              currentMessage !== null &&
-                              m._id === currentMessage._id
-                                ? "lightBlue"
-                                : "#cfd8dc"
-                            }
-                            onClick={() => setCurrentMessage(m)}
-                            key={m._id}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <MessageThread
-                              messageThread={m}
-                              currentUser={currentUser.id}
-                            />
-                          </Box>
-                        ) : (
-                          <Box
-                            pl={2}
-                            pr={2}
-                            m={1}
-                            borderRadius={1}
-                            bgcolor={
-                              currentMessage !== null &&
-                              m._id === currentMessage._id
-                                ? "lightBlue"
-                                : "#cfd8dc"
-                            }
-                            onClick={() => setCurrentMessage(m)}
-                            key={m._id}
-                            sx={{ cursor: "pointer" }}
-                          >
-                            <MessageThread
-                              messageThread={m}
-                              currentUser={currentUser.id}
-                            />
-                          </Box>
-                        )}
-                      </>
-                    ))}
-                  </>
-                ) : (
-                  <>
-                    {messageThreads?.map((m) => (
-                      <Box
-                        pl={2}
-                        pr={2}
-                        m={1}
-                        borderRadius={1}
-                        bgcolor={
-                          currentMessage !== null &&
-                          m._id === currentMessage._id
-                            ? "lightBlue"
-                            : "#cfd8dc"
-                        }
-                        onClick={() => setCurrentMessage(m)}
-                        key={m._id}
-                        sx={{ cursor: "pointer" }}
-                      >
-                        <MessageThread
-                          messageThread={m}
-                          currentUser={currentUser.id}
-                        />
-                      </Box>
-                    ))}
-                  </>
-                )}
+                <>
+                  {messageThreads?.map((m) => (
+                    <Box
+                      pl={2}
+                      pr={2}
+                      m={1}
+                      borderRadius={1}
+                      bgcolor={
+                        currentMessage !== null && m._id === currentMessage._id
+                          ? "lightBlue"
+                          : "#cfd8dc"
+                      }
+                      onClick={() => setCurrentMessage(m)}
+                      key={m._id}
+                      sx={{ cursor: "pointer" }}
+                    >
+                      <MessageThread
+                        messageThread={m}
+                        currentUser={currentUser.id}
+                      />
+                    </Box>
+                  ))}
+                </>
 
                 <Box height="100%" />
               </Box>

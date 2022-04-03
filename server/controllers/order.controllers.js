@@ -3,6 +3,8 @@ const ErrorResponse = require("../utils/errorResponse");
 const sendEmail = require("../utils/sendEmail");
 
 const { Order } = require("../models/Order");
+const Stall = require("../models/Stall");
+const mongoose = require("mongoose");
 
 // GET: Get all Orders
 exports.getAllOrders = async (req, res, next) => {
@@ -51,11 +53,32 @@ exports.getStallOrders = async (req, res, next) => {
   }
 };
 
+// Returns each stall for the user and their related orders
 exports.getReceivedOrders = async (req, res, next) => {
-  res.status(200).json({
-    success: true,
-  });
+  const orders = await Stall.aggregate([
+    {
+      $match: {
+        user: mongoose.Types.ObjectId(req.params.userId),
+      },
+    },
+    {
+      $lookup: {
+        from: "orders",
+        localField: "_id",
+        foreignField: "stall.id",
+        as: "orders",
+      },
+    },
+  ])
+    .then((result) => {
+      res.status(200).json(result);
+    })
+    .catch((error) => {
+      return next(error);
+    });
 };
+
+
 
 // POST: Create a new Order
 exports.createOrder = async (req, res, next) => {

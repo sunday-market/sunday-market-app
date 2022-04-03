@@ -6,6 +6,8 @@ export default function MessageThread({ messageThread, currentUser }) {
   const [user, setUser] = useState(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const otherUserId = messageThread.message_members.find(
       (m) => m !== currentUser
     );
@@ -16,14 +18,20 @@ export default function MessageThread({ messageThread, currentUser }) {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal,
         };
         const res = await axios(`/api/user/${otherUserId}`, config);
         setUser(res.data.data);
       } catch (error) {
-        console.log(error);
+        if (axios.isCancel(error)) {
+          return "Successfully Aborted";
+        }
       }
     };
     getUser();
+    return () => {
+      controller.abort();
+    };
   }, [currentUser, messageThread]);
   return (
     <>

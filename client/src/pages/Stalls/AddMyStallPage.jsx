@@ -36,16 +36,43 @@ export default function AddMyStallPage() {
   const [location, setLocation] = useState("");
   const [error, setError] = useState("");
   const [user, setCurrentUser] = useState(null);
+  const [currentStalls, setCurrentStalls] = useState(null);
 
   // navigation
   const navigate = useNavigate();
   const errorRef = useRef(null);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const getCurrentStalls = async () => {
+      try {
+        setCurrentStalls((await axios.get("/api/stalls", signal)).data);
+      } catch (error) {
+        if (axios.isCancel(error)) {
+          return console.log("Successfully Aborted");
+        }
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        return setError(error);
+      }
+    };
+    getCurrentStalls();
+    return () => {
+      controller.abort();
+    };
+  }, []);
+
+  useEffect(() => {
     if (localStorage.getItem("authToken")) {
       const getUser = async () => {
         try {
-          setCurrentUser(await jwtDecode(localStorage.getItem("authToken")));
+          setCurrentUser(jwtDecode(localStorage.getItem("authToken")));
         } catch (error) {
           if (error.response.status === 401) {
             localStorage.removeItem("authToken");
@@ -66,10 +93,15 @@ export default function AddMyStallPage() {
   }, [navigate]);
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
     const getCategorys = async () => {
       try {
-        setCategoryList(await (await axios.get("/api/category/")).data);
+        setCategoryList((await axios.get("/api/category/", signal)).data);
       } catch (error) {
+        if (axios.isCancel(error)) {
+          return console.log("Successfully Aborted");
+        }
         setTimeout(() => {
           setError("");
         }, 5000);
@@ -81,6 +113,9 @@ export default function AddMyStallPage() {
       }
     };
     getCategorys();
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   useEffect(() => {
@@ -91,6 +126,7 @@ export default function AddMyStallPage() {
 
   const saveStall = async (e) => {
     e.preventDefault();
+    let sendPost = true;
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -123,6 +159,7 @@ export default function AddMyStallPage() {
           setError("");
         }, 5000);
         errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        sendPost = false;
         return setError(error);
       }
     }
@@ -133,10 +170,23 @@ export default function AddMyStallPage() {
         setError("");
       }, 5000);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      sendPost = false;
       return setError("You Need To Provide A Stall Name");
     } else {
       stallData.append("stallName", stallName);
     }
+    currentStalls.forEach((currentStall) => {
+      if (stallName === currentStall.stallName) {
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        sendPost = false;
+        return setError(
+          `The stall name ${stallName}, is already taken please try another.`
+        );
+      }
+    });
 
     // Check for Category selected
     if (!category) {
@@ -144,6 +194,7 @@ export default function AddMyStallPage() {
         setError("");
       }, 5000);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      sendPost = false;
       return setError("You need to select a category to upload a store");
     } else {
       stallData.append("category", category);
@@ -174,25 +225,32 @@ export default function AddMyStallPage() {
         setError("");
       }, 5000);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+      sendPost = false;
       return setError("You must provide a location for the stall");
     } else {
       stallData.append("city_location", location);
     }
-
-    // try and post the data
-    try {
-      await axios.post("/api/stalls/", stallData, config);
-    } catch (error) {
-      if (error.response.status === 401) {
-        localStorage.removeItem("authToken");
-        return navigate("/login");
+    if (sendPost) {
+      // try and post the data
+      try {
+        await axios.post("/api/stalls/", stallData, config);
+        return navigate("/account/stalls/mystalls");
+      } catch (error) {
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          return navigate("/login");
+        }
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
+        return setError(error.response.data.error);
       }
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return setError(error.response.data.error);
     }
+  };
+
+  const handleCancel = () => {
+    return navigate("/account/stalls/mystalls");
   };
 
   return (
@@ -364,6 +422,7 @@ export default function AddMyStallPage() {
                 sx={{ margin: 1 }}
                 variant="outlined"
                 startIcon={<CancelIcon />}
+                onClick={handleCancel}
               >
                 Cancel
               </Button>

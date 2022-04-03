@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router";
 
-import { Box, Grid, Button } from "@mui/material";
+import { Grid, Button } from "@mui/material";
 
 import {
   PersonOutlined as AccountDetailsIcon,
@@ -15,39 +15,31 @@ import PageContainer from "../../components/PageContainer";
 
 const AccountPage = () => {
   const navigate = useNavigate();
+
   const [detailsButton, setDetailsButton] = useState("outlined");
   const [myStallsButton, setMyStallsButton] = useState("outlined");
   const [myProductsButton, setMyProductsButton] = useState("outlined");
   const [myOrdersButton, setMyOrdersButton] = useState("outlined");
   const [ordersReceivedButton, setOrdersReceivedButton] = useState("outlined");
+  const [currentPage, setCurrentPage] = useState("");
 
   useEffect(() => {
     setDetailsButton(
-      window.location.pathname === "/account/myaccount"
-        ? "contained"
-        : "outlined"
+      "/account/myaccount" === currentPage ? "contained" : "outlined"
     );
     setMyStallsButton(
-      window.location.pathname === "/account/stalls/mystalls"
-        ? "contained"
-        : "outlined"
+      "/account/stalls/mystalls" === currentPage ? "contained" : "outlined"
     );
     setMyProductsButton(
-      window.location.pathname === "/account/products/myproducts"
-        ? "contained"
-        : "outlined"
+      "/account/products/myproducts" === currentPage ? "contained" : "outlined"
     );
     setMyOrdersButton(
-      window.location.pathname === "/account/orders/myorders"
-        ? "contained"
-        : "outlined"
+      "/account/orders/myorders" === currentPage ? "contained" : "outlined"
     );
     setOrdersReceivedButton(
-      window.location.pathname === "/account/orders/received"
-        ? "contained"
-        : "outlined"
+      "/account/orders/received" === currentPage ? "contained" : "outlined"
     );
-  });
+  }, [currentPage]);
 
   return (
     <>
@@ -66,6 +58,7 @@ const AccountPage = () => {
             variant={detailsButton}
             startIcon={<AccountDetailsIcon />}
             onClick={() => {
+              setCurrentPage("/account/myaccount");
               navigate("myaccount");
             }}
           >
@@ -77,6 +70,7 @@ const AccountPage = () => {
             size="small"
             variant={detailsButton}
             onClick={() => {
+              setCurrentPage("/account/myaccount");
               navigate("myaccount");
             }}
           >
@@ -90,6 +84,7 @@ const AccountPage = () => {
             variant={myStallsButton}
             startIcon={<MyStallsIcon />}
             onClick={() => {
+              setCurrentPage("/account/stalls/mystalls");
               navigate("stalls/mystalls");
             }}
           >
@@ -101,6 +96,7 @@ const AccountPage = () => {
             size="small"
             variant={myStallsButton}
             onClick={() => {
+              setCurrentPage("/account/stalls/mystalls");
               navigate("stalls/mystalls");
             }}
           >
@@ -114,6 +110,7 @@ const AccountPage = () => {
             variant={myProductsButton}
             startIcon={<MyProductsIcon />}
             onClick={() => {
+              setCurrentPage("/account/products/myproducts");
               navigate("products/myproducts");
             }}
           >
@@ -125,6 +122,7 @@ const AccountPage = () => {
             size="small"
             variant={myProductsButton}
             onClick={() => {
+              setCurrentPage("/account/products/myproducts");
               navigate("products/myproducts");
             }}
           >
@@ -138,6 +136,7 @@ const AccountPage = () => {
             variant={myOrdersButton}
             startIcon={<MyOrdersIcon />}
             onClick={() => {
+              setCurrentPage("/account/orders/myorders");
               navigate("orders/myorders");
             }}
           >
@@ -149,6 +148,7 @@ const AccountPage = () => {
             size="small"
             variant={myOrdersButton}
             onClick={() => {
+              setCurrentPage("/account/orders/myorders");
               navigate("orders/myorders");
             }}
           >
@@ -160,7 +160,10 @@ const AccountPage = () => {
           <Button
             variant={ordersReceivedButton}
             startIcon={<OrdersReceivedIcon />}
-            onClick={() => navigate("orders/received")}
+            onClick={() => {
+              setCurrentPage("/account/orders/received");
+              navigate("orders/received");
+            }}
           >
             Orders Received
           </Button>
@@ -169,7 +172,10 @@ const AccountPage = () => {
           <Button
             size="small"
             variant={ordersReceivedButton}
-            onClick={() => navigate("orders/received")}
+            onClick={() => {
+              setCurrentPage("/account/orders/received");
+              navigate("orders/received");
+            }}
           >
             <OrdersReceivedIcon />
           </Button>

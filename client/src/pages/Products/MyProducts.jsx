@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
 import {
   Box,
@@ -13,47 +13,54 @@ import AddProductCard from "../../components/Products/AddProductCard";
 
 import jwtDecode from "jwt-decode";
 import axios from "axios";
+
+import DataContext from "../../context/DataContext";
+
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
-  const [error, setError] = useState("");
+  const { setLoading, setError } = useContext(DataContext);
 
   const navigate = useNavigate();
 
   useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+
     (async () => {
-      try {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-        };
-        const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
-        const data = await axios.get(
-          `/api/product/user/${decodedJWT.id}`,
-          config
-        );
-        setProducts(data.data);
-      } catch (error) {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          navigate("/login");
-        }
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+        },
+        signal: controller.signal,
+      };
 
-        setError(error.response.data.error);
-
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-      }
+      const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
+      await axios
+        .get(`/api/product/user/${decodedJWT.id}`, config)
+        .then((result) => {
+          setProducts(result.data);
+        })
+        .catch((error) => {
+          setError(error);
+          setLoading(false);
+          controller.abort();
+        });
     })();
-  }, [navigate]);
+
+    setLoading(false);
+
+    return () => {
+      controller.abort();
+    };
+  }, [navigate, setError, setLoading]);
 
   return (
     <>
       <Box
         component="main"
         p={2}
+        py={{ xs: 2, md: 3, lg: 4 }}
         sx={{
           flexGrow: 1,
         }}
@@ -62,12 +69,6 @@ const MyProducts = () => {
           <Typography variant="h4" gutterBottom>
             My Products
           </Typography>
-
-          {error && (
-            <Box sx={{ marginY: "1em" }}>
-              <Alert severity="error">{error}</Alert>
-            </Box>
-          )}
 
           <Box sx={{ pt: 0 }}>
             <Grid container spacing={3}>
@@ -93,15 +94,7 @@ const MyProducts = () => {
               ))}
             </Grid>
           </Box>
-          <Box
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              pt: 3,
-            }}
-          >
-            <Pagination color="primary" count={3} size="small" />
-          </Box>
+
         </Container>
       </Box>
     </>

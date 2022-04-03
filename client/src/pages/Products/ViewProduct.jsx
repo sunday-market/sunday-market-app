@@ -4,7 +4,8 @@ import axios from "axios";
 
 import { Alert, Button, Typography, Divider, CardMedia } from "@mui/material";
 import { Box, Grid } from "@mui/material";
-import IncDecButton from "../../components/IncDecButton";
+import AddToCartButton from "../../components/AddToCartButton";
+import SendMessageButton from "../../components/SendMessageButton";
 
 import { priceToCurrency } from "../../utils/currency";
 
@@ -12,9 +13,6 @@ const ViewProduct = () => {
   const [product, setProduct] = useState([]);
   const [stall, setStall] = useState([]);
   const [error, setError] = useState("");
-
-  const [counter, setCounter] = useState(0);
-  const [quantityInStock, setQuantityInStock] = useState(0);
 
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -35,13 +33,11 @@ const ViewProduct = () => {
           `/api/product/${productId}`,
           config
         );
-        setProduct(productData.data);
-
-        setQuantityInStock(productData.data.quantity_in_stock);
+        setProduct(productData.data[0]);
 
         // Get Stall Information
         const stallData = await axios.get(
-          `/api/stalls/${productData.data.product_stall}`
+          `/api/stalls/${productData.data[0].product_stall}`
         );
         setStall(stallData.data[0]);
       } catch (error) {
@@ -53,16 +49,6 @@ const ViewProduct = () => {
       }
     })();
   }, [navigate, productId]);
-
-  const incrementQuantity = () => {
-    setCounter(counter + 1);
-    setQuantityInStock(quantityInStock - 1);
-  };
-
-  const decrementQuantity = () => {
-    setCounter(counter - 1);
-    setQuantityInStock(quantityInStock + 1);
-  };
 
   return (
     <Box p={2}>
@@ -92,7 +78,7 @@ const ViewProduct = () => {
           <Typography variant="body1">
             <strong>{product.product_name}</strong>
           </Typography>
-          <Typography variant="body2">{product.product_subcategory}</Typography>
+          <Typography variant="body2">{product.subcategory}</Typography>
 
           <Divider />
 
@@ -145,10 +131,18 @@ const ViewProduct = () => {
                 </Typography>
 
                 <Box display="flex" justifyContent="center" p={2}>
-                  <Button variant="contained" sx={{ marginRight: 1 }}>
+                  <Button
+                    variant="contained"
+                    sx={{ marginRight: 1 }}
+                    onClick={() =>
+                      navigate(
+                        `/account/stalls/viewstall/${product.product_stall}`
+                      )
+                    }
+                  >
                     View
                   </Button>
-                  <Button variant="outlined">Contact</Button>
+                  <SendMessageButton stall={stall} />
                 </Box>
               </Box>
 
@@ -163,15 +157,8 @@ const ViewProduct = () => {
                 <Typography variant="h4" textAlign="center">
                   {priceToCurrency(product.product_price)}
                 </Typography>
-                <IncDecButton
-                  counter={counter}
-                  quantityInStock={quantityInStock}
-                  incrementQuantity={incrementQuantity}
-                  decrementQuantity={decrementQuantity}
-                />
-                <Typography align="center">
-                  Remaining Stock: {quantityInStock}
-                </Typography>
+
+                <AddToCartButton product={product} />
               </Box>
             </Box>
           </Box>

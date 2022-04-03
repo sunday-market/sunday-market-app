@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import {
   Typography,
@@ -9,15 +9,30 @@ import {
   Button,
 } from "@mui/material";
 
-import {
-  Article as ArticleIcon,
-  Message as MessageIcon,
-} from "@mui/icons-material";
+import { Article as ArticleIcon } from "@mui/icons-material";
+
+import SendMessageButton from "../SendMessageButton";
 
 const OrderCard = ({ order }) => {
+  const [user, setUser] = useState({});
+  const [stall, setStall] = useState({});
+
   const navigate = useNavigate();
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
+
+  // Set User and Stall data to correct format
+  // for SendMessageButton component
+  useEffect(() => {
+    setUser({
+      _id: order.customer.id,
+    });
+
+    setStall({
+      _id: order.stall.id,
+      stallName: order.stall.name,
+    });
+  }, [order]);
 
   return (
     <Card
@@ -44,7 +59,6 @@ const OrderCard = ({ order }) => {
             display: "flex",
             flexDirection: "column",
             justifyContent: "center",
-            // p: 1,
           }}
         >
           <Typography variant="h6">{order.stall.name}</Typography>
@@ -97,9 +111,7 @@ const OrderCard = ({ order }) => {
           {" "}
           View
         </Button>
-        <Button variant="outlined" size="small" startIcon={<MessageIcon />}>
-          Message Stall
-        </Button>
+        <SendMessageButton variant="outlined" stall={stall} user={user} />
       </Box>
     </Card>
   );

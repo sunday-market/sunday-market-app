@@ -9,6 +9,9 @@ import SearchIcon from "@mui/icons-material/Search";
 import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
 import ProductionQuantityLimitsOutlinedIcon from "@mui/icons-material/ProductionQuantityLimitsOutlined"; // This is for when a timer on the cart is going to run out
 import ShoppingCartTwoToneIcon from "@mui/icons-material/ShoppingCartTwoTone";
+
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+
 import PersonIcon from "@mui/icons-material/Person";
 import FilterAltRoundedIcon from "@mui/icons-material/FilterAltRounded";
 import { useIsMobileScreen } from "../hooks/useIsMobileScreen";
@@ -22,12 +25,14 @@ import {
   InputAdornment,
   Menu,
   MenuItem,
+  Snackbar,
   TextField,
   Typography,
 } from "@mui/material";
-import { useNavigate, NavLink } from "react-router-dom";
-import { useEffect, useState } from "react";
-import { useUser } from "../hooks/useUser";
+import MuiAlert from "@mui/material/Alert";
+import axios from "axios";
+import { useNavigate, NavLink, Outlet } from "react-router-dom";
+import React, { useEffect, useState } from "react";
 
 // IMPORTANT
 // Navbar still needs to adjust for smaller screens
@@ -37,15 +42,162 @@ import { useUser } from "../hooks/useUser";
 
 export default function Navbar() {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
-  const userData = useUser();
 
+  const [categories, setCategories] = useState([]);
   const [userToken, setUserToken] = useState(null);
+  const [shoppingCart, setShoppingCart] = useState();
+  const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [cartLoaded, setCartLoaded] = useState(false);
+
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // store shopping cart id in local storage for data preseverance,
+  // create one if not already assigned
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const getShoppingCart = async () => {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
+      // if exists try and get cart, or create new one if cart no longer exists
+      if (localStorage.getItem("shoppingCartId")) {
+        try {
+          const cartId = localStorage.getItem("shoppingCartId");
+          const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
+          // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
+          if (cart.products_selected.length === 0) {
+            await axios.delete(`/api/cart/${cartId}`);
+            const shoppingCartId = (await axios.post("/api/cart/", config)).data
+              .data._id;
+            localStorage.setItem("shoppingCartId", shoppingCartId);
+            const cart = (
+              await axios.get(`/api/cart/${shoppingCartId}`, config)
+            ).data[0];
+            setShoppingCart(cart);
+            setCartLoaded(true);
+          }
+          // Cart has items still that haven't been erased in timeout so set the cart equal to this
+          else {
+            setShoppingCart(cart);
+            setCartLoaded(true);
+          }
+        } catch (error) {
+          // error has occured
+          return error;
+        }
+      }
+      // if shopping cart doesn't exist then create one
+      else {
+        try {
+          const shoppingCartId = (await axios.post("/api/cart/", config)).data
+            .data._id;
+          localStorage.setItem("shoppingCartId", shoppingCartId);
+          const cart = (await axios.get(`/api/cart/${shoppingCartId}`, config))
+            .data[0];
+          setShoppingCart(cart);
+          setCartLoaded(true);
+        } catch (error) {
+          return error;
+        }
+      }
+    };
+    getShoppingCart();
+    return () => {
+      controller.abort();
+    };
+  }, []);
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    if (cartLoaded) {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal,
+      };
+      const setProductInfo = async (productID) => {
+        try {
+          const res = await axios.get("/api/product/" + productID, config);
+          setSelectedItems((prev) => [...prev, res.data[0]]);
+        } catch (error) {
+          return;
+        }
+      };
+      const loopThroughCart = () => {
+        shoppingCart.products_selected.forEach((product) => {
+          setProductInfo(product.product_id);
+        });
+      };
+      if (shoppingCart?.products_selected?.length > 0) {
+        loopThroughCart();
+      }
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [cartLoaded, shoppingCart]);
+
+  useEffect(() => {
+    if (shoppingCart) {
+      let total = 0;
+      shoppingCart.products_selected.forEach((product) => {
+        total += product.product_price * product.quantity;
+      });
+      setShoppingCartPriceTotal(total.toFixed(2));
+    }
+  }, [shoppingCart]);
+
   useEffect(() => {
     function handleLoggedInStatus() {
       setUserToken(localStorage.getItem("authToken"));
     }
     handleLoggedInStatus();
   });
+
+  // Get Categories Data
+  useEffect(() => {
+    const controller = new AbortController();
+    let unmounted = false;
+
+    (async () => {
+      const config = {
+        headers: {
+          "Content-Type": "application/json",
+        },
+        signal: controller.signal,
+      };
+      await axios
+        .get("/api/category", config)
+        .then((response) => {
+          if (!unmounted) {
+            setCategories(response.data);
+            controller.abort();
+          }
+        })
+        .catch((error) => {
+          if (axios.isCancel(error)) {
+            return "axios request cancelled...";
+          }
+          return error;
+        });
+    })();
+
+    return () => {
+      unmounted = true;
+      controller.abort();
+    };
+  }, []);
+
+  // Category Selection Click Handler
+  const handleSelectCategory = (categoryId) => {
+    navigate(`search/category/${categoryId}`);
+  };
 
   // Shopping dropdown
   const [anchorShopping, setAnchorShopping] = useState(null);
@@ -107,23 +259,52 @@ export default function Navbar() {
   };
 
   const navigateToOrdersRecieved = () => {
-    navigate("/account/ordersrecieved");
+    navigate("/account/orders/received");
   };
 
   const navigateToMyOrders = () => {
-    navigate("/accounts/myorders");
+    navigate("/account/orders/myorders");
   };
 
   const navigateToMyProducts = () => {
     navigate("/account/products/myproducts");
   };
 
+  const [searchError, setSearchError] = useState("");
+  const [openSearchError, setOpenSearchError] = useState(false);
+
+  const handleSearchErrorClose = () => {
+    setOpenSearchError(false);
+  };
+
+  const ErrorAlert = React.forwardRef(function Alert(props, ref) {
+    return <MuiAlert elevation={6} ref={ref} variant="filled" {...props} />;
+  });
+
   // Search submit
-  const onSearchSubmit = (e) => {
-    console.log(e.key);
+  const onSearchSubmit = async (e) => {
     if (e.key === "Enter") {
-      console.log(`Search submit`);
-      console.log(e.target.value);
+      if (searchQuery.trim().length < 2) {
+        setSearchError("Search term must be at least 2 characters");
+        setOpenSearchError(true);
+        return setSearchQuery(searchQuery.trim());
+      }
+
+      navigate(`/search/results/?q=${searchQuery.trim()}`);
+    }
+  };
+
+  // Handle cart clear
+  const handleCartClear = async () => {
+    try {
+      console.log("clear cart");
+      await axios.put("/api/cart/clearcart/" + shoppingCart._id);
+      setCartLoaded(false);
+      setShoppingCart();
+      setShoppingCartPriceTotal();
+      setSelectedItems([]);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -145,6 +326,21 @@ export default function Navbar() {
           flexDirection: "row",
         }}
       >
+        <Snackbar
+          open={openSearchError}
+          autoHideDuration={6000}
+          onClose={handleSearchErrorClose}
+          anchorOrigin={{ vertical: "top", horizontal: "center" }}
+        >
+          <ErrorAlert
+            onClose={handleSearchErrorClose}
+            severity="error"
+            sx={{ width: "100%" }}
+          >
+            {searchError}
+          </ErrorAlert>
+        </Snackbar>
+
         <Grid
           container
           direction={"row"}
@@ -190,8 +386,10 @@ export default function Navbar() {
                   ),
                 }}
                 placeholder="Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 onKeyDown={onSearchSubmit}
-              ></TextField>
+              />
             </Grid>
           )}
           {/* Icon menu */}
@@ -220,7 +418,7 @@ export default function Navbar() {
             <Typography
               sx={{ fontSize: "12px", color: "white", pl: 1.5, margin: "auto" }}
             >
-              Category
+              Categories
             </Typography>
           </Grid>
           {/* Account */}
@@ -240,7 +438,7 @@ export default function Navbar() {
               <AccountCircleRoundedIcon
                 sx={{
                   transform: "scale(2)",
-                  color: "#eceff1",
+                  color: "white",
                   margin: "auto",
                 }}
               />
@@ -249,6 +447,17 @@ export default function Navbar() {
               sx={{ fontSize: "12px", color: "white", pl: 1.5, margin: "auto" }}
             >
               Account
+            </Typography>
+          </Grid>
+
+          {/* Help Icon  */}
+          <Grid item p={1} justifyContent="center" alignItems="center">
+            <HelpOutlineIcon
+              style={{ fontSize: 55, color: "white" }}
+              onClick={() => navigate("/support")}
+            />
+            <Typography variant="body2" color="white">
+              Support
             </Typography>
           </Grid>
 
@@ -279,7 +488,7 @@ export default function Navbar() {
                   margin: 0,
                 }}
               >
-                $0.00
+                ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
               </Typography>
               <ShoppingCartTwoToneIcon
                 sx={{
@@ -486,10 +695,14 @@ export default function Navbar() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {Array.from(Array(5)).map((_, index) => (
-          <MenuItem sx={{ color: "white" }} key={index}>
-            <PersonIcon sx={{ pr: 1.5, scale: 2 }} />
-            Category
+        {/* Categories Menu */}
+        {categories.map((category) => (
+          <MenuItem
+            sx={{ color: "white", px: 4 }}
+            key={category._id}
+            onClick={() => handleSelectCategory(category._id)}
+          >
+            {category.category_name}
           </MenuItem>
         ))}
       </Menu>
@@ -530,32 +743,42 @@ export default function Navbar() {
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
-        {Array.from(Array(5)).map((_, index) => (
-          <Box
-            container
-            direction={"row"}
-            justifyContent="center"
-            alignContent={"center"}
-            width={"100%"}
-            key={index}
-          >
-            <MenuItem sx={{ color: "white" }} width={"100%"}>
-              <Box
-                component={"img"}
-                sx={{ maxHeight: 60, maxWidth: 80 }}
-                alt={"This product image of the shopping cart"}
-                src={
-                  "https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=774&q=80"
-                }
-              />
-              <Typography paddingLeft={2} sx={{ width: "100%" }}>
-                Shopping cart details..
-              </Typography>
-              <Typography paddingLeft={2}>QTY</Typography>
-              <Typography paddingLeft={2}>$00.00</Typography>
-            </MenuItem>
-          </Box>
-        ))}
+        {selectedItems !== [] &&
+          selectedItems.length === shoppingCart?.products_selected.length &&
+          shoppingCart?.products_selected.map((product, index) => (
+            <Box
+              container
+              direction={"row"}
+              justifyContent="center"
+              alignContent={"center"}
+              width={"100%"}
+              key={index}
+            >
+              <MenuItem sx={{ color: "white" }} width={"100%"}>
+                <Box
+                  component={"img"}
+                  sx={{ maxHeight: 60, maxWidth: 80 }}
+                  alt={"This product image of the shopping cart"}
+                  src={`${PF}products/${selectedItems[index].image}`}
+                />
+                <Typography paddingLeft={2} sx={{ width: "100%" }}>
+                  {product.product_name
+                    ? product.product_name
+                    : "No name for this poduct can be found"}
+                </Typography>
+                <Typography paddingLeft={2}>QTY {product.quantity}</Typography>
+                <Typography paddingLeft={2}>
+                  ${(product.quantity * product.product_price).toFixed(2)}
+                </Typography>
+              </MenuItem>
+            </Box>
+          ))}
+        <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+
+        <Typography>
+          Estimated Total: $
+          {shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
+        </Typography>
         <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
         <Box
           container
@@ -614,12 +837,13 @@ export default function Navbar() {
             variant="outlined"
             sx={{
               bgcolor: "white",
-              borderRadius: 4,
+              borderRadius: 2,
               margin: 2,
               marginBottom: 0.5,
               border: 1,
               boxShadow: 2,
             }}
+            onClick={handleCartClear}
           >
             Clear
           </Button>
@@ -627,17 +851,19 @@ export default function Navbar() {
           <Button
             variant="contained"
             sx={{
-              borderRadius: 4,
+              borderRadius: 2,
               margin: 2,
               marginBottom: 0.5,
               border: 0,
               boxShadow: 2,
             }}
+            onClick={() => navigate("/shoppingcart/myshoppingcart")}
           >
-            Place Order
+            View Cart
           </Button>
         </Box>
       </Menu>
+      {/* <Outlet /> */}
     </>
   );
 }

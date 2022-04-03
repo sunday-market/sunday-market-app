@@ -6,6 +6,7 @@ const {
   getUserById,
   deleteUser,
   updateUser,
+  userExists,
 } = require("../controllers/user.controllers");
 
 router
@@ -13,5 +14,7 @@ router
   .get(protect, getUserById)
   .put(protect, updateUser)
   .delete(protect, deleteUser);
+
+router.route("/exists/:userId").get(userExists);
 
 module.exports = router;
