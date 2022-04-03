@@ -25,7 +25,7 @@ export default function ViewStallPage() {
 
   // handle update button click
   const update = () => {
-    console.log("update clicked");
+    navigate(`/account/stalls/editstall/${stallid}`);
   };
 
   // error ref for scrolling
@@ -137,7 +137,7 @@ export default function ViewStallPage() {
           try {
             const userID = stall[0].user;
             const userData = await axios.get(`/api/user/${userID}`, config);
-            console.log(userData);
+
             if (isApiSubscribed) {
               setUser(userData.data.data);
             }
@@ -162,7 +162,7 @@ export default function ViewStallPage() {
       controller.abort();
       isApiSubscribed = false;
     };
-  }, [stall, user]);
+  }, [stall]);
 
   useEffect(() => {
     const checkIfOwner = () => {
@@ -173,7 +173,6 @@ export default function ViewStallPage() {
     checkIfOwner();
   }, [user, currentUser]);
 
-  console.log(stall[0]);
   const stallLengthBool = stall.length > 0;
   return (
     <>
