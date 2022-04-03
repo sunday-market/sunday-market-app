@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router";
 import axios from "axios";
@@ -13,13 +13,35 @@ import {
   ButtonGroup,
 } from "@mui/material";
 
+import DataContext from "../context/DataContext";
+
 const AddToCartButton = ({ product }) => {
   const [request, setRequest] = useState(false);
   const [isUserProduct, setIsUserProduct] = useState(false);
   const [counter, setCounter] = useState(0);
   const [quantityInStock, setQuantityInStock] = useState(0);
 
+  const { shoppingCart, setUpdateCart, setError } = useContext(DataContext);
+
   const navigate = useNavigate();
+
+  const [inCart, setInCart] = useState(false);
+
+  useEffect(() => {
+    if (shoppingCart) {
+      // console.log("The cart has: ", shoppingCart.products_selected);
+      //      console.log("Product Card: ", product.product_name);
+      //      shoppingCart.products_selected.forEach((p) => {
+      //     console.log("Ordered a ", p.product_name);
+      //     console.log("The product I ordered has an Id of ", p.product_id);
+      //     console.log("The product im comparing has an Id of ", product._id);
+      //     console.log(p.product_id === product._id);
+      //     if (p.product_id === product._id) {
+      //       setCounter(p.quantity);
+      //     }
+      //   });
+    }
+  }, [shoppingCart]);
 
   const incrementQuantity = async () => {
     setRequest(true);
@@ -39,12 +61,14 @@ const AddToCartButton = ({ product }) => {
       .then(() => {
         setCounter(counter + 1);
         setQuantityInStock(quantityInStock - 1);
+        setUpdateCart(true);
         controller.abort();
       })
       .catch((error) => {
         if (axios.isCancel(error)) {
           return "axios request cancelled...";
         }
+        setError(error);
       });
 
     setRequest(false);
@@ -74,12 +98,14 @@ const AddToCartButton = ({ product }) => {
       .then(() => {
         setCounter(counter - 1);
         setQuantityInStock(quantityInStock + 1);
+        setUpdateCart(true);
         controller.abort();
       })
       .catch((error) => {
         if (axios.isCancel(error)) {
           return "axios request cancelled...";
         }
+        setError(error);
       });
 
     setRequest(false);

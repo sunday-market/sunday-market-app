@@ -12,6 +12,7 @@ export const DataProvider = ({ children }) => {
   const [categories, setCategories] = useState();
   const [loggedInUser, setLoggedInUser] = useState({});
   const [shoppingCart, setShoppingCart] = useState();
+  const [updateCart, setUpdateCart] = useState(false);
 
   // Clear Error Messages
   useEffect(() => {
@@ -29,6 +30,8 @@ export const DataProvider = ({ children }) => {
 
   // Get logged in user
   useEffect(() => {
+    const controller = new AbortController();
+
     if (localStorage.getItem("authToken")) {
       (async () => {
         const decodedJWT = jwtDecode(localStorage.getItem("authToken"));
@@ -47,9 +50,17 @@ export const DataProvider = ({ children }) => {
           })
           .catch((error) => {
             setError(error);
+            if (axios.isCancel(error)) {
+              return "Request Cancelled";
+            }
+            controller.abort();
           });
       })();
     }
+
+    return () => {
+      controller.abort();
+    };
   }, []);
 
   // Get the users shopping cart
@@ -80,16 +91,22 @@ export const DataProvider = ({ children }) => {
           })
           .catch((error) => {
             setError(error);
+            setUpdateCart(false);
+            if (axios.isCancel(error)) {
+              return "Request Cancelled";
+            }
+            controller.abort();
           });
       }
     })();
 
+    setUpdateCart(false);
     setLoading(false);
 
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [updateCart]);
 
   // Get Product Categories
   useEffect(() => {
@@ -111,6 +128,9 @@ export const DataProvider = ({ children }) => {
           })
           .catch((error) => {
             setError(error);
+            if (axios.isCancel(error)) {
+              return "Request Cancelled";
+            }
             controller.abort();
           });
       })();

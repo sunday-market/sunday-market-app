@@ -9,6 +9,7 @@ const PrivateRoute = () => {
   // Check for Authorization
   useEffect(() => {
     if (error?.response?.status === 401) {
+      setError("You are not authorised to access this page");
       localStorage.removeItem("authToken");
       <Navigate to="/login" />;
     }

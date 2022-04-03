@@ -86,7 +86,10 @@ const AccountsPage = () => {
           setAddressLine3(user?.address_line3);
         })
         .catch((error) => {
-          setError(error.response);
+          setError(error);
+          if (axios.isCancel(error)) {
+            return "Request Cancelled";
+          }
         });
     })();
 
@@ -167,7 +170,10 @@ const AccountsPage = () => {
         setError(error.response.data.error);
         setLoading(false);
         setEditAccount(!editAccount);
-        controller.abort();
+
+        if (axios.isCancel(error)) {
+          return "Request Cancelled";
+        }
       });
 
     return controller.abort();
@@ -224,8 +230,11 @@ const AccountsPage = () => {
         localStorage.removeItem("authToken");
       })
       .catch((error) => {
-        setError(error.response);
+        setError(error);
         setLoading(false);
+        if (axios.isCancel(error)) {
+          return "Request Cancelled";
+        }
         controller.abort();
       });
 
@@ -252,7 +261,7 @@ const AccountsPage = () => {
         localStorage.removeItem("authToken");
       })
       .catch((error) => {
-        setError(error.response.data.error);
+        setError(error);
         setLoading(false);
         controller.abort();
       });

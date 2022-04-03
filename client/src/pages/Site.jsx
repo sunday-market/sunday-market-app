@@ -23,7 +23,7 @@ const Site = () => {
         {error && (
           <Alert severity="error">
             <AlertTitle>Error</AlertTitle>
-            {error.response.data.error}
+            {error?.response?.data.error || error}
           </Alert>
         )}
 
