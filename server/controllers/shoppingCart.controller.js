@@ -1,5 +1,6 @@
 const ShoppingCart = require("../models/ShoppingCart");
 const { Product } = require("../models/Product");
+const Transaction = require("../models/Transaction");
 const ErrorResponse = require("../utils/errorResponse");
 
 const mongoose = require("mongoose");
@@ -95,7 +96,6 @@ exports.updateShoppingCart = async (req, res, next) => {
   }
 
   try {
-    console.log(req.body);
     await ShoppingCart.findByIdAndUpdate(cartid, req.body);
     const updatedShoppingCart = await ShoppingCart.find({ _id: cartid });
     res.status(200).json({
@@ -114,21 +114,16 @@ exports.clearShoppingCart = async (req, res, next) => {
   try {
     // find cart
     const cart = (await ShoppingCart.find({ _id: cartid }))[0];
-    // console.log(cart);
     const products_selected = cart.products_selected;
     // check length for products
     if (products_selected.length !== 0) {
       // loop through each product and take quantity and id append new quantity to the product
       products_selected.forEach(async (product) => {
-        //console.log(product);
         let productId = product.product_id.toString();
-        //console.log(productId);
         let qty = product.quantity;
         const updateProduct = await Product.findById({ _id: productId });
-        //console.log(`before save ${updateProduct}`);
         updateProduct.quantity_in_stock += qty;
         updateProduct.save();
-        // console.log(`after save ${updateProduct}`);
       });
     }
     cart.products_selected = [];
@@ -215,16 +210,65 @@ exports.removeItemInCart = async (req, res, next) => {
   }
 };
 
+exports.returnCartWithFullProductAndStall = async (req, res, next) => {
+  if (!req.body || !req.params.cartId) {
+    // check if params and body has been passed
+    return next(
+      new ErrorResponse(
+        "You Must Provide A Cart ID or Cart Contents to use this route"
+      )
+    );
+  }
+  // check cart exists and allocate to memory for aggregation
+  try {
+    let cart = await ShoppingCart.findById(req.params.cartId);
+    if (!cart) {
+      return next(new ErrorResponse("Cart Doesn't Exist? Try Again"));
+    }
 
-
+    try {
+      // retrieve product details associated with the cart
+      const cartWithProductsAndStalls = await ShoppingCart.aggregate([
+        {
+          $match: {
+            _id: cart._id,
+          },
+        },
+        {
+          $lookup: {
+            from: "products",
+            localField: "products_selected.product_id",
+            foreignField: "_id",
+            as: "products",
+          },
+        },
+        {
+          $lookup: {
+            from: "stalls",
+            localField: "products.product_stall",
+            foreignField: "_id",
+            as: "stalls",
+          },
+        },
+      ]);
+      console.log(cartWithProductsAndStalls);
+      return res.status(200).json({
+        success: true,
+        data: cartWithProductsAndStalls,
+      });
+    } catch (error) {
+      return next(error);
+    }
+  } catch (error) {
+    return next(error);
+  }
+};
 
 // loop through and delete all unused carts function
 async function clearOldCarts() {
   console.log("Clensing Database started");
   const today = new Date();
   const expiryTime = new Date(today.getTime() - 30 * 60000);
-  console.log(new Date());
-  console.log(expiryTime);
   const expiredCarts = await ShoppingCart.aggregate([
     {
       $match: {
@@ -234,8 +278,6 @@ async function clearOldCarts() {
       },
     },
   ]);
-  console.log(expiredCarts);
-
   expiredCarts.forEach(async (cart) => {
     const products_selected = cart.products_selected;
     // check length for products

@@ -29,10 +29,6 @@ const orderSchema = new mongoose.Schema(
           "Please provide a valid email",
         ],
       },
-      phone: {
-        type: String,
-        required: [true, "Stall name is required"],
-      },
       location: {
         type: String,
         required: [true, "Address is required"],

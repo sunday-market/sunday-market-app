@@ -8,7 +8,9 @@ const {
   addItemToCart,
   removeItemInCart,
   clearShoppingCart,
+  returnCartWithFullProductAndStall,
 } = require("../controllers/shoppingCart.controller");
+const { protect } = require("../middleware/auth");
 
 router.route("/").post(createNewShoppingCart);
 router
@@ -20,4 +22,7 @@ router
 router.route("/additem/:cartid").post(addItemToCart);
 router.route("/removeitem/:cartid").delete(removeItemInCart);
 router.route("/clearcart/:cartid").put(clearShoppingCart);
+router
+  .route("/processpurchase/:cartId")
+  .post(protect, returnCartWithFullProductAndStall);
 module.exports = router;

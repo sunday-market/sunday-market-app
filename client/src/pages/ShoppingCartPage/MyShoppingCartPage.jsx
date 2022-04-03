@@ -41,6 +41,7 @@ export default function MyShoppingCartPage() {
   const navigate = useNavigate();
   const errorRef = useRef(null);
   const timerRef = useRef(null);
+  const orderNoteRef = useRef(null);
 
   useEffect(() => {
     let minutesToAdd = 30;
@@ -75,22 +76,13 @@ export default function MyShoppingCartPage() {
           else {
             setShoppingCart(cart);
             setCartLoaded(true);
-            console.log(cart.updatedAt);
-            console.log(
-              `this is update at: ${new Date(
-                cart.updatedAt
-              ).getTime()}, this is new date: ${new Date().getTime()}`
-            );
             const currentDate =
               new Date(cart.updatedAt).getTime() +
               minutesToAdd * 60000 -
               new Date().getTime();
-            console.log(`this is the new date minus cart date: ${currentDate}`);
-
             if (currentDate <= 0) {
               deleteCart();
             } else {
-              console.log("Timer still has time left");
               setFutureDate(
                 new Date(cart.updatedAt).getTime() + minutesToAdd * 60000
               );
@@ -133,7 +125,6 @@ export default function MyShoppingCartPage() {
       }
       if (cart === undefined || cart === null) {
         // if null or undefined the cart no longer exists
-        console.log("creating cart in timer");
         localStorage.removeItem("shoppingCartId");
         createNewCart();
       }
@@ -180,20 +171,17 @@ export default function MyShoppingCartPage() {
         console.log(jwt);
         try {
           let res = await axios.get(`/api/user/exists/${jwt.id}`);
-          console.log(shoppingCart);
           // if shopping cart === undefined then no user has been added to this shopping cart - if res is true procceed else if res is false delete token
           if (
             (shoppingCart.user === undefined || shoppingCart.user === null) &&
             res &&
             shoppingCartId
           ) {
-            console.log("im attempting to load user into the cart");
             // put user in data
             const newCartData = {
               user: jwt.id,
               shoppingCart,
             };
-            console.log(shoppingCartId);
             res = await axios.put(
               `/api/cart/${shoppingCartId}`,
               newCartData,
@@ -269,7 +257,6 @@ export default function MyShoppingCartPage() {
     // set shopping cart and load time
     setShoppingCart(cart);
     setCartLoaded(true);
-    console.log(`this is the new cart id ${newCartId}`);
     setShoppingCartId(newCartId);
     localStorage.setItem("shoppingCartId", newCartId);
     setCreateCart(false);
@@ -297,9 +284,7 @@ export default function MyShoppingCartPage() {
     };
     const setProductInfo = async (productID) => {
       try {
-        console.log(productID);
         const res = await axios.get("/api/product/" + productID, config);
-        console.log(res.data[0]);
         setSelectedItems((prev) => [...prev, res.data[0]]);
       } catch (error) {
         if (axios.isCancel(error)) {
@@ -318,7 +303,6 @@ export default function MyShoppingCartPage() {
     };
     const loopThroughCart = () => {
       shoppingCart.products_selected.forEach((product) => {
-        console.log(`this is ${product.product_id}`);
         setProductInfo(product.product_id);
       });
     };
@@ -354,11 +338,9 @@ export default function MyShoppingCartPage() {
     try {
       const cartId = localStorage.getItem("shoppingCartId");
       const cart = (await axios.get(`/api/cart/${cartId}`)).data[0];
-      console.log(cart);
       const res = await axios.put(`/api/cart/${cartId}`, cart);
       const currentDate = new Date(res.data.data[0].updatedAt);
       setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
-      console.log(res);
     } catch (error) {
       setTimeout(() => {
         setError("");
@@ -372,12 +354,17 @@ export default function MyShoppingCartPage() {
   };
 
   const handlePurchase = async () => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+    };
     let cart;
     let cartId;
     console.log("Purchase Pressed");
     // check local storage id
     if (!localStorage.getItem("shoppingCartId")) {
-      console.log("no cart id exists");
       setTimeout(() => {
         setError("");
       }, 5000);
@@ -449,10 +436,101 @@ export default function MyShoppingCartPage() {
     // if user logged in complete purchase creation (new transaction document)
     else {
       // TODO
+      try {
+        const user_id = jwtDecode(localStorage.getItem("authToken"));
+        const customer_id = user_id.id;
+        const user = await (
+          await axios.get("/api/user/" + customer_id, config)
+        ).data.data;
+        // create transaction
+        const transaction = await (
+          await axios.post("/api/transaction/", { customer_id }, config)
+        ).data.data;
+        const transaction_id = transaction._id;
+        // create a const holding all stall and product details
+        const completeCartWithProductStalls = await (
+          await axios.post(`/api/cart/processpurchase/${cartId}`, cart, config)
+        ).data.data[0];
+
+        let orders = [];
+        for (const stall of completeCartWithProductStalls.stalls) {
+          // create products array for order
+          let products = [];
+          let orderTotal = 0;
+          completeCartWithProductStalls.products.forEach((product) => {
+            if (stall._id === product.product_stall) {
+              completeCartWithProductStalls.products_selected.forEach(
+                (selected) => {
+                  if (product._id === selected.product_id) {
+                    products.push({
+                      id: product._id,
+                      name: product.product_name,
+                      description: product.product_description,
+                      category: product.product_subcategory,
+                      price: product.product_price,
+                      quantity: selected.quantity,
+                    });
+                    orderTotal += product.product_price * selected.quantity;
+                  }
+                }
+              );
+            }
+          });
+          // Create New Order
+          let newOrder = {
+            transaction_id,
+            stall: {
+              id: stall._id,
+              name: stall.stallName,
+              category_id: stall.category,
+              email: stall.email,
+              location: stall.city_location,
+              image: stall.image,
+            },
+            customer: {
+              id: customer_id,
+              name: user.fullname,
+              email: user.email,
+            },
+            products,
+            order_notes: orderNoteRef.current.value,
+            total_order_price: orderTotal.toFixed(2),
+          };
+          console.log(newOrder);
+          let resNewOrder = await axios.post("/api/order/", newOrder, config);
+          orders.push(resNewOrder.data.data);
+        }
+        // add orders to transaction
+        console.log({ transaction, orders });
+        const res = await axios.put(
+          `/api/transaction/update/${transaction_id}`,
+          { transaction, orders },
+          config
+        );
+        console.log(res);
+      } catch (error) {
+        console.log(error);
+        if (error.response.status === 401) {
+          localStorage.removeItem("authToken");
+          return navigate("/login");
+        }
+
+        setTimeout(() => {
+          setError("");
+        }, 5000);
+        errorRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+        return setError(error.response.data.error);
+      }
+
       // delete shopping cart and keep product qtys the same and minused
-      // await axios.delete(`/api/cart/${cartId}`);
-      // navigate the user to a purchase complete page
-      return console.log("purchase successful");
+      await axios.delete(`/api/cart/${cartId}`);
+      localStorage.removeItem("shoppingCartId");
+
+      // navigate the user to a my order page
+      return navigate("/account/orders/myorders")
     }
   };
 
@@ -570,6 +648,29 @@ export default function MyShoppingCartPage() {
                 </Grid>
               );
             })}
+        </Grid>
+        <Grid container justifyContent={"flex-end"} spacing={0}>
+          <Grid
+            container
+            item
+            order={{ xs: 1, md: 2 }}
+            xs={12}
+            sm={8}
+            md={4}
+            marginTop={{ xs: 2, sm: 1 }}
+            spacing={0}
+            boxShadow={2}
+            flexShrink={1}
+            justifyContent="center"
+          >
+            <Grid item xs={12} alignContent={"center"}>
+              <TextField
+                ref={orderNoteRef}
+                placeholder="Enter Any Order Notes..."
+                fullWidth
+              ></TextField>
+            </Grid>
+          </Grid>
         </Grid>
         <Grid container justifyContent={"flex-end"} spacing={0}>
           <Grid

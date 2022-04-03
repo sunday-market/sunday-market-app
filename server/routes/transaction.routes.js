@@ -5,11 +5,15 @@ const {
   getTransactionsByUserId,
   getTransactionById,
   getAllTransactions,
+  updateTransaction,
 } = require("../controllers/transaction.controller");
 const { protect } = require("../middleware/auth");
 
-router.route("/").get(getAllTransactions).post(createNewTransaction);
-router.route("/:transactionId").get(getTransactionById);
-router.route("/customer/:userId").get(getTransactionsByUserId);
-
+router
+  .route("/")
+  .get(protect, getAllTransactions)
+  .post(protect, createNewTransaction);
+router.route("/:transactionId").get(protect, getTransactionById);
+router.route("/customer/:userId").get(protect, getTransactionsByUserId);
+router.route("/update/:transactionId").put(protect, updateTransaction);
 module.exports = router;

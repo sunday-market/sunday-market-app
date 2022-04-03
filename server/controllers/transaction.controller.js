@@ -74,3 +74,27 @@ exports.createNewTransaction = async (req, res, next) => {
     return next(error);
   }
 };
+
+// PUTS
+// Update transaction to hold the order data
+exports.updateTransaction = async (req, res, next) => {
+  // check transaction exists
+  let transactionId;
+  if (req.params.transactionId) {
+    transactionId = req.params.transactionId;
+  } else {
+    return next(new ErrorResponse("You haven't provided a transaction ID"));
+  }
+
+  try {
+    await Transaction.findByIdAndUpdate(transactionId, req.body);
+    const updatedTransaction = await Transaction.findById(transactionId);
+    res.status(200).json({
+      success: true,
+      data: updatedTransaction,
+      message: "Transaction Successfully Updated",
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
