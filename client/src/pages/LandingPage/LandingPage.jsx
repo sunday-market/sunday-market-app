@@ -52,7 +52,7 @@ const LandingPage = () => {
       controller.abort();
     };
   }, [setLoading, setError]);
-  console.log(categories);
+
   return (
     <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
       {loading ? (

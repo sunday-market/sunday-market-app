@@ -9,7 +9,11 @@ export default function CategoryAvatars({
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   const navigate = useNavigate();
   const GoToCategory = async (e) => {
-    // TODO add scroll to top
+    window.scrollTo({
+      top: 0,
+      left: 100,
+      behavior: "smooth",
+    });
     navigate(categoryLink);
   };
   return (
@@ -34,7 +38,7 @@ export default function CategoryAvatars({
         src={imgSource ? imgSource : PF + "logo192.png"}
         onClick={GoToCategory}
       />
-      <Typography align="center" fontWeight={"bold"} >
+      <Typography align="center" fontWeight={"bold"}>
         {categoryTitle ? categoryTitle : "Category"}
       </Typography>
     </>
