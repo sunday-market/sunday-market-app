@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import jwtDecode from "jwt-decode";
 
 import ContactSupportIcon from "@mui/icons-material/ContactSupport";
@@ -8,8 +8,6 @@ import ContactSupportImage from "../assets/contactsupport.jpg";
 import QuestionsImage from "../assets/questions.svg";
 
 import {
-  Alert,
-  AlertTitle,
   Box,
   CardMedia,
   Typography,
@@ -21,12 +19,9 @@ import {
   MenuItem,
 } from "@mui/material";
 
-import PageLoading from "../components/PageLoading";
+import DataContext from "../context/DataContext";
 
 const Support = () => {
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
   const [contactForm, setContactForm] = useState({
     name: "",
     email: "",
@@ -34,23 +29,7 @@ const Support = () => {
     comments: "",
   });
 
-  // Catch Errors
-  useEffect(() => {
-    if (error) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-    }
-  }, [error]);
-
-  // Catch Success
-  useEffect(() => {
-    if (success) {
-      setTimeout(() => {
-        setSuccess("");
-      }, 5000);
-    }
-  }, [success]);
+  const { setError, setSuccess, setLoading } = useContext(DataContext);
 
   // Get User info if logged in
   useEffect(() => {
@@ -80,8 +59,9 @@ const Support = () => {
             }));
           })
           .catch((error) => {
-            setError(error.message);
             setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
           });
       }
     })();
@@ -90,7 +70,7 @@ const Support = () => {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [setError, setLoading]);
 
   const handleChange = (e) => {
     setContactForm({ ...contactForm, [e.target.name]: e.target.value });
@@ -99,8 +79,6 @@ const Support = () => {
   const handleSendMessage = async () => {
     const controller = new AbortController();
     setLoading(true);
-
-    console.log(contactForm);
 
     if (
       !contactForm.name ||
@@ -120,9 +98,8 @@ const Support = () => {
       })
       .catch((error) => {
         setLoading(false);
-        console.log(error.response.data);
-        setError(error.response.data.error);
-        controller.abort();
+        if (axios.isCancel(error)) return;
+        setError([error]);
       });
 
     setLoading(false);
@@ -134,197 +111,178 @@ const Support = () => {
 
   return (
     <>
-      {error && (
-        <Alert severity="error">
-          <AlertTitle>Error</AlertTitle>
-          {error}
-        </Alert>
-      )}
-      {success && (
-        <Alert severity="success">
-          <AlertTitle>Success</AlertTitle>
-          {success}
-        </Alert>
-      )}
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="center"
+        direction="row"
+      >
+        <CardMedia
+          component="img"
+          src={ContactSupportImage}
+          height="190px"
+          style={{
+            filter: "grayscale(50%) contrast(50%) blur(1px)",
+            position: "relative",
+          }}
+        />
 
-      {loading ? (
-        <PageLoading />
-      ) : (
-        <>
+        <Box position="absolute" align="center">
+          <Typography
+            variant="h3"
+            textAlign="center"
+            color="white"
+            sx={{
+              textShadow: "0px 0px 15px black",
+              WebkittextStroke: "2px red",
+            }}
+          >
+            Sunday Market Support
+          </Typography>
+
+          <Typography
+            backgroundColor="rgba(0, 0, 0, 0.10)"
+            variant="h5"
+            textAlign="center"
+            color="white"
+            p={1}
+            sx={{
+              textShadow: "0px 0px 2px black",
+            }}
+          >
+            Got an issue? Let us know!
+          </Typography>
+        </Box>
+      </Box>
+
+      <Grid
+        container
+        justifyContent="center"
+        position="relative"
+        dirction="column"
+        mt={2}
+        flexGrow={1}
+      >
+        <Grid item xs={11} sm={6} md={5} p={1}>
           <Box
-            display="flex"
-            alignItems="center"
-            justifyContent="center"
-            direction="row"
+            backgroundColor="#f0f0f0"
+            border="solid 1px #b0b0b0"
+            p={2}
+            borderRadius={1}
           >
-            <CardMedia
-              component="img"
-              src={ContactSupportImage}
-              height="200px"
-              style={{
-                filter: "grayscale(50%) contrast(50%) blur(1px)",
-                position: "relative",
-              }}
-            />
-
-            <Box position="absolute" align="center">
-              <Typography
-                variant="h3"
-                textAlign="center"
-                color="white"
-                sx={{
-                  textShadow: "0px 0px 15px black",
-                  WebkittextStroke: "2px red",
-                }}
-              >
-                Sunday Market Support
-              </Typography>
-
-              <Typography
-                backgroundColor="rgba(0, 0, 0, 0.10)"
-                variant="h5"
-                textAlign="center"
-                color="white"
-                p={1}
-                sx={{
-                  textShadow: "0px 0px 2px black",
-                }}
-              >
-                Got an issue? Let us know!
-              </Typography>
-            </Box>
-          </Box>
-
-          <Grid
-            container
-            justifyContent="center"
-            position="relative"
-            dirction="column"
-            mt={2}
-            height="100%"
-            flexGrow={1}
-          >
-            <Grid item xs={11} sm={6} md={5} p={1}>
-              <Box
-                backgroundColor="#f0f0f0"
-                border="solid 1px #b0b0b0"
-                p={2}
-                borderRadius={1}
-              >
-                <Grid container direction="column">
-                  <Grid container alignItems="center">
-                    <ContactSupportIcon
-                      style={{ fontSize: 40, color: "grey" }}
-                      display="inline-block"
-                    />
-                    <Typography variant="h5">
-                      <strong>Contact Support</strong>
-                    </Typography>
-                  </Grid>
-                  <Grid item>
-                    <Typography ml={5} variant="body1">
-                      Got an issue? Want to provide feedback? Fill out the form
-                      below to send us a message.
-                    </Typography>
-                  </Grid>
-
-                  <Grid item p={1}>
-                    <InputLabel>Name: </InputLabel>
-                    <TextField
-                      fullWidth
-                      name="name"
-                      variant="outlined"
-                      value={contactForm?.name}
-                      onChange={handleChange}
-                      type="text"
-                      size="small"
-                      sx={{ backgroundColor: "white" }}
-                    />
-                  </Grid>
-
-                  <Grid item p={1}>
-                    <InputLabel>Email:</InputLabel>
-                    <TextField
-                      fullWidth
-                      name="email"
-                      variant="outlined"
-                      value={contactForm?.email}
-                      onChange={handleChange}
-                      type="text"
-                      size="small"
-                      sx={{ backgroundColor: "white" }}
-                    />
-                  </Grid>
-
-                  <Grid item p={1}>
-                    <InputLabel>Contact Reason:</InputLabel>
-                    <Select
-                      fullWidth
-                      name="contactReason"
-                      variant="outlined"
-                      size="small"
-                      sx={{ backgroundColor: "white" }}
-                      value={contactForm?.contactReason}
-                      onChange={handleChange}
-                    >
-                      <MenuItem value="report stall">Report a Stall</MenuItem>
-                      <MenuItem value="order problem">
-                        Problem with an Order
-                      </MenuItem>
-                      <MenuItem value="feedback">Give Feedback</MenuItem>
-                      <MenuItem value="other">Other</MenuItem>
-                    </Select>
-                  </Grid>
-
-                  <Grid item p={1}>
-                    <InputLabel>Comments:</InputLabel>
-                    <TextField
-                      fullWidth
-                      name="comments"
-                      multiline
-                      rows={4}
-                      value={contactForm?.comments}
-                      onChange={handleChange}
-                      variant="outlined"
-                      type="text"
-                      size="small"
-                      sx={{ backgroundColor: "white" }}
-                    />
-                  </Grid>
-
-                  <Grid item p={1}>
-                    <Box textAlign="center">
-                      <Button variant="contained" onClick={handleSendMessage}>
-                        Send Message
-                      </Button>
-                    </Box>
-                  </Grid>
-                </Grid>
-              </Box>
-            </Grid>
-
-            <Grid item xs={11} sm={6} md={5} p={1}>
-              <Box
-                backgroundColor="white"
-                border="solid 1px #b0b0b0"
-                borderRadius={1}
-                display="flex"
-                direction="column"
-                justifyContent="center"
-                alignItems="center"
-                height="100%"
-              >
-                <Box
-                  component="img"
-                  src={QuestionsImage}
-                  alt="One-eyed creatures with computer and question marks"
-                  width="70%"
+            <Grid container direction="column">
+              <Grid container alignItems="center">
+                <ContactSupportIcon
+                  style={{ fontSize: 40, color: "grey" }}
+                  display="inline-block"
                 />
-              </Box>
+                <Typography variant="h5">
+                  <strong>Contact Support</strong>
+                </Typography>
+              </Grid>
+              <Grid item>
+                <Typography ml={5} variant="body1">
+                  Got an issue? Want to provide feedback? Fill out the form
+                  below to send us a message.
+                </Typography>
+              </Grid>
+
+              <Grid item p={1}>
+                <InputLabel>Name: </InputLabel>
+                <TextField
+                  fullWidth
+                  name="name"
+                  variant="outlined"
+                  value={contactForm?.name}
+                  onChange={handleChange}
+                  type="text"
+                  size="small"
+                  sx={{ backgroundColor: "white" }}
+                />
+              </Grid>
+
+              <Grid item p={1}>
+                <InputLabel>Email:</InputLabel>
+                <TextField
+                  fullWidth
+                  name="email"
+                  variant="outlined"
+                  value={contactForm?.email}
+                  onChange={handleChange}
+                  type="text"
+                  size="small"
+                  sx={{ backgroundColor: "white" }}
+                />
+              </Grid>
+
+              <Grid item p={1}>
+                <InputLabel>Contact Reason:</InputLabel>
+                <Select
+                  fullWidth
+                  name="contactReason"
+                  variant="outlined"
+                  size="small"
+                  sx={{ backgroundColor: "white" }}
+                  value={contactForm?.contactReason}
+                  onChange={handleChange}
+                >
+                  <MenuItem value="report stall">Report a Stall</MenuItem>
+                  <MenuItem value="order problem">
+                    Problem with an Order
+                  </MenuItem>
+                  <MenuItem value="feedback">Give Feedback</MenuItem>
+                  <MenuItem value="other">Other</MenuItem>
+                </Select>
+              </Grid>
+
+              <Grid item p={1}>
+                <InputLabel>Comments:</InputLabel>
+                <TextField
+                  fullWidth
+                  name="comments"
+                  multiline
+                  rows={4}
+                  value={contactForm?.comments}
+                  onChange={handleChange}
+                  variant="outlined"
+                  type="text"
+                  size="small"
+                  sx={{ backgroundColor: "white" }}
+                />
+              </Grid>
+
+              <Grid item p={1}>
+                <Box textAlign="center">
+                  <Button variant="contained" onClick={handleSendMessage}>
+                    Send Message
+                  </Button>
+                </Box>
+              </Grid>
             </Grid>
-          </Grid>
-        </>
-      )}
+          </Box>
+        </Grid>
+
+        <Grid item xs={11} sm={6} md={5} p={1}>
+          <Box
+            backgroundColor="white"
+            border="solid 1px #b0b0b0"
+            borderRadius={1}
+            display="flex"
+            direction="column"
+            justifyContent="center"
+            alignItems="center"
+            height="100%"
+          >
+            <Box
+              component="img"
+              src={QuestionsImage}
+              alt="One-eyed creatures with computer and question marks"
+              width="65%"
+              py={2}
+            />
+          </Box>
+        </Grid>
+      </Grid>
     </>
   );
 };

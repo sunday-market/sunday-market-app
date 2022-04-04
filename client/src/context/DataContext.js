@@ -14,14 +14,14 @@ export const DataProvider = ({ children }) => {
   const [shoppingCart, setShoppingCart] = useState();
   const [updateCart, setUpdateCart] = useState(false);
 
-  // Clear Error Messages
+  // // Clear Error Messages
   useEffect(() => {
     setTimeout(() => {
       setError("");
     }, 5000);
   }, [error]);
 
-  // Clear Success Messages
+  // // Clear Success Messages
   useEffect(() => {
     setTimeout(() => {
       setSuccess("");
@@ -80,7 +80,6 @@ export const DataProvider = ({ children }) => {
           .get(`/api/cart/${localStorage.getItem("shoppingCartId")}`, config)
           .then((result) => {
             setShoppingCart(result.data[0]);
-            console.log("DataContext: Shopping Cart", result.data[0]);
           })
           .catch((error) => {
             if (axios.isCancel(error)) return;
