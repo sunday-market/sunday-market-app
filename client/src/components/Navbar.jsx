@@ -500,7 +500,7 @@ export default function Navbar() {
             </IconButton>
           </Grid>
           <Box width={"100%"} />
-          {!windowSize && (
+          {windowSize && (
             <Grid
               item
               alignContent={"center"}
