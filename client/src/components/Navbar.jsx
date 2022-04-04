@@ -367,7 +367,7 @@ export default function Navbar() {
             </NavLink>
           </Grid>
           {/* Search bar desktop */}
-          {windowSize && (
+          {!windowSize && (
             <Grid
               item
               alignContent={"center"}
