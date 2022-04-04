@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
 import axios from "axios";
@@ -23,6 +23,9 @@ import {
   Box,
 } from "@mui/material";
 
+import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
+
 const AddProduct = () => {
   const [product, setProduct] = useState({
     product_name: "",
@@ -34,22 +37,17 @@ const AddProduct = () => {
     image: "",
   });
 
-  const [request, setRequest] = useState(false);
   const [imageName, setImageName] = useState("");
   const [stalls, setStalls] = useState([]); // All User Stalls
   const [subCategories, setSubCategories] = useState();
-  const [success, setSuccess] = useState("");
-  const [error, setError] = useState("");
-
-  const errorRef = useRef(null);
-  const successRef = useRef(null);
+  const { setError, setSuccess, loading, setLoading } = useContext(DataContext);
 
   const navigate = useNavigate();
 
   // Get the User Stalls
   useEffect(() => {
     const controller = new AbortController();
-    setRequest(true);
+    setLoading(true);
 
     (async () => {
       const authToken = localStorage.getItem("authToken");
@@ -69,37 +67,24 @@ const AddProduct = () => {
         .get(`../../api/mystalls/${decodedJWT.id}`, config)
         .then((result) => {
           setStalls(result.data);
-          setRequest(false);
-          controller.abort();
         })
         .catch((error) => {
-          if (axios.isCancel(error)) {
-            return "Request cancelled...";
-          }
-
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            navigate("/login");
-          }
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-
-          return setError(error.response.data.error);
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
         });
     })();
 
-    setRequest(false);
-
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, [navigate]);
+  }, [navigate, setError, setLoading]);
 
   // update the product category when the stall changes
   useEffect(() => {
     const controller = new AbortController();
-    setRequest(true);
+    setLoading(true);
 
     if (product.product_stall) {
       (async () => {
@@ -120,21 +105,20 @@ const AddProduct = () => {
           )
           .then((result) => {
             setSubCategories(result.data[0].stall_subcategories);
-            controller.abort();
           })
           .catch((error) => {
-            if (axios.isCancel(error)) {
-              return "Request cancelled...";
-            }
+            setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
           });
       })();
     }
 
-    setRequest(false);
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, [product.product_stall]);
+  }, [product.product_stall, setError, setLoading]);
 
   const handleChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
@@ -166,7 +150,31 @@ const AddProduct = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const controller = new AbortController();
     const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
+
+    if (!product.product_stall) {
+      setError("You must select a stall");
+      return;
+    }
+    console.log("Stall passed");
+
+    if (!product.product_name) {
+      return setError("You must provide a name for the product");
+    }
+    console.log("Name passed");
+
+    if (!product.product_subcategory) {
+      return setError("You must provide a product category");
+    }
+
+    if (!product.product_price || product.product_price === 0) {
+      return setError("You must specify a price to sell this product");
+    }
+
+    if (!product.quantity_in_stock) {
+      setProduct((p) => ({ ...p, quantity_in_stock: 1 }));
+    }
 
     const formData = new FormData();
 
@@ -179,73 +187,31 @@ const AddProduct = () => {
     formData.append("quantity_in_stock", product.quantity_in_stock);
     formData.append("image", product.image);
 
-    if (!product.product_stall) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return setError("You must select a stall");
-    }
-
-    if (!product.product_name) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return setError("You must provide a name for the product");
-    }
-
-    if (!product.product_subcategory) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return setError("You must provide a product category");
-    }
-
-    if (!product.product_price || product.product_price === 0) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      return setError("You must specify a price to sell this product");
-    }
-
-    if (!product.quantity_in_stock) {
-      setProduct((p) => ({ ...p, quantity_in_stock: 1 }));
-    }
-
     const config = {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
+      signal: controller.signal,
     };
+    setLoading(true);
 
-    try {
-      await axios.post("/api/product/", formData, config);
+    await axios
+      .post("/api/product/", formData, config)
+      .then(() => {
+        setSuccess("Product added");
+      })
+      .catch((error) => {
+        setLoading(false);
+        if (axios.isCancel(error)) return;
+        setError([error]);
+        scrollToTop();
+      });
 
-      handleClearForm();
-
-      setSuccess("Product added");
-
-      setTimeout(() => {
-        setSuccess("");
-      }, 6000);
-      successRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    } catch (error) {
-      if (error.response.status === 401) {
-        localStorage.removeItem("authToken");
-        return navigate("/login");
-      }
-
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      setError(error);
-
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-    }
+    setLoading(false);
+    handleClearForm();
+    scrollToTop();
+    return controller.abort();
   };
 
   const handleImage = (e) => {
@@ -255,20 +221,11 @@ const AddProduct = () => {
 
   return (
     <Box p={{ xs: 0, sm: 4, md: 8 }}>
-      <form onSubmit={handleSubmit} encType="multipart/form-data">
+      <form onSubmit={(e) => handleSubmit(e)} encType="multipart/form-data">
         <Typography variant="h4">Add Product</Typography>
 
         {/* Stall */}
         <Grid container direction="column" spacing={2}>
-          {/* Success Alert */}
-          <Grid item ref={successRef}>
-            {success && <Alert severity="success">{success}</Alert>}
-          </Grid>
-          {/* Error Alert */}
-          <Grid item ref={errorRef}>
-            {error && <Alert severity="error">{error}</Alert>}
-          </Grid>
-
           <Grid item></Grid>
           <Grid item>
             <InputLabel required>Stall</InputLabel>
@@ -276,18 +233,18 @@ const AddProduct = () => {
             <Select
               autoFocus
               name="product_stall"
-              disabled={stalls.length === 0 || request}
+              disabled={stalls?.length === 0 || loading}
               variant="outlined"
               size="small"
               fullWidth
-              value={product.product_stall}
+              value={product?.product_stall}
               placeholder="Choose a Stall"
               onChange={handleChange}
               sx={{ background: "white" }}
             >
               {stalls.map((stall) => (
-                <MenuItem key={stall._id} value={stall._id}>
-                  {stall.stallName}
+                <MenuItem key={stall?._id} value={stall?._id}>
+                  {stall?.stallName}
                 </MenuItem>
               ))}
             </Select>
@@ -313,13 +270,13 @@ const AddProduct = () => {
           <Grid item>
             <InputLabel required>Product Name</InputLabel>
             <TextField
-              disabled={request}
+              disabled={loading}
               name="product_name"
               variant="outlined"
               fullWidth
               size="small"
               type="text"
-              value={product.product_name}
+              value={product?.product_name}
               onFocus={handleFocus}
               onChange={handleChange}
               placeholder="Product Name"
@@ -332,7 +289,7 @@ const AddProduct = () => {
             <InputLabel>Description</InputLabel>
             <TextField
               name="product_description"
-              disabled={request}
+              disabled={loading}
               variant="outlined"
               fullWidth
               multiline
@@ -340,7 +297,7 @@ const AddProduct = () => {
               maxRows={8}
               size="small"
               type="text"
-              value={product.product_description}
+              value={product?.product_description}
               onFocus={handleFocus}
               onChange={handleChange}
               placeholder="Enter a description of the product here..."
@@ -355,17 +312,17 @@ const AddProduct = () => {
 
             <Select
               name="product_subcategory"
-              disabled={request}
+              disabled={loading}
               variant="outlined"
               size="small"
               fullWidth
-              value={product.product_subcategory}
+              value={product?.product_subcategory}
               placeholder="Product Category"
               onChange={handleChange}
               sx={{ background: "white" }}
             >
               {subCategories &&
-                subCategories.map((category) => (
+                subCategories?.map((category) => (
                   <MenuItem key={category._id} value={category._id}>
                     {category.subcategory}
                   </MenuItem>
@@ -378,12 +335,12 @@ const AddProduct = () => {
             <InputLabel required>Price</InputLabel>
 
             <TextField
-              disabled={request}
+              disabled={loading}
               name="product_price"
               variant="outlined"
               size="small"
               type="text"
-              value={product.product_price}
+              value={product?.product_price}
               onChange={handleChange}
               onFocus={handleFocus}
               onBlur={handleCurrencyOnBlur}
@@ -396,12 +353,12 @@ const AddProduct = () => {
           <Grid item>
             <InputLabel required>Quantity in Stock</InputLabel>
             <TextField
-              disabled={request}
+              disabled={loading}
               name="quantity_in_stock"
               variant="outlined"
               size="small"
               type="text"
-              value={product.quantity_in_stock}
+              value={product?.quantity_in_stock}
               onChange={handleChange}
               onFocus={handleFocus}
               placeholder="0"
@@ -426,7 +383,7 @@ const AddProduct = () => {
                 onChange={handleImage}
               />
               <Button
-                disabled={request}
+                disabled={loading}
                 variant="contained"
                 size="small"
                 component="span"
@@ -440,7 +397,7 @@ const AddProduct = () => {
               <>
                 <Button
                   name="image"
-                  disabled={request}
+                  disabled={loading}
                   variant="outlined"
                   startIcon={<DeleteIcon />}
                   onClick={() => {
@@ -467,15 +424,15 @@ const AddProduct = () => {
           <Grid item>
             <Grid container justifyContent="center">
               <Button
-                disabled={request}
-                type="submit"
+                disabled={loading}
+                onClick={(e) => handleSubmit(e)}
                 variant="contained"
                 startIcon={<SaveIcon />}
               >
                 Save
               </Button>
               <Button
-                disabled={request}
+                disabled={loading}
                 variant="outlined"
                 startIcon={<CancelIcon />}
                 onClick={() => navigate("../myproducts")}

@@ -123,10 +123,10 @@ const Order = () => {
               <Box component="div" p={1}>
                 <Divider />
               </Box>
-              <Typography variant="body2">
+              {/* <Typography variant="body2">
                 <strong>Phone: </strong>
                 {order?.stall?.phone || "Not supplied"}
-              </Typography>
+              </Typography> */}
               <Typography variant="body2">
                 <strong>Email: </strong>
                 {order?.stall?.email || "Not supplied"}

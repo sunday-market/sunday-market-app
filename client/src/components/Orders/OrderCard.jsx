@@ -67,10 +67,10 @@ const OrderCard = ({ order }) => {
           }}
         >
           <Typography variant="h6">{order.stall.name}</Typography>
-          <Typography variant="body2">
+          {/* <Typography variant="body2">
             <strong>Phone: </strong>
             {order.stall.phone}
-          </Typography>
+          </Typography> */}
           <Typography variant="body2" mb={2}>
             <strong>Email: </strong>
             {order.stall.email}
