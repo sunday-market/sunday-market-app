@@ -114,7 +114,6 @@ export default function MessagePage(props) {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    setLoading(true);
 
     const getMesssages = async () => {
       if (currentMessage) {
@@ -132,7 +131,6 @@ export default function MessagePage(props) {
           );
           setMessages(res.data);
         } catch (error) {
-          setLoading(false);
           if (axios.isCancel(error)) {
             return console.log("Successfully Aborted");
           }
@@ -146,8 +144,6 @@ export default function MessagePage(props) {
     };
 
     getMesssages();
-    setLoading(false);
-
     return () => {
       controller.abort();
     };
@@ -163,7 +159,6 @@ export default function MessagePage(props) {
   const handleSubmit = async (e) => {
     e.preventDefault();
     const controller = new AbortController();
-    setLoading(true);
 
     const message = {
       send_user: loggedInUser._id,
@@ -195,7 +190,6 @@ export default function MessagePage(props) {
       setMessages([...messages, res.data]);
       setNewMessage("");
     } catch (error) {
-      setLoading(false);
       if (error.response.status === 401) {
         localStorage.removeItem("authToken");
         return navigate("/login");
@@ -203,7 +197,6 @@ export default function MessagePage(props) {
       setError("Unable to send new message.");
     }
 
-    setLoading(false);
     return controller.abort();
   };
 
