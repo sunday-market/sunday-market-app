@@ -108,7 +108,7 @@ exports.updateStall = async (req, res, next) => {
 exports.deleteStallByID = async (req, res, next) => {
   try {
     await Stall.deleteOne({ _id: req.params.stallid });
-    if (req.body.image !== "noimage.jpg") {
+    if (req.body.image !== "noimage.png") {
       await fs.unlink(
         path.resolve(`../server/public/images/stalls/${req.body.image}`),
         (err) => {
