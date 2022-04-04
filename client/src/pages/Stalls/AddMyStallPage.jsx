@@ -55,10 +55,6 @@ export default function AddMyStallPage() {
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
         return setError([error]);
       }
     };
@@ -80,10 +76,6 @@ export default function AddMyStallPage() {
         } catch (error) {
           setLoading(false);
 
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
           return setError(error);
         }
       };
@@ -104,11 +96,6 @@ export default function AddMyStallPage() {
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
-
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
 
         return setError([error]);
       }
@@ -155,8 +142,6 @@ export default function AddMyStallPage() {
         }
       } catch (error) {
         setLoading(false);
-
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         sendPost = false;
         return setError([error]);
       }
@@ -165,7 +150,6 @@ export default function AddMyStallPage() {
     // Check stall name for a value
     if (stallName === "" || stallName.trim() === "") {
       setLoading(false);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You Need To Provide A Stall Name");
     } else {
@@ -175,7 +159,6 @@ export default function AddMyStallPage() {
     currentStalls.forEach((currentStall) => {
       if (stallName === currentStall.stallName) {
         setLoading(false);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         sendPost = false;
         return setError(
           `The stall name ${stallName}, is already taken please try another.`
@@ -186,7 +169,6 @@ export default function AddMyStallPage() {
     // Check for Category selected
     if (!category) {
       setLoading(false);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You need to select a category to upload a store");
     } else {
@@ -216,7 +198,6 @@ export default function AddMyStallPage() {
     // check location
     if (!location) {
       setLoading(false);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You must provide a location for the stall");
     } else {
@@ -234,8 +215,6 @@ export default function AddMyStallPage() {
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
-
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         return setError([error]);
       }
     }
