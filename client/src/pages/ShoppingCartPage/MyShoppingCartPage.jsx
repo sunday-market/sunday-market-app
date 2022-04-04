@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Replay30Icon from "@mui/icons-material/Replay30";
 import {
@@ -23,23 +23,25 @@ import jwtDecode from "jwt-decode";
 import axios from "axios";
 import { useCountdown } from "../../hooks/useCountdown";
 
+import DataContext from "../../context/DataContext";
+
 export default function MyShoppingCartPage() {
   const [shoppingCart, setShoppingCart] = useState(null);
   const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
   const [shoppingCartId, setShoppingCartId] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
-  const [error, setError] = useState("");
   const [createCart, setCreateCart] = useState(false);
   const [cartLoaded, setCartLoaded] = useState(false);
   const [futureDate, setFutureDate] = useState(
     new Date().getTime() + 30 * 60000
   );
 
-  const [days, hours, minutes, seconds] = useCountdown(futureDate);
+  const { setError, setLoading } = useContext(DataContext);
+
+  const [minutes, seconds] = useCountdown(futureDate);
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
   // navigation
   const navigate = useNavigate();
-  const errorRef = useRef(null);
   const timerRef = useRef(null);
   const orderNoteRef = useRef(null);
 
@@ -89,14 +91,7 @@ export default function MyShoppingCartPage() {
             }
           }
         } catch (error) {
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          return setError(error.response.data.error);
+          return setError([error]);
         }
       }
     };
@@ -195,10 +190,7 @@ export default function MyShoppingCartPage() {
               controller.abort();
               return navigate("/login");
             }, 5000);
-            errorRef.current.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
+
             return setError(
               "Bad Authentication! your user doesn't appear to exist, you'll be redirected to login, please login and try again!"
             );
@@ -208,14 +200,7 @@ export default function MyShoppingCartPage() {
             console.log(error);
             return console.log("Successfully Aborted");
           }
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          return setError(error.response.data.error);
+          return setError([error]);
         }
       };
       loadUserIdToCart();
@@ -223,7 +208,7 @@ export default function MyShoppingCartPage() {
     return () => {
       controller.abort();
     };
-  }, [cartLoaded, navigate, shoppingCart, shoppingCartId]);
+  }, [cartLoaded, navigate, setError, shoppingCart, shoppingCartId]);
 
   async function deleteCart() {
     let cartid = localStorage.getItem("shoppingCartId");
@@ -295,14 +280,8 @@ export default function MyShoppingCartPage() {
           console.log(error);
           return console.log("Successfully Aborted");
         }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        return setError(error.response.data.error);
+
+        return setError([error]);
       }
     };
     const loopThroughCart = () => {
@@ -317,7 +296,7 @@ export default function MyShoppingCartPage() {
     return () => {
       controller.abort();
     };
-  }, [shoppingCart]);
+  }, [setError, shoppingCart]);
 
   // Handle cart clear
   const handleCartClear = async () => {
@@ -346,14 +325,7 @@ export default function MyShoppingCartPage() {
       const currentDate = new Date(res.data.data[0].updatedAt);
       setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
     } catch (error) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-      return setError(error.response.data.error);
+      return setError([error]);
     }
   };
 
@@ -369,13 +341,6 @@ export default function MyShoppingCartPage() {
     console.log("Purchase Pressed");
     // check local storage id
     if (!localStorage.getItem("shoppingCartId")) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
       return setError("Your Cart doesn't appear to exist anymore.");
     }
     // check id returns a valid cart
@@ -384,24 +349,10 @@ export default function MyShoppingCartPage() {
       try {
         cart = await (await axios.get(`/api/cart/${cartId}`)).data[0];
       } catch (error) {
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        return setError(error.response.data.error);
+        return setError([error]);
       }
     }
     if (!cart) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
       return setError(
         "Your Cart ID doesn't Match any cart in the database try refreshing your page or add items to the cart, if the problem persists please contact the support team"
       );
@@ -410,13 +361,6 @@ export default function MyShoppingCartPage() {
 
     // check cart length
     if (cart.products_selected.length === 0) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
       return setError("Your Cart doesn't have any items in it!");
     }
     // update cart to avoid any possible deletion
@@ -429,10 +373,7 @@ export default function MyShoppingCartPage() {
         setError("");
         navigate("/login");
       }, 5000);
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
+
       return setError(
         "You are not logged in! Redirecting you to the Login Page, don't worry your cart is safe and valid for another 30minutes."
       );
@@ -519,14 +460,7 @@ export default function MyShoppingCartPage() {
           return navigate("/login");
         }
 
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        return setError(error.response.data.error);
+        return setError([error]);
       }
 
       // delete shopping cart and keep product qtys the same and minused
@@ -541,10 +475,6 @@ export default function MyShoppingCartPage() {
   return (
     <>
       <Box p={2} boxShadow={1} m={2} bgcolor="grey.A200">
-        <Box p={2} ref={errorRef}>
-          {error && <Alert severity="error">{error}</Alert>}
-        </Box>
-
         <Typography p={3} variant="h4">
           My Shopping Cart
         </Typography>
