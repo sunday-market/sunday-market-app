@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import {
   Grid,
@@ -7,7 +7,6 @@ import {
   TextField,
   Select,
   MenuItem,
-  Alert,
   Button,
   Box,
   RadioGroup,
@@ -25,6 +24,8 @@ import {
 import jwtDecode from "jwt-decode";
 import axios from "axios";
 
+import DataContext from "../../context/DataContext";
+
 export default function AddMyStallPage() {
   const [stallName, setStallName] = useState("");
   const [image, setImage] = useState("");
@@ -34,9 +35,10 @@ export default function AddMyStallPage() {
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [location, setLocation] = useState("");
-  const [error, setError] = useState("");
   const [user, setCurrentUser] = useState(null);
   const [currentStalls, setCurrentStalls] = useState(null);
+
+  const { setError, setLoading } = useContext(DataContext);
 
   // navigation
   const navigate = useNavigate();
@@ -45,42 +47,39 @@ export default function AddMyStallPage() {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+    setLoading(true);
+
     const getCurrentStalls = async () => {
       try {
         setCurrentStalls((await axios.get("/api/stalls", signal)).data);
       } catch (error) {
-        if (axios.isCancel(error)) {
-          return console.log("Successfully Aborted");
-        }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
+        if (axios.isCancel(error)) return;
         errorRef.current.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
-        return setError(error);
+        return setError([error]);
       }
     };
     getCurrentStalls();
+    setLoading(false);
+
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [setError, setLoading]);
 
   useEffect(() => {
+    setLoading(true);
+
     if (localStorage.getItem("authToken")) {
       const getUser = async () => {
         try {
           setCurrentUser(jwtDecode(localStorage.getItem("authToken")));
         } catch (error) {
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            navigate("/login");
-          }
-          setTimeout(() => {
-            setError("");
-          }, 5000);
+          setLoading(false);
+
           errorRef.current.scrollIntoView({
             behavior: "smooth",
             block: "start",
@@ -90,48 +89,51 @@ export default function AddMyStallPage() {
       };
       getUser();
     }
-  }, [navigate]);
+
+    setLoading(false);
+  }, [navigate, setError, setLoading]);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+    setLoading(true);
+
     const getCategorys = async () => {
       try {
         setCategoryList((await axios.get("/api/category/", signal)).data);
       } catch (error) {
-        if (axios.isCancel(error)) {
-          return console.log("Successfully Aborted");
-        }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
+        if (axios.isCancel(error)) return;
+
         errorRef.current.scrollIntoView({
           behavior: "smooth",
           block: "start",
         });
-        return setError(error);
+
+        return setError([error]);
       }
     };
     getCategorys();
+    setLoading(false);
+
     return () => {
       controller.abort();
     };
-  }, []);
-
-  useEffect(() => {
-    if (!localStorage.getItem("authToken")) {
-      navigate("/");
-    }
-  }, [navigate]);
+  }, [setError, setLoading]);
 
   const saveStall = async (e) => {
     e.preventDefault();
+
+    const controller = new AbortController();
+    setLoading(true);
+
     let sendPost = true;
     const config = {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
+      signal: controller.signal,
     };
 
     const stallData = new FormData();
@@ -146,40 +148,33 @@ export default function AddMyStallPage() {
           // if length is 0 then user is not genuine and
           // must remove token and navigate to home
           localStorage.removeItem("authToken");
+          setLoading(false);
           navigate("/login");
         } else {
           stallData.append("user", user.id);
         }
       } catch (error) {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          navigate("/login");
-        }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
+
         errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         sendPost = false;
-        return setError(error);
+        return setError([error]);
       }
     }
 
     // Check stall name for a value
     if (stallName === "" || stallName.trim() === "") {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setLoading(false);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You Need To Provide A Stall Name");
     } else {
       stallData.append("stallName", stallName);
     }
+
     currentStalls.forEach((currentStall) => {
       if (stallName === currentStall.stallName) {
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
         errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         sendPost = false;
         return setError(
@@ -190,15 +185,14 @@ export default function AddMyStallPage() {
 
     // Check for Category selected
     if (!category) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setLoading(false);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You need to select a category to upload a store");
     } else {
       stallData.append("category", category);
     }
+
     // set current activated to currently selected radio button - false by default
     stallData.append("activated", activateStall);
 
@@ -221,32 +215,33 @@ export default function AddMyStallPage() {
 
     // check location
     if (!location) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setLoading(false);
       errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You must provide a location for the stall");
     } else {
       stallData.append("city_location", location);
     }
+
     if (sendPost) {
       // try and post the data
       try {
         await axios.post("/api/stalls/", stallData, config);
+
+        setLoading(false);
+
         return navigate("/account/stalls/mystalls");
       } catch (error) {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          return navigate("/login");
-        }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
+        if (axios.isCancel(error)) return;
+
         errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-        return setError(error.response.data.error);
+        return setError([error]);
       }
     }
+
+    setLoading(false);
+    return controller.abort();
   };
 
   const handleCancel = () => {
@@ -259,9 +254,7 @@ export default function AddMyStallPage() {
         <Typography variant="h4">Create A Stall</Typography>
         <Grid container direction={"column"} spacing={1}>
           {/* Error Alert */}
-          <Grid item ref={errorRef}>
-            {error && <Alert severity="error">{error}</Alert>}
-          </Grid>
+
           <Grid item>
             <InputLabel required>Stall Name</InputLabel>
             <TextField

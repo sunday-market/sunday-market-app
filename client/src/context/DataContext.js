@@ -41,6 +41,7 @@ export const DataProvider = ({ children }) => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal: controller.signal,
         };
 
         await axios
@@ -68,10 +69,6 @@ export const DataProvider = ({ children }) => {
       setLoading(true);
 
       if (localStorage.getItem("shoppingCartId")) {
-        console.log(
-          "DataContext: Shopping Cart Id:",
-          localStorage.getItem("shoppingCartId")
-        );
         const config = {
           headers: {
             "Content-Type": "application/json",
