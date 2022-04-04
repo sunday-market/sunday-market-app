@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import axios from "axios";
 import {
@@ -8,11 +8,11 @@ import {
   Grid,
   TextField,
   Button,
-  Alert,
   InputLabel,
 } from "@mui/material";
 
 import registerImage from "../../assets/register.svg";
+import DataContext from "../../context/DataContext";
 
 const RegisterPage = () => {
   const [fullName, setFullName] = useState("");
@@ -20,7 +20,8 @@ const RegisterPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [error, setError] = useState("");
+
+  const { setError, setLoading } = useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -32,25 +33,25 @@ const RegisterPage = () => {
 
   const registerHandler = async (e) => {
     e.preventDefault();
+    const controller = new AbortController();
+    setLoading(true);
 
-    // Set header for Axios requests
     const config = {
       headers: {
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
     };
 
     if (password !== confirmPassword) {
       setPassword("");
       setConfirmPassword("");
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setLoading(false);
       return setError("Passwords do not match");
     }
 
     try {
-      const { data } = await axios.post(
+      await axios.post(
         "/api/auth/register",
         {
           fullname: fullName,
@@ -61,21 +62,15 @@ const RegisterPage = () => {
         config
       );
 
-      // --------------------------------------------
-      // Removed token to ensure that only a logged in user
-      // can access the site pages.  Registered users
-      // will not get a token until they login.
-      // ---------------------------------------------
-      // localStorage.setItem("authToken", data.token);
-
       navigate("/accountverify");
     } catch (error) {
+      setLoading(false);
+      if (axios.isCancel(error)) return;
       setError(error.response.data.error);
-
-      setTimeout(() => {
-        setError("");
-      }, 5000);
     }
+
+    setLoading(false);
+    return controller.abort();
   };
 
   return (
@@ -93,11 +88,6 @@ const RegisterPage = () => {
           <Grid item xs={12} md={6} sx={{ background: "#eceff1" }}>
             <form onSubmit={registerHandler}>
               <Grid container direction="column" spacing={2} padding="1em">
-                {/* Error Alert Message */}
-                <Grid item>
-                  {error && <Alert severity="error">{error}</Alert>}
-                </Grid>
-
                 {/* Full Name */}
                 <Grid item align={"left"}>
                   <InputLabel required>Full Name</InputLabel>

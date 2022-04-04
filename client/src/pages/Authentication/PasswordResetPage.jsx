@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import { useParams } from "react-router-dom";
 import axios from "axios";
 import {
@@ -10,42 +10,29 @@ import {
   Alert,
   TextField,
   InputLabel,
-  Modal,
 } from "@mui/material";
 import { Link, useNavigate } from "react-router-dom";
 
 import ResetPasswordImage from "../../assets/resetpassword.svg";
+import DataContext from "../../context/DataContext";
 
 const PasswordResetPage = () => {
   const [fullName, setFullName] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [tokenError, setTokenError] = useState("");
-  const [error, setError] = useState("");
+  const [tokenError, setTokenError] = useState(false);
+
+  const { setLoading, setError, setSuccess } = useContext(DataContext);
 
   const navigate = useNavigate();
   const params = useParams();
 
-  const [resetToken, setResetToken] = useState(params.resetToken);
-
-  const modalStyle = {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-    width: 400,
-    bgcolor: "background.paper",
-    border: "2px solid #000",
-    boxShadow: 24,
-    p: 4,
-  };
-
-  const [openModal, setOpenModal] = useState(false);
-  const handleOpenModal = () => setOpenModal(true);
-  const handleCloseModal = () => setOpenModal(false);
+  const resetToken = params.resetToken;
 
   useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+
     (async () => {
       try {
         const config = {
@@ -57,45 +44,61 @@ const PasswordResetPage = () => {
           `/api/auth/resetpassword/${resetToken}`,
           config
         );
-
         setFullName(user.data.data.fullName);
       } catch (error) {
-        setTokenError(error.response.data.error);
+        setLoading(false);
+        if (axios.isCancel(error)) return;
+        setTokenError(true);
       }
     })();
-  }, [resetToken]);
+
+    setLoading(false);
+
+    return () => {
+      controller.abort();
+    };
+  }, [resetToken, setError, setLoading]);
 
   const resetPasswordHandler = async () => {
+    const controller = new AbortController();
+    setLoading(true);
+
     if (!password) {
-      setTimeout(() => {
-        setPasswordError("");
-      }, 5000);
-      return setPasswordError("You must enter a new password");
+      return setError("You must enter a new password");
     }
 
     if (password !== confirmPassword) {
-      setTimeout(() => {
-        setPasswordError("");
-      }, 5000);
-      return setPasswordError("Passwords do not match!");
+      return setError("Passwords do not match!");
     }
+
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal: controller.signal,
+    };
 
     try {
-      await axios.put(`/api/auth/resetpassword/${resetToken}`, {
-        password,
-      });
+      await axios.put(
+        `/api/auth/resetpassword/${resetToken}`,
+        {
+          password,
+        },
+        config
+      );
     } catch (error) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      return setError(error.response.data.error);
+      setLoading(false);
+      if (axios.isCancel(error)) return;
+      setError(error.response.data.error);
     }
 
-    handleOpenModal();
+    setLoading(false);
+    setSuccess("Password Successfully Changed");
+    navigate("/login");
 
-    setTimeout(() => {
-      navigate("/login");
-    }, 4000);
+    return () => {
+      controller.abort();
+    };
   };
 
   return (
@@ -138,7 +141,6 @@ const PasswordResetPage = () => {
               ) : (
                 <>
                   <Grid item>
-                    {error && <Alert severity="error">{error}</Alert>}
                     <Typography variant="body1">
                       <b>Hi {fullName},</b>
                     </Typography>
@@ -176,12 +178,7 @@ const PasswordResetPage = () => {
                       sx={{ background: "white" }}
                     />
                   </Grid>
-                  {/* Password Errors  */}
-                  <Grid item>
-                    {passwordError && (
-                      <Alert severity="error">{passwordError}</Alert>
-                    )}
-                  </Grid>
+
                   <Grid item mt={2}>
                     <Button variant="contained" onClick={resetPasswordHandler}>
                       Change Password
@@ -193,26 +190,6 @@ const PasswordResetPage = () => {
           </form>
         </Paper>
       </Box>
-
-      <Modal
-        open={openModal}
-        onClose={handleCloseModal}
-        aria-labelledby="modal-modal-title"
-        aria-describedby="modal-modal-description"
-      >
-        <Box sx={modalStyle}>
-          <Typography id="modal-modal-title" variant="h6" component="h2">
-            Password Updated
-          </Typography>
-          <Typography id="modal-modal-description" mt={2} mb={2}>
-            Your password was successfully changed! <br />
-            You will be automatically redirected to the Login screen.
-          </Typography>
-          <Button variant="contained" component={Link} to="/login">
-            Login
-          </Button>
-        </Box>
-      </Modal>
     </>
   );
 };
