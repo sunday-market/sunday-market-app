@@ -31,7 +31,7 @@ const ProductCard = ({ product }) => {
         setIsUserProduct(jwt.id === product.product_user);
       }
     } catch (error) {
-      setError(error.response.data.error);
+      setError([error]);
     }
   }, [product.product_user, setError]);
 

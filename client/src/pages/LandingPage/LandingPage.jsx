@@ -1,7 +1,7 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 
-import Carousel from "../../components/Carousel";
+//import Carousel from "../../components/Carousel";
 import CategoryAvatars from "../../components/CategoryAvatars";
 
 import {
@@ -9,55 +9,17 @@ import {
   Typography,
   Grid,
   CircularProgress,
-  Alert,
   CardMedia,
 } from "@mui/material";
 
 import ProductCard from "../../components/Products/ProductCard";
-import { useIsMobileScreen } from "../../hooks/useIsMobileScreen";
+
+import DataContext from "../../context/DataContext";
 
 const LandingPage = () => {
   const [recentProducts, setRecentProducts] = useState([]);
 
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const CardArray = [
-    {
-      textId: "Card 1",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 2",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 3",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 4",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 5",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-  ];
-  const product = {
-    id: 1,
-    product_name: "Strawberries 500g Punnet",
-    product_image:
-      "https://images.unsplash.com/photo-1623227866882-c005c26dfe41?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
-    product_description:
-      "This is a test product.  This is dummy data to see what the contents of the title will contain",
-    product_category: "Fruits and Vegetables",
-    qty: 3,
-    product_price: "2.99",
-  };
-
-  // this will adjust the screen size accordingly
-  // const windowSize = useIsMobileScreen();
+  const { setError, loading, setLoading } = useContext(DataContext);
 
   // Get Recently Added Products
   useEffect(() => {
@@ -78,18 +40,17 @@ const LandingPage = () => {
           setRecentProducts(result.data);
         })
         .catch((error) => {
-          if (axios.isCancel(error)) {
-            return "Request Cancelled...";
-          }
-          setError(error.message);
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
         });
     })();
-    setLoading(false);
 
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [setLoading, setError]);
 
   return (
     <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
@@ -108,8 +69,6 @@ const LandingPage = () => {
         </>
       ) : (
         <>
-          {error && <Alert severity="error">{error}</Alert>}
-
           {/* Carousel */}
           <Grid container>{/* <Carousel Cards={CardArray} /> */}</Grid>
 

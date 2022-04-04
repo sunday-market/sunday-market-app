@@ -17,12 +17,12 @@ const errorHandler = (err, erq, res, next) => {
     error = new ErrorResponse(message, 400);
   }
 
-  console.log(`(${err.statusCode}) Server Error: `, err.message);
+  console.log(`(${err.code}) Server Error: `, err.message);
 
   res.status(error.statusCode || 500).json({
     success: false,
     error:
-      `(${error.statusCode}) Server Error: ${error.message}` || "Server Error",
+      `Server Error: ${error.message}` || "Server Error",
   });
 };
 

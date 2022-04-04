@@ -66,8 +66,7 @@ const RegisterPage = () => {
     } catch (error) {
       setLoading(false);
       if (axios.isCancel(error)) return;
-      setError(error.response.data.error);
-    }
+      setError([error]);    }
 
     setLoading(false);
     return controller.abort();

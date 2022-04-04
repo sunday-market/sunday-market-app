@@ -88,7 +88,7 @@ const AccountsPage = () => {
         .catch((error) => {
           setLoading(false);
           if (axios.isCancel(error)) return;
-          setError(error.response.data.error);
+          setError([error]);
         });
     })();
 
@@ -168,8 +168,7 @@ const AccountsPage = () => {
       .catch((error) => {
         setLoading(false);
         if (axios.isCancel(error)) return;
-        setError(error.response.data.error);
-
+        setError([error]);
         setEditAccount(!editAccount);
       });
 
@@ -226,7 +225,7 @@ const AccountsPage = () => {
       .catch((error) => {
         setLoading(false);
         if (axios.isCancel(error)) return;
-        setError(error.response.data.error);
+        setError([error]);
       });
 
     setLoading(false);
@@ -251,7 +250,7 @@ const AccountsPage = () => {
       })
       .catch((error) => {
         setLoading(false);
-        setError(error.response.data.error);
+        setError([error]);
       });
 
     setLoading(false);

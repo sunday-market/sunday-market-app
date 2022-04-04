@@ -39,7 +39,7 @@ const AccountConfirmTokenPage = () => {
         setLoading(false);
         if (axios.isCancel(error)) return;
         setVerified(false);
-        setError(error.response.data.error);
+        setError([error]);
       }
     };
 

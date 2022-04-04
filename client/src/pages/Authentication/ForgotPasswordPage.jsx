@@ -1,13 +1,6 @@
 import { useState, useContext } from "react";
 import axios from "axios";
-import {
-  Paper,
-  Box,
-  Typography,
-  Button,
-  TextField,
-  Grid,
-} from "@mui/material";
+import { Paper, Box, Typography, Button, TextField, Grid } from "@mui/material";
 
 import DataContext from "../../context/DataContext";
 import ForgotPasswordImage from "../../assets/forgotpassword.svg";
@@ -38,7 +31,7 @@ const ForgotPasswordPage = () => {
       setSuccess(`Password reset instructions have been sent to ${email}.`);
     } catch (error) {
       if (axios.isCancel(error)) return;
-      setError(error.response.data.error);
+      setError([error]);
     }
     return controller.abort();
   };

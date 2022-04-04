@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useContext } from "react";
 import axios from "axios";
 import Message from "../../components/Messages/Message";
 import MessageThread from "../../components/Messages/MessageThread";
@@ -14,21 +14,23 @@ import {
 import { useNavigate, useLocation } from "react-router-dom";
 import { io } from "socket.io-client";
 
+import DataContext from "../../context/DataContext";
+
 export default function MessagePage(props) {
   // States
   const [messageThreads, setMessageThread] = useState([]);
   const [currentMessage, setCurrentMessage] = useState(null);
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-  const [currentUser, setCurrentUser] = useState(null);
-  const [error, setError] = useState("");
+
   const { state } = useLocation();
   const [arrivalMessage, setArrivalMessage] = useState(null);
+
+  const { setError, setLoading, loggedInUser } = useContext(DataContext);
 
   // const variables
   const scrollRef = useRef();
   const navigate = useNavigate();
-  const errorRef = useRef(null);
   const socket = useRef();
 
   // useEffects
@@ -36,7 +38,6 @@ export default function MessagePage(props) {
   useEffect(() => {
     socket.current = io("ws://localhost:8900");
     socket.current.on("getMessage", (data) => {
-      console.log(data);
       setArrivalMessage({
         send_user: data.senderId,
         message: data.sentMessage,
@@ -44,6 +45,7 @@ export default function MessagePage(props) {
       });
     });
   }, []);
+
   useEffect(() => {
     arrivalMessage &&
       currentMessage?.message_members.includes(arrivalMessage.send_user) &&
@@ -51,62 +53,20 @@ export default function MessagePage(props) {
   }, [arrivalMessage, currentMessage]);
 
   useEffect(() => {
-    if (currentUser) {
-      socket.current.emit("addUser", currentUser.id);
-      socket.current.on("getUsers", (users) => {
-        console.log(users); // for testing that users are connected could be used to display online
-      });
+    if (loggedInUser) {
+      socket.current.emit("addUser", loggedInUser._id);
+      socket.current.on("getUsers", (users) => {});
     }
-  }, [currentUser]);
-
-  // get current user
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const getCurrentUser = async () => {
-      if (localStorage.getItem("authToken")) {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          signal,
-        };
-        try {
-          const decodedJWT = jwt(localStorage.getItem("authToken"));
-          const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
-          setCurrentUser(user.data.data);
-        } catch (error) {
-          if (axios.isCancel(error)) {
-            return console.log("Successfully Aborted");
-          }
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            return navigate("/login");
-          }
-          setError("Login has expired");
-          setTimeout(() => {
-            setError("");
-          }, 15000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-        }
-      }
-    };
-    getCurrentUser();
-    return () => {
-      controller.abort();
-    };
-  }, [navigate]);
+  }, [loggedInUser]);
 
   // get messagethreads
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+
+    setLoading(true);
     const getMessageThreads = async () => {
-      if (currentUser) {
+      if (loggedInUser) {
         const config = {
           headers: {
             "Content-Type": "application/json",
@@ -116,46 +76,46 @@ export default function MessagePage(props) {
         };
         try {
           const res = await axios.get(
-            `/api/messagethreads/${currentUser.id}`,
+            `/api/messagethreads/${loggedInUser._id}`,
             config
           );
           setMessageThread(res.data);
         } catch (error) {
-          if (axios.isCancel(error)) {
-            return console.log("Successfully Aborted");
-          }
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            return navigate("/login");
-          }
-          setError("Unable to load message threads.");
-          setTimeout(() => {
-            setError("");
-          }, 15000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+
+          setError([error]);
         }
       }
     };
     getMessageThreads();
-    if (state && currentMessage === null) {
-      messageThreads.forEach((m) => {
-        if (m._id === state._id) {
-          setCurrentMessage(m);
-        }
-      });
-    }
+
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, [currentUser, messageThreads, navigate, currentMessage, state]);
+  }, [navigate, currentMessage, setError, setLoading, loggedInUser]);
+
+  useEffect(() => {
+    setLoading(true);
+    if (messageThreads.length > 0) {
+      if (state && currentMessage === null) {
+        messageThreads.forEach((m) => {
+          if (m._id === state._id) {
+            setCurrentMessage(m);
+          }
+        });
+      }
+    }
+    setLoading(false);
+  }, [currentMessage, messageThreads, setLoading, state]);
 
   // get messages
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+    setLoading(true);
+
     const getMesssages = async () => {
       if (currentMessage) {
         try {
@@ -172,6 +132,7 @@ export default function MessagePage(props) {
           );
           setMessages(res.data);
         } catch (error) {
+          setLoading(false);
           if (axios.isCancel(error)) {
             return console.log("Successfully Aborted");
           }
@@ -180,22 +141,17 @@ export default function MessagePage(props) {
             return navigate("/login");
           }
           setError("Unable to get messages for thread.");
-          setTimeout(() => {
-            setError("");
-          }, 15000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
         }
       }
-      return () => {
-        controller.abort();
-      };
     };
 
     getMesssages();
-  }, [currentMessage, navigate]);
+    setLoading(false);
+
+    return () => {
+      controller.abort();
+    };
+  }, [currentMessage, navigate, setError, setLoading]);
 
   // scroll use effect
   useEffect(() => {
@@ -206,8 +162,11 @@ export default function MessagePage(props) {
   // handle submit of new message
   const handleSubmit = async (e) => {
     e.preventDefault();
+    const controller = new AbortController();
+    setLoading(true);
+
     const message = {
-      send_user: currentUser.id,
+      send_user: loggedInUser._id,
       message: newMessage,
       message_thread_id: currentMessage._id,
     };
@@ -215,11 +174,11 @@ export default function MessagePage(props) {
     // SOCKET IO instant message
     // get reciever from current chat message
     const recieverId = currentMessage.message_members.find(
-      (member) => member !== currentUser.id
+      (member) => member !== loggedInUser._id
     );
     // emit new message to socket io
     socket.current.emit("sendMessage", {
-      senderId: currentUser.id,
+      senderId: loggedInUser._id,
       recieverId,
       sentMessage: newMessage,
     });
@@ -230,24 +189,22 @@ export default function MessagePage(props) {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
+        signal: controller.signal,
       };
       const res = await axios.post("/api/messages/", message, config);
       setMessages([...messages, res.data]);
       setNewMessage("");
     } catch (error) {
+      setLoading(false);
       if (error.response.status === 401) {
         localStorage.removeItem("authToken");
         return navigate("/login");
       }
       setError("Unable to send new message.");
-      setTimeout(() => {
-        setError("");
-      }, 15000);
-      errorRef.current.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
     }
+
+    setLoading(false);
+    return controller.abort();
   };
 
   return (
@@ -260,12 +217,6 @@ export default function MessagePage(props) {
         }}
       >
         <Grid container spacing={1} alignItems="center" justifyContent="center">
-          {/* ERROR */}
-          {error && (
-            <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
-              <Alert severity="error">{error}</Alert>
-            </Grid>
-          )}
           {/* THREAD BOX */}
           <Grid item lg={3} md={3} sm={3} xs={12} height="500px">
             <Box
@@ -324,7 +275,7 @@ export default function MessagePage(props) {
                     >
                       <MessageThread
                         messageThread={m}
-                        currentUser={currentUser.id}
+                        currentUser={loggedInUser._id}
                       />
                     </Box>
                   ))}
@@ -375,7 +326,7 @@ export default function MessagePage(props) {
                         <Box margin={"auto"} ref={scrollRef} key={m._id}>
                           <Message
                             message={m}
-                            own={m.send_user === currentUser.id}
+                            own={m.send_user === loggedInUser._id}
                           />
                         </Box>
                       ))

@@ -6,15 +6,17 @@ import DataContext from "../../context/DataContext";
 
 export default function MessageThread({ messageThread, currentUser }) {
   const [user, setUser] = useState(null);
-
-  const { setError } = useContext(DataContext);
+  const [otherUserId] = useState(
+    messageThread.message_members.find((m) => m !== currentUser)
+  );
+  const { setError, setLoading } = useContext(DataContext);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    const otherUserId = messageThread.message_members.find(
-      (m) => m !== currentUser
-    );
+
+    setLoading(true);
+
     const getUser = async () => {
       try {
         const config = {
@@ -28,14 +30,18 @@ export default function MessageThread({ messageThread, currentUser }) {
         setUser(res.data.data);
       } catch (error) {
         if (axios.isCancel(error)) return;
-        setError(error.response.data.error);
+        setError([error]);
       }
     };
     getUser();
+
+    setLoading(false);
+
     return () => {
       controller.abort();
     };
-  }, [currentUser, messageThread, setError]);
+  }, [setError, otherUserId, setLoading]);
+
   return (
     <>
       <Box>

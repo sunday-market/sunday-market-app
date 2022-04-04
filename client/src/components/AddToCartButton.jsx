@@ -66,7 +66,7 @@ const AddToCartButton = ({ product }) => {
       .catch((error) => {
         if (axios.isCancel(error)) return;
         setRequest(false);
-        setError(error.response.data.error);
+        setError([error]);
       });
 
     setRequest(false);
@@ -99,7 +99,7 @@ const AddToCartButton = ({ product }) => {
       .catch((error) => {
         if (axios.isCancel(error)) return;
         setRequest(false);
-        setError(error.response.data.error);
+        setError([error]);
       });
 
     setRequest(false);

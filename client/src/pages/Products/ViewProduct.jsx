@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 
@@ -8,24 +8,32 @@ import AddToCartButton from "../../components/AddToCartButton";
 import SendMessageButton from "../../components/SendMessageButton";
 
 import { priceToCurrency } from "../../utils/currency";
+import DataContext from "../../context/DataContext";
+import ProductionQuantityLimitsOutlined from "@mui/icons-material/ProductionQuantityLimitsOutlined";
 
 const ViewProduct = () => {
   const [product, setProduct] = useState([]);
   const [stall, setStall] = useState([]);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
+
+  const { setError, setLoading, loggedInUser } = useContext(DataContext);
 
   const navigate = useNavigate();
   const { productId } = useParams();
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
-
+  console.log(loggedInUser);
   useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+
     (async () => {
       try {
         const config = {
           headers: {
             "Content-Type": "application/json",
           },
+          signal: controller.signal,
         };
 
         // Get Product Information
@@ -34,6 +42,7 @@ const ViewProduct = () => {
           config
         );
         setProduct(productData.data[0]);
+        console.log(productData.data[0]);
 
         // Get Stall Information
         const stallData = await axios.get(
@@ -41,19 +50,20 @@ const ViewProduct = () => {
         );
         setStall(stallData.data[0]);
       } catch (error) {
+        setLoading(false);
+        if (axios.isCancel(error)) return;
         setError(error.response.data.error);
-
-        setTimeout(() => {
-          setError("");
-        }, 5000);
       }
     })();
-  }, [navigate, productId]);
+
+    setLoading(false);
+    return () => {
+      controller.abort();
+    };
+  }, [navigate, productId, setError, setLoading]);
 
   return (
     <Box p={2}>
-      {error && <Alert severity="error">{error}</Alert>}
-
       <Typography variant="h4" textAlign="center" gutterBottom>
         {product.product_name}
       </Typography>
@@ -129,23 +139,25 @@ const ViewProduct = () => {
                 <Typography variant="body2" align="center" pb={2}>
                   {stall.city_location}
                 </Typography>
+                
 
-                <Box display="flex" justifyContent="center" p={2}>
-                  <Button
-                    variant="contained"
-                    sx={{ marginRight: 1 }}
-                    onClick={() =>
-                      navigate(
-                        `/account/stalls/viewstall/${product.product_stall}`
-                      )
-                    }
-                  >
-                    View
-                  </Button>
-                  <SendMessageButton stall={stall} />
-                </Box>
+                {loggedInUser?._id?.toString() !== product?.product_user?.toString() && (
+                  <Box display="flex" justifyContent="center" p={2}>
+                    <Button
+                      variant="contained"
+                      sx={{ marginRight: 1 }}
+                      onClick={() =>
+                        navigate(
+                          `/account/stalls/viewstall/${product.product_stall}`
+                        )
+                      }
+                    >
+                      View
+                    </Button>
+                    <SendMessageButton stall={stall} />
+                  </Box>
+                )}
               </Box>
-
               <Box
                 mt={{ xs: 1, md: 3 }}
                 mb={{ xs: 4, md: 0 }}

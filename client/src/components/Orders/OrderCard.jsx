@@ -35,7 +35,7 @@ const OrderCard = ({ order }) => {
         stallName: order.stall.name,
       });
     } catch (error) {
-      setError(error.response.data.error);
+      setError([error]);
     }
   }, [order, setError]);
 

@@ -82,7 +82,7 @@ const SendMessageButton = (props) => {
         .catch((error) => {
           if (axios.isCancel(error)) return;
           setLoading(false);
-          setError(error.response.data.error);
+          setError([error]);
         });
 
       if (stalls.length === 0) {
@@ -97,7 +97,7 @@ const SendMessageButton = (props) => {
           .catch((error) => {
             if (axios.isCancel(error)) return;
             setLoading(false);
-            setError(error.response.data.error);
+            setError([error]);
           });
       } else {
         // User has messaged the stall previsouly

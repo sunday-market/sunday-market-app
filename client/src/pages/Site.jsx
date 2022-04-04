@@ -24,7 +24,7 @@ const Site = () => {
           <>
             <Alert severity="error">
               <AlertTitle>Error</AlertTitle>
-              {error?.response?.data.error || error}
+              {error[0]?.response?.data?.error || error}
             </Alert>
           </>
         )}

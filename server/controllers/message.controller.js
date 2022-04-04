@@ -21,6 +21,6 @@ exports.addNewMessage = async (req, res, next) => {
     const savedMessage = await newMessage.save();
     res.status(200).json(savedMessage);
   } catch (error) {
-    next(newMessage);
+    next(error);
   }
 };

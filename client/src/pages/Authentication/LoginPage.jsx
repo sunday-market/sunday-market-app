@@ -64,7 +64,7 @@ const LoginPage = () => {
       );
     } catch (error) {
       if (axios.isCancel(error)) return;
-      setError(error.response.data.error);
+      setError([error]);
     }
     return controller.abort();
   };
@@ -91,11 +91,12 @@ const LoginPage = () => {
 
       localStorage.setItem("authToken", data.token);
       controller.abort();
+      setLoading(false);
       navigate("/");
     } catch (error) {
       if (axios.isCancel(error)) return;
       setLoading(false);
-      setError(error.response.data.error);
+      setError([error]);
     }
 
     setLoading(false);

@@ -10,7 +10,7 @@ export const DataProvider = ({ children }) => {
   const [success, setSuccess] = useState("");
 
   const [categories, setCategories] = useState();
-  const [loggedInUser, setLoggedInUser] = useState({});
+  const [loggedInUser, setLoggedInUser] = useState(undefined);
   const [shoppingCart, setShoppingCart] = useState();
   const [updateCart, setUpdateCart] = useState(false);
 
@@ -50,7 +50,7 @@ export const DataProvider = ({ children }) => {
           })
           .catch((error) => {
             if (axios.isCancel(error)) return;
-            setError(error);
+            setError([error]);
           });
       })();
     }
@@ -87,7 +87,7 @@ export const DataProvider = ({ children }) => {
           })
           .catch((error) => {
             if (axios.isCancel(error)) return;
-            setError(error.response.data.error);
+            setError([error]);
             setUpdateCart(false);
           });
       }
@@ -112,26 +112,24 @@ export const DataProvider = ({ children }) => {
       signal: controller.signal,
     };
 
-    if (!categories) {
-      (async () => {
-        await axios
-          .get("/api/category", config)
-          .then((result) => {
-            setCategories(result.data);
-          })
-          .catch((error) => {
-            if (axios.isCancel(error)) return;
-            setError(error.response.data.error);
+    (async () => {
+      await axios
+        .get("/api/category", config)
+        .then((result) => {
+          setCategories(result.data);
+        })
+        .catch((error) => {
+          if (axios.isCancel(error)) return;
+          setError([error]);
 
-            controller.abort();
-          });
-      })();
-    }
+          controller.abort();
+        });
+    })();
 
     return () => {
       controller.abort();
     };
-  }, [categories]);
+  }, []);
 
   return (
     <DataContext.Provider
