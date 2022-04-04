@@ -9,8 +9,8 @@ export const useIsMobileScreen = (customScreen) => {
       function handleWindowResize() {
         setIsNotMobile(
           customScreen
-            ? window.screen.width > customScreen
-            : window.screen.width > 600
+            ? window.screen.width < customScreen
+            : window.screen.width < 600
         );
       }
       // add window resize event

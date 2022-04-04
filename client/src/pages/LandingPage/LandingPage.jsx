@@ -13,13 +13,14 @@ import {
 } from "@mui/material";
 
 import ProductCard from "../../components/Products/ProductCard";
-
+import { useIsMobileScreen } from "../../hooks/useIsMobileScreen";
 import DataContext from "../../context/DataContext";
 
 const LandingPage = () => {
   const [recentProducts, setRecentProducts] = useState([]);
+  const { setError, loading, setLoading, categories } = useContext(DataContext);
 
-  const { setError, loading, setLoading } = useContext(DataContext);
+  const isMobileScreen = useIsMobileScreen();
 
   // Get Recently Added Products
   useEffect(() => {
@@ -51,7 +52,7 @@ const LandingPage = () => {
       controller.abort();
     };
   }, [setLoading, setError]);
-
+  console.log(categories);
   return (
     <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
       {loading ? (
@@ -107,27 +108,40 @@ const LandingPage = () => {
               </Grid>
             ))}
           </Grid>
-
           {/* Product Categories  */}
-          <Grid container mt={4} display={{ xs: "none", sm: "flex" }}>
-            <Grid item xs={12}>
-              <Typography
-                variant="h5"
-                px={2}
-                sx={{
-                  fontWeight: "bold",
-                }}
-              >
-                Product Categories
-              </Typography>
-            </Grid>
-
-            {Array.from(Array(12)).map((_, index) => (
-              <Grid item sm={4} md={3} lg={2} p={3} key={index}>
-                <CategoryAvatars />
+          {!isMobileScreen && (
+            <Grid container mt={4} spacing={0}>
+              <Grid item xs={12}>
+                <Typography
+                  variant="h5"
+                  px={2}
+                  sx={{
+                    fontWeight: "bold",
+                  }}
+                >
+                  Product Categories
+                </Typography>
               </Grid>
-            ))}
-          </Grid>
+              {categories?.map((category, index) => (
+                <Grid
+                  container
+                  item
+                  sm={4}
+                  md={3}
+                  p={1}
+                  key={index}
+                  justifyContent="center"
+                  alignContent={"center"}
+                >
+                  <CategoryAvatars
+                    categoryTitle={category.category_name}
+                    categoryLink={`/search/category/${category._id}`}
+                    categoryId={category._id}
+                  />
+                </Grid>
+              ))}
+            </Grid>
+          )}
         </>
       )}
     </Box>

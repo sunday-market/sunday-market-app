@@ -1,13 +1,16 @@
 import { Box, Typography } from "@mui/material";
-
+import { useNavigate } from "react-router";
 export default function CategoryAvatars({
   categoryTitle,
   categoryLink,
   imgSource,
+  categoryId,
 }) {
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
+  const navigate = useNavigate();
   const GoToCategory = async (e) => {
-    console.log("Go To Category");
+    // TODO add scroll to top
+    navigate(categoryLink);
   };
   return (
     <>
@@ -15,13 +18,11 @@ export default function CategoryAvatars({
         component="img"
         sx={{
           bgcolor: "#eceff1",
-          height: "100%",
-          minWidth: "100%",
-          maxHeight: 180,
-          maxWidth: 180,
           borderRadius: "50%",
           boxShadow: 3,
           cursor: "pointer",
+          margin: 1,
+          width: "90%",
         }}
         alt={
           categoryTitle
@@ -33,8 +34,8 @@ export default function CategoryAvatars({
         src={imgSource ? imgSource : PF + "logo192.png"}
         onClick={GoToCategory}
       />
-      <Typography align="center">
-        {categoryTitle ? categoryLink : "Category"}
+      <Typography align="center" fontWeight={"bold"} >
+        {categoryTitle ? categoryTitle : "Category"}
       </Typography>
     </>
   );
