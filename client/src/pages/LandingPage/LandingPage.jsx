@@ -19,7 +19,6 @@ import DataContext from "../../context/DataContext";
 const LandingPage = () => {
   const [recentProducts, setRecentProducts] = useState([]);
   const { setError, loading, setLoading, categories } = useContext(DataContext);
-
   const isMobileScreen = useIsMobileScreen();
 
   // Get Recently Added Products
