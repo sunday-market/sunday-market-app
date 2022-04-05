@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, useContext } from "react";
+import { useEffect, useRef, useState, useContext, useCallback } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import Replay30Icon from "@mui/icons-material/Replay30";
 import {
@@ -26,17 +26,27 @@ import { useCountdown } from "../../hooks/useCountdown";
 import DataContext from "../../context/DataContext";
 
 export default function MyShoppingCartPage() {
-  const [shoppingCart, setShoppingCart] = useState(null);
-  const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
-  const [shoppingCartId, setShoppingCartId] = useState("");
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [createCart, setCreateCart] = useState(false);
-  const [cartLoaded, setCartLoaded] = useState(false);
-  const [futureDate, setFutureDate] = useState(
-    new Date().getTime() + 30 * 60000
-  );
-
-  const { setError, setLoading } = useContext(DataContext);
+  const {
+    setError,
+    setLoading,
+    shoppingCart,
+    setShoppingCart,
+    shoppingCartPriceTotal,
+    setShoppingCartPriceTotal,
+    shoppingCartId,
+    setShoppingCartId,
+    selectedItems,
+    setSelectedItems,
+    handleCartClear,
+    setCreateCart,
+    cartLoaded,
+    setCartLoaded,
+    futureDate,
+    setFutureDate,
+    deleteCart,
+    createNewCart,
+    handleRefresh,
+  } = useContext(DataContext);
 
   const [minutes, seconds] = useCountdown(futureDate);
   const PF = process.env.REACT_APP_PUBLIC_FOLDER;
@@ -45,62 +55,7 @@ export default function MyShoppingCartPage() {
   const timerRef = useRef(null);
   const orderNoteRef = useRef(null);
 
-  useEffect(() => {
-    let minutesToAdd = 30;
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const getShoppingCart = async () => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal,
-      };
-      // if exists try and get cart, or create new one if cart no longer exists
-      if (localStorage.getItem("shoppingCartId")) {
-        try {
-          const cartId = localStorage.getItem("shoppingCartId");
-          const cart = await (
-            await axios.get(`/api/cart/${cartId}`, config)
-          )?.data[0];
-          if (cart === undefined || cart === null) {
-            localStorage.removeItem("shoppingCartId");
-            return createNewCart();
-          }
-
-          // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
-          if (cart?.products_selected.length === 0 || !cart) {
-            let res = await axios.delete(`/api/cart/${cartId}`);
-            console.log(res);
-            return createNewCart();
-          }
-          // Cart has items still that haven't been erased in timeout so set the cart equal to this
-          else {
-            setShoppingCart(cart);
-            setCartLoaded(true);
-            const currentDate =
-              new Date(cart.updatedAt).getTime() +
-              minutesToAdd * 60000 -
-              new Date().getTime();
-            if (currentDate <= 0) {
-              deleteCart();
-            } else {
-              setFutureDate(
-                new Date(cart.updatedAt).getTime() + minutesToAdd * 60000
-              );
-            }
-          }
-        } catch (error) {
-          return setError([error]);
-        }
-      }
-    };
-    getShoppingCart();
-    return () => {
-      controller.abort();
-    };
-  }, [setError]);
-
+  // timer checks
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
@@ -113,221 +68,42 @@ export default function MyShoppingCartPage() {
       };
       let cartId;
       let cart;
-      // check for cart still existing in the database
-      if (localStorage.getItem("shoppingCartId")) {
-        cartId = localStorage.getItem("shoppingCartId");
-        cart = await (await axios.get(`/api/cart/${cartId}`, config))?.data[0];
-      }
-      if (cart === undefined || cart === null) {
-        // if null or undefined the cart no longer exists
-        localStorage.removeItem("shoppingCartId");
-        createNewCart();
-      }
-      // timer check
-      if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
-        deleteCart();
-      } else if (minutes >= 0 && minutes <= 10) {
-        timerRef.current.style.color = "red";
-      } else if (minutes >= 10) {
-        timerRef.current.style.color = "green";
-      } else if (minutes + seconds < 0) {
-        deleteCart();
+      try {
+        // check for cart still existing in the database
+        if (localStorage.getItem("shoppingCartId")) {
+          cartId = localStorage.getItem("shoppingCartId");
+          cart = await (
+            await axios.get(`/api/cart/${cartId}`, config)
+          )?.data[0];
+        }
+        if (cart === undefined || cart === null) {
+          // if null or undefined the cart no longer exists
+          localStorage.removeItem("shoppingCartId");
+          createNewCart();
+        }
+        // timer check
+        if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
+          deleteCart();
+        } else if (minutes >= 0 && minutes <= 10) {
+          timerRef.current.style.color = "red";
+        } else if (minutes >= 10) {
+          timerRef.current.style.color = "green";
+        } else if (minutes + seconds < 0) {
+          deleteCart();
+        }
+      } catch (error) {
+        if (axios.isCancel(error)) {
+          return;
+        }
+        return setError([error]);
       }
     };
     checkTimer();
     return () => {
       controller.abort();
     };
-  }, [minutes, seconds]);
+  }, [createNewCart, deleteCart, minutes, seconds, setError]);
 
-  useEffect(() => {
-    const recreateCart = async () => {
-      if (!localStorage.getItem("shoppingCartId") && createCart) {
-        createNewCart();
-      }
-    };
-    recreateCart();
-  }, [createCart]);
-
-  // is user logged in and has a shopping cart
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    if (localStorage.getItem("authToken") && cartLoaded) {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal,
-      };
-      const loadUserIdToCart = async () => {
-        // get auth token and check if valid
-        const jwt = jwtDecode(localStorage.getItem("authToken"));
-        console.log(jwt);
-        try {
-          let res = await axios.get(`/api/user/exists/${jwt.id}`);
-          // if shopping cart === undefined then no user has been added to this shopping cart - if res is true procceed else if res is false delete token
-          if (
-            (shoppingCart?.user === undefined || shoppingCart?.user === null) &&
-            res &&
-            shoppingCartId
-          ) {
-            // put user in data
-            const newCartData = {
-              user: jwt.id,
-              shoppingCart,
-            };
-            res = await axios.put(
-              `/api/cart/${shoppingCartId}`,
-              newCartData,
-              config
-            );
-            // user doesn't exist
-          } else if (res === false) {
-            setTimeout(() => {
-              setError("");
-              localStorage.removeItem("authToken");
-              controller.abort();
-              return navigate("/login");
-            }, 5000);
-
-            return setError(
-              "Bad Authentication! your user doesn't appear to exist, you'll be redirected to login, please login and try again!"
-            );
-          }
-        } catch (error) {
-          if (axios.isCancel(error)) {
-            console.log(error);
-            return console.log("Successfully Aborted");
-          }
-          return setError([error]);
-        }
-      };
-      loadUserIdToCart();
-    }
-    return () => {
-      controller.abort();
-    };
-  }, [cartLoaded, navigate, setError, shoppingCart, shoppingCartId]);
-
-  async function deleteCart() {
-    let cartid = localStorage.getItem("shoppingCartId");
-    await axios.put("/api/cart/clearcart/" + cartid);
-    await axios.delete(`/api/cart/${cartid}`);
-    setShoppingCartId("");
-    setCartLoaded(false);
-    setShoppingCart(null);
-    setShoppingCartPriceTotal(null);
-    setSelectedItems([]);
-    localStorage.removeItem("shoppingCartId");
-    setCreateCart(true);
-  }
-
-  const createNewCart = async () => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    let minutesToAdd = 30;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      signal,
-    };
-    const newCartId = await (
-      await axios.post("/api/cart/", config)
-    ).data.data._id;
-    const cart = await (
-      await axios.get(`/api/cart/${newCartId}`, config)
-    ).data[0];
-    // set current date to time the cart was last updated
-    const currentDate = new Date(cart.updatedAt);
-    // set countdown date
-    setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
-    // set shopping cart and load time
-    setShoppingCart(cart);
-    setCartLoaded(true);
-    setShoppingCartId(newCartId);
-    localStorage.setItem("shoppingCartId", newCartId);
-    setCreateCart(false);
-    controller.abort();
-  };
-
-  useEffect(() => {
-    if (shoppingCart) {
-      let total = 0;
-      shoppingCart.products_selected.forEach((product) => {
-        total += product.product_price * product.quantity;
-      });
-      setShoppingCartPriceTotal(total.toFixed(2));
-    }
-  }, [shoppingCart]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const config = {
-      headers: {
-        "Content-Type": "application/json",
-      },
-      signal,
-    };
-    const setProductInfo = async (productID) => {
-      try {
-        const res = await axios.get("/api/product/" + productID, config);
-        setSelectedItems((prev) => [...prev, res.data[0]]);
-      } catch (error) {
-        if (axios.isCancel(error)) {
-          console.log(error);
-          return console.log("Successfully Aborted");
-        }
-
-        return setError([error]);
-      }
-    };
-    const loopThroughCart = () => {
-      shoppingCart.products_selected.forEach((product) => {
-        setProductInfo(product.product_id);
-      });
-    };
-    if (shoppingCart?.products_selected?.length > 0) {
-      loopThroughCart();
-    }
-
-    return () => {
-      controller.abort();
-    };
-  }, [setError, shoppingCart]);
-
-  // Handle cart clear
-  const handleCartClear = async () => {
-    try {
-      console.log("clear cart");
-      await axios.put("/api/cart/clearcart/" + shoppingCart._id);
-      setCartLoaded(false);
-      setShoppingCart();
-      setShoppingCartPriceTotal();
-      setSelectedItems([]);
-      let minutesToAdd = 30;
-      const currentDate = new Date();
-      setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  const handleRefresh = async () => {
-    console.log("test");
-    let minutesToAdd = 30;
-    try {
-      const cartId = localStorage.getItem("shoppingCartId");
-      const cart = (await axios.get(`/api/cart/${cartId}`)).data[0];
-      const res = await axios.put(`/api/cart/${cartId}`, cart);
-      const currentDate = new Date(res.data.data[0].updatedAt);
-      setFutureDate(new Date(currentDate.getTime() + minutesToAdd * 60000));
-    } catch (error) {
-      return setError([error]);
-    }
-  };
 
   const handlePurchase = async () => {
     const config = {
@@ -462,11 +238,15 @@ export default function MyShoppingCartPage() {
 
         return setError([error]);
       }
-
+      setShoppingCartId("");
+      setCartLoaded(false);
+      setShoppingCart(null);
+      setShoppingCartPriceTotal(null);
+      setSelectedItems([]);
       // delete shopping cart and keep product qtys the same and minused
       await axios.delete(`/api/cart/${cartId}`);
       localStorage.removeItem("shoppingCartId");
-
+      setCreateCart(true);
       // navigate the user to a my order page
       return navigate("/account/orders/myorders");
     }

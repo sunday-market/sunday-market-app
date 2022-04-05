@@ -24,6 +24,14 @@ export default function CategoryAvatars({
   };
 
   useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal,
+    };
     // Set random images for the avatars
     const handleRandomImage = async () => {
       // get the products associated with the category
