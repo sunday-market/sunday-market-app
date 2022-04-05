@@ -38,7 +38,7 @@ io.on("connection", (socket) => {
   // send and get message
   socket.on("sendMessage", ({ senderId, recieverId, sentMessage }) => {
     const user = getUser(recieverId);
-    io.to(user.socketId).emit("getMessage", { senderId, sentMessage });
+    io.to(user?.socketId).emit("getMessage", { senderId, sentMessage });
   });
 
   // user has disconnected from the instant messaging service

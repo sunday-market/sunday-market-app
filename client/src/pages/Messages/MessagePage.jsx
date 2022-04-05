@@ -37,6 +37,13 @@ export default function MessagePage(props) {
   // SOCKET IO
   useEffect(() => {
     socket.current = io("ws://localhost:8900");
+    if (loggedInUser) {
+      socket.current.emit("addUser", loggedInUser._id);
+      socket.current.on("getUsers", (users) => {});
+    }
+  }, [loggedInUser]);
+
+  useEffect(() => {
     socket.current.on("getMessage", (data) => {
       setArrivalMessage({
         send_user: data.senderId,
@@ -51,13 +58,6 @@ export default function MessagePage(props) {
       currentMessage?.message_members.includes(arrivalMessage.send_user) &&
       setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage, currentMessage]);
-
-  useEffect(() => {
-    if (loggedInUser) {
-      socket.current.emit("addUser", loggedInUser._id);
-      socket.current.on("getUsers", (users) => {});
-    }
-  }, [loggedInUser]);
 
   // get messagethreads
   useEffect(() => {
