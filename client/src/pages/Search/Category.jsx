@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import { useParams } from "react-router";
 
 import axios from "axios";
@@ -13,18 +13,19 @@ import {
 } from "@mui/material";
 
 import ProductCard from "../../components/Products/ProductCard";
+import { scrollToTop } from "../../utils/ux";
+import DataContext from "../../context/DataContext";
 
 const Category = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [categoryName, setCategoryName] = useState("");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
 
+  const { setError, setLoading } = useContext(DataContext);
   const { categoryId } = useParams();
 
   useEffect(() => {
-    let unmounted = false;
     const controller = new AbortController();
+    setLoading(true);
 
     (async () => {
       const config = {
@@ -37,34 +38,24 @@ const Category = () => {
       await axios
         .get(`/api/category/get/${categoryId}`, config)
         .then((result) => {
-          if (!unmounted) {
-            setCategoryName(result.data);
-            controller.abort();
-          }
+          setCategoryName(result.data);
         })
         .catch((error) => {
-          if (axios.isCancel(error)) {
-            return "axios request cancelled...";
-          }
-
-          if (!unmounted) {
-            setError(error.response.data.error);
-            setTimeout(() => {
-              setError("");
-            }, 5000);
-          }
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
+          scrollToTop();
         });
     })();
 
     return () => {
-      unmounted = true;
       controller.abort();
     };
-  }, [categoryId]);
+  }, [categoryId, setError, setLoading]);
 
   useEffect(() => {
-    let unmounted = false;
     const controller = new AbortController();
+    setLoading(true);
 
     (async () => {
       const config = {
@@ -77,30 +68,22 @@ const Category = () => {
       await axios
         .get(`/api/product/category/${categoryId}`, config)
         .then((result) => {
-          if (!unmounted) {
-            setSubcategories(result.data);
-            setLoading(false);
-          }
+          setSubcategories(result.data);
         })
         .catch((error) => {
-          if (axios.isCancel(error)) {
-            return "axios request cancelled...";
-          }
-
-          if (!unmounted) {
-            setError(error.response.data.error);
-            setTimeout(() => {
-              setError("");
-            }, 5000);
-          }
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
+          scrollToTop();
         });
     })();
 
+    setLoading(false);
+
     return () => {
-      unmounted = true;
       controller.abort();
     };
-  }, [categoryId]);
+  }, [categoryId, setError, setLoading]);
 
   return (
     <Box
@@ -108,12 +91,6 @@ const Category = () => {
       px={{ xs: 2, sm: 4, md: 8, lg: 20 }}
       backgroundColor="white"
     >
-      {error && (
-        <Box p={2}>
-          <Alert severity="error">{error}</Alert>
-        </Box>
-      )}
-
       <Typography variant="h4" align="center" color="grey.800" gutterBottom>
         <strong>{categoryName}</strong>
       </Typography>
@@ -127,50 +104,34 @@ const Category = () => {
       />
       <Typography textAlign="center">Advertisment</Typography>
 
-      {loading ? (
-        <>
-          <Box sx={{ display: "flex", justifyContent: "center" }}>
-            <CircularProgress />
-          </Box>
-        </>
-      ) : (
-        <>
-          {subcategories.map((category) => (
-            <Box component="span" key={category._id}>
-              {category.products.length > 0 && (
-                <Grid container>
-                  <Grid
-                    item
-                    xs={12}
-                    p={1}
-                    mt={1}
-                    // sx={{ backgroundColor: "#01a9f4", color: "white" }}
-                  >
-                    <Typography
-                      variant="h5"
-                      mt={6}
-                      align="left"
-                      sx={{ fontWeight: "bold" }}
-                    >
-                      {category.subcategory}
-                    </Typography>
-                  </Grid>
-                  {category.products.map((product) => (
-                    <Grid item xs={12} sm={6} md={4} p={1} key={product._id}>
-                      <ProductCard
-                        product={{
-                          ...product,
-                          subcategory: category.subcategory,
-                        }}
-                      />
-                    </Grid>
-                  ))}
+      {subcategories.map((category) => (
+        <Box component="span" key={category._id}>
+          {category.products.length > 0 && (
+            <Grid container>
+              <Grid item xs={12} p={1} mt={1}>
+                <Typography
+                  variant="h5"
+                  mt={6}
+                  align="left"
+                  sx={{ fontWeight: "bold" }}
+                >
+                  {category.subcategory}
+                </Typography>
+              </Grid>
+              {category.products.map((product) => (
+                <Grid item xs={12} sm={6} md={4} p={1} key={product._id}>
+                  <ProductCard
+                    product={{
+                      ...product,
+                      subcategory: category.subcategory,
+                    }}
+                  />
                 </Grid>
-              )}
-            </Box>
-          ))}
-        </>
-      )}
+              ))}
+            </Grid>
+          )}
+        </Box>
+      ))}
     </Box>
   );
 };
