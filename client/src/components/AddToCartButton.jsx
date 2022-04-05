@@ -25,23 +25,15 @@ const AddToCartButton = ({ product }) => {
 
   const navigate = useNavigate();
 
-  const [inCart, setInCart] = useState(false);
-
   useEffect(() => {
-    if (shoppingCart) {
-      // console.log("The cart has: ", shoppingCart.products_selected);
-      //      console.log("Product Card: ", product.product_name);
-      //      shoppingCart.products_selected.forEach((p) => {
-      //     console.log("Ordered a ", p.product_name);
-      //     console.log("The product I ordered has an Id of ", p.product_id);
-      //     console.log("The product im comparing has an Id of ", product._id);
-      //     console.log(p.product_id === product._id);
-      //     if (p.product_id === product._id) {
-      //       setCounter(p.quantity);
-      //     }
-      //   });
+    if (shoppingCart?.products_selected.length > 0) {
+      shoppingCart.products_selected.forEach((prod) => {
+        if (prod.product_id === product._id) {
+          setCounter(prod.quantity);
+        }
+      });
     }
-  }, [shoppingCart]);
+  }, [product._id, shoppingCart]);
 
   const incrementQuantity = async () => {
     setRequest(true);
