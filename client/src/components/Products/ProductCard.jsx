@@ -15,7 +15,8 @@ const ProductCard = ({ product }) => {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          boxShadow: "1px 1px 10px 2px rgba(64,64,64,0.35);",
+          // boxShadow: "0px 0px 5px 0px rgba(64,64,64,0.35);",
+          border: "solid 1px #c3c3c3",
         }}
       >
         <Box position="relative">
@@ -31,6 +32,7 @@ const ProductCard = ({ product }) => {
             alt={product.product_name}
             sx={{
               boxShadow: "0px 5px 20px 2px rgba(64,64,64,0.35);",
+              // border: "solid 1px grey"
             }}
           />
           <Typography
@@ -45,7 +47,7 @@ const ProductCard = ({ product }) => {
             backgroundColor="#39B8FF"
             border="solid 1px white"
             borderRadius={2}
-            p={1}
+            px={1}
           >
             {product.subcategory || ""}
           </Typography>
@@ -61,6 +63,7 @@ const ProductCard = ({ product }) => {
           variant="body2"
           gutterBottom
           pb={3}
+          px={1}
           sx={{
             textOverflow: "ellipsis",
             overflow: "hidden",
