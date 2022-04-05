@@ -1,11 +1,18 @@
 import { useContext } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Box, Grid, Typography } from "@mui/material";
 
 import DataContext from "../context/DataContext";
 
 const Footer = () => {
   const { categories } = useContext(DataContext);
+
+  const navigate = useNavigate();
+
+  const navigateTo = (categoryId) => {
+    navigate(`/search/category/${categoryId}`);
+    window.scrollTo(0, 0);
+  };
 
   return (
     <Box
@@ -21,10 +28,15 @@ const Footer = () => {
 
           {categories &&
             categories.slice(-5).map((category) => (
-              <Typography variant="body2" key={category._id}>
-                <Link to={`/search/category/${category._id}`}>
-                  {category.category_name}
-                </Link>
+              <Typography
+                variant="body2"
+                key={category._id}
+                onClick={() => navigateTo(category._id)}
+                sx={{ cursor: "pointer" }}
+              >
+                {/* <Link to={`/search/category/${category._id}`}> */}
+                {category.category_name}
+                {/* </Link> */}
               </Typography>
             ))}
         </Grid>
