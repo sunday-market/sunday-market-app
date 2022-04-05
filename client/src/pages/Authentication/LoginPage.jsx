@@ -22,7 +22,8 @@ const LoginPage = () => {
   const [verificationSuccess, setVerificationSuccess] = useState("");
   const [verificationError, setVerificationError] = useState("");
 
-  const { setError, setLoading } = useContext(DataContext);
+  const { setError, setLoading, setSuccess, setRefreshLoggedInUser } =
+    useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -63,6 +64,7 @@ const LoginPage = () => {
         "Verification email sent.  Please check your email."
       );
     } catch (error) {
+      setLoading(false);
       if (axios.isCancel(error)) return;
       setError([error]);
     }
@@ -90,17 +92,18 @@ const LoginPage = () => {
       );
 
       localStorage.setItem("authToken", data.token);
-      controller.abort();
-      setLoading(false);
-      navigate("/");
+
+      setRefreshLoggedInUser(true);
+      setSuccess("Login Successful");
     } catch (error) {
-      if (axios.isCancel(error)) return;
       setLoading(false);
+      if (axios.isCancel(error)) return;
       setError([error]);
     }
 
     setLoading(false);
-    return controller.abort();
+
+    navigate("/");
   };
 
   return (

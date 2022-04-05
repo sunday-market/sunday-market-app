@@ -26,7 +26,7 @@ const Site = () => {
         <FeedbackAlert severity="success" message={success} />
 
         {/* Navigation Bar  */}
-        <Nav />
+        <Navigation />
 
         {/* Outlet  */}
         <Box flex={1}>

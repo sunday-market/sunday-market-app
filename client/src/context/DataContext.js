@@ -11,6 +11,7 @@ export const DataProvider = ({ children }) => {
 
   const [categories, setCategories] = useState();
   const [loggedInUser, setLoggedInUser] = useState(undefined);
+  const [refreshLoggedInUser, setRefreshLoggedInUser] = useState(false);
   const [shoppingCart, setShoppingCart] = useState();
   const [updateCart, setUpdateCart] = useState(false); // Note for future implementation. Name should be "refreshCart"
 
@@ -31,7 +32,6 @@ export const DataProvider = ({ children }) => {
   // Get logged in user
   useEffect(() => {
     const controller = new AbortController();
-
     if (localStorage.getItem("authToken")) {
       (async () => {
         const decodedJWT = jwtDecode(localStorage.getItem("authToken"));
@@ -54,12 +54,13 @@ export const DataProvider = ({ children }) => {
             setError([error]);
           });
       })();
+      setRefreshLoggedInUser(false);
     }
 
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [refreshLoggedInUser]);
 
   // Get the users shopping cart
   useEffect(() => {
@@ -140,6 +141,8 @@ export const DataProvider = ({ children }) => {
         setCategories,
         loggedInUser,
         setLoggedInUser,
+        refreshLoggedInUser,
+        setRefreshLoggedInUser,
         shoppingCart,
         setShoppingCart,
         updateCart,
