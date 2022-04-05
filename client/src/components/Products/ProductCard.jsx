@@ -32,6 +32,7 @@ const ProductCard = ({ product }) => {
             alt={product.product_name}
             sx={{
               boxShadow: "0px 5px 20px 2px rgba(64,64,64,0.35);",
+              cursor: "pointer",
               // border: "solid 1px grey"
             }}
           />
@@ -62,6 +63,7 @@ const ProductCard = ({ product }) => {
           color="grey.500"
           variant="body2"
           gutterBottom
+          onClick={() => navigate(`/products/${product._id}`)}
           pb={3}
           px={1}
           sx={{
@@ -70,6 +72,7 @@ const ProductCard = ({ product }) => {
             display: "-webkit-box !important",
             WebkitLineClamp: 3,
             WebkitBoxOrient: "vertical",
+            cursor: "pointer",
           }}
         >
           {product.product_description || "No description"}
