@@ -15,6 +15,15 @@ export const DataProvider = ({ children }) => {
   const [shoppingCart, setShoppingCart] = useState();
   const [updateCart, setUpdateCart] = useState(false); // Note for future implementation. Name should be "refreshCart"
 
+  const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
+  const [shoppingCartId, setShoppingCartId] = useState("");
+  const [selectedItems, setSelectedItems] = useState([]);
+  const [createCart, setCreateCart] = useState(false);
+  const [cartLoaded, setCartLoaded] = useState(false);
+  const [futureDate, setFutureDate] = useState(
+    new Date().getTime() + 30 * 60000
+  );
+
   // // Clear Error Messages
   useEffect(() => {
     setTimeout(() => {
@@ -147,6 +156,18 @@ export const DataProvider = ({ children }) => {
         setShoppingCart,
         updateCart,
         setUpdateCart,
+        shoppingCartPriceTotal,
+        setShoppingCartPriceTotal,
+        shoppingCartId,
+        setShoppingCartId,
+        selectedItems,
+        setSelectedItems,
+        createCart,
+        setCreateCart,
+        cartLoaded,
+        setCartLoaded,
+        futureDate,
+        setFutureDate,
       }}
     >
       {children}
