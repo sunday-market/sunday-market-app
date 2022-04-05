@@ -295,6 +295,7 @@ const EditProduct = () => {
       .put(`/api/product/${productId}`, formData, config)
       .then(() => {
         setLoading(false);
+        setSuccess(`${product.product_name} Sucessfully Updated`);
         navigate(`/products/${productId}`);
       })
       .catch((error) => {
