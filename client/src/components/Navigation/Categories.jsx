@@ -26,7 +26,7 @@ const Categories = () => {
 
   return (
     <>
-      <Grid item xs={3}>
+      <Grid item xs={3} sx={{ cursor: "pointer" }}>
         <FilterAltRoundedIcon
           onClick={handleCategoryClick}
           aria-controls={openCategory ? "category-menu" : undefined}

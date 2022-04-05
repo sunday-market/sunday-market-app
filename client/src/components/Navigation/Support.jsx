@@ -7,7 +7,7 @@ const Support = () => {
 
   return (
     <>
-      <Grid item xs={3}>
+      <Grid item xs={3} sx={{ cursor: "pointer" }}>
         <HelpOutlineIcon
           style={{ fontSize: 45, color: "white" }}
           onClick={() => navigate("/support")}

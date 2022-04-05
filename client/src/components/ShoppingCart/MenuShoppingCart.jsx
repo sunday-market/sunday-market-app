@@ -39,6 +39,7 @@ const MenuShoppingCart = () => {
   // navigation
   const navigate = useNavigate();
   const timerRef = useRef(null);
+  const cartRef = useRef(null);
 
   // timer checks
   useEffect(() => {
@@ -75,6 +76,11 @@ const MenuShoppingCart = () => {
             deleteCart();
           } else if (minutes >= 0 && minutes <= 10) {
             timerRef.current.style.color = "red";
+            cartRef.current.style.color = "red";
+            setTimeout(() => {
+              cartRef.current.style.color = "white";
+              timerRef.current.style.color = "white";
+            }, 500);
           } else if (minutes >= 10) {
             timerRef.current.style.color = "green";
           } else if (minutes + seconds < 0) {
@@ -88,6 +94,18 @@ const MenuShoppingCart = () => {
         }
       };
       checkTimer();
+    } else if (!anchorShopping) {
+      // timer check
+      if (minutes + seconds <= 0 && localStorage.getItem("shoppingCartId")) {
+        deleteCart();
+      } else if (minutes >= 0 && minutes <= 10) {
+        cartRef.current.style.color = "red";
+        setTimeout(() => {
+          cartRef.current.style.color = "white";
+        }, 500);
+      } else if (minutes + seconds < 0) {
+        deleteCart();
+      }
     }
     return () => {
       controller.abort();
@@ -107,14 +125,27 @@ const MenuShoppingCart = () => {
   return (
     <>
       {/* Shopping Cart */}
-      <Grid item xs={3}>
-        <ShoppingCartTwoToneIcon
-          onClick={handleShoppingClick}
-          aria-controls={openShopping ? "shopping-menu" : undefined}
-          aria-haspopup="true"
-          aria-expanded={openShopping ? "true" : undefined}
-          style={{ fontSize: 45, color: "white" }}
-        />
+      <Grid item xs={3} sx={{ cursor: "pointer" }}>
+        {minutes <= 10 ? (
+          <ProductionQuantityLimitsOutlinedIcon
+            onClick={handleShoppingClick}
+            aria-controls={openShopping ? "shopping-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={openShopping ? "true" : undefined}
+            style={{ fontSize: 45, color: "white" }}
+            ref={cartRef}
+          />
+        ) : (
+          <ShoppingCartTwoToneIcon
+            onClick={handleShoppingClick}
+            aria-controls={openShopping ? "shopping-menu" : undefined}
+            aria-haspopup="true"
+            aria-expanded={openShopping ? "true" : undefined}
+            style={{ fontSize: 45, color: "white" }}
+            ref={cartRef}
+          />
+        )}
+
         <Typography
           variant="body2"
           color="white"
@@ -258,7 +289,7 @@ const MenuShoppingCart = () => {
             variant="outlined"
             sx={{
               bgcolor: "white",
-              borderRadius: 2,
+              borderRadius: 1,
               margin: 2,
               marginBottom: 0.5,
               border: 1,
@@ -272,7 +303,7 @@ const MenuShoppingCart = () => {
           <Button
             variant="contained"
             sx={{
-              borderRadius: 2,
+              borderRadius: 1,
               margin: 2,
               marginBottom: 0.5,
               border: 0,

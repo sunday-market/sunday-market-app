@@ -41,7 +41,7 @@ const Account = () => {
 
   return (
     <>
-      <Grid item xs={3}>
+      <Grid item xs={3} sx={{ cursor: "pointer" }}>
         <AccountCircleRoundedIcon
           style={{ fontSize: 45, color: "white" }}
           onClick={handleAccClick}

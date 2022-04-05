@@ -50,7 +50,13 @@ const Navigation = () => {
         backgroundColor="#03a9f4"
       >
         {/* Logo  */}
-        <Grid item xs={4} sm={2} onClick={() => navigate("/")}>
+        <Grid
+          item
+          xs={4}
+          sm={2}
+          onClick={() => navigate("/")}
+          sx={{ cursor: "pointer" }}
+        >
           <Box
             component="img"
             src={Logo}
@@ -90,23 +96,7 @@ const Navigation = () => {
 
             {/* Shopping Cart  */}
             <Grid item xs={3}>
-              {/**
-               *
-               * START OF SHOPPING CART
-               *
-               *  */}
               <MenuShoppingCart />
-              {/* <ShoppingCartTwoToneIcon
-                style={{ fontSize: 45, color: "white" }}
-              /> */}
-              <Typography variant="body2" color="white">
-                Shopping Cart
-              </Typography>
-              {/**
-               *
-               * END OF SHOPPING CART
-               *
-               *  */}
             </Grid>
           </Grid>
         </Grid>
