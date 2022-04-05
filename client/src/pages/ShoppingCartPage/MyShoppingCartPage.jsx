@@ -99,7 +99,7 @@ export default function MyShoppingCartPage() {
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [setError]);
 
   useEffect(() => {
     const controller = new AbortController();

@@ -125,18 +125,21 @@ const LandingPage = () => {
                 <Grid
                   container
                   item
-                  sm={4}
-                  md={3}
+                  sm={3}
+                  md={2}
                   p={1}
                   key={index}
                   justifyContent="center"
                   alignContent={"center"}
+                  spacing={0}
                 >
-                  <CategoryAvatars
-                    categoryTitle={category.category_name}
-                    categoryLink={`/search/category/${category._id}`}
-                    categoryId={category._id}
-                  />
+                  <Grid item margin={1} sx={{ aspectRatio: "1 / 1" }}>
+                    <CategoryAvatars
+                      categoryTitle={category.category_name}
+                      categoryLink={`/search/category/${category._id}`}
+                      category_id={category._id}
+                    />
+                  </Grid>
                 </Grid>
               ))}
             </Grid>

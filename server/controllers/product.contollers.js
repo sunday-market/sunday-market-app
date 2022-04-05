@@ -316,6 +316,38 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
     });
 };
 
+// Get all products by main category
+exports.getAllProductsByMainCategory = async (req, res, next) => {
+  if (!req.params.categoryId) {
+    return next(new ErrorResponse("You must provide a category id"));
+  }
+  try {
+    const products = await Product.aggregate([
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "product_subcategory",
+          foreignField: "_id",
+          as: "full_sub",
+        },
+      },
+      {
+        $match: {
+          "full_sub.category_id": mongoose.Types.ObjectId(
+            req.params.categoryId
+          ),
+        },
+      },
+    ]);
+    res.status(200).json({
+      success: true,
+      data: products,
+    });
+  } catch (error) {
+    return next(error);
+  }
+};
+
 // POSTS
 // Add Product
 exports.addProduct = async (req, res, next) => {

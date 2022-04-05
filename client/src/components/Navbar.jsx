@@ -70,7 +70,7 @@ export default function Navbar() {
           const cartId = localStorage.getItem("shoppingCartId");
           const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
           // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
-          if (cart.products_selected.length === 0) {
+          if (cart?.products_selected?.length === 0) {
             await axios.delete(`/api/cart/${cartId}`);
             const shoppingCartId = (await axios.post("/api/cart/", config)).data
               .data._id;
@@ -130,7 +130,7 @@ export default function Navbar() {
         }
       };
       const loopThroughCart = () => {
-        shoppingCart.products_selected.forEach((product) => {
+        shoppingCart?.products_selected?.forEach((product) => {
           setProductInfo(product.product_id);
         });
       };
@@ -146,7 +146,7 @@ export default function Navbar() {
   useEffect(() => {
     if (shoppingCart) {
       let total = 0;
-      shoppingCart.products_selected.forEach((product) => {
+      shoppingCart?.products_selected?.forEach((product) => {
         total += product.product_price * product.quantity;
       });
       setShoppingCartPriceTotal(total.toFixed(2));
@@ -744,8 +744,8 @@ export default function Navbar() {
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
       >
         {selectedItems !== [] &&
-          selectedItems.length === shoppingCart?.products_selected.length &&
-          shoppingCart?.products_selected.map((product, index) => (
+          selectedItems.length === shoppingCart?.products_selected?.length &&
+          shoppingCart?.products_selected?.map((product, index) => (
             <Box
               container
               direction={"row"}
