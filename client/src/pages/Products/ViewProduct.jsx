@@ -152,9 +152,7 @@ const ViewProduct = () => {
                       variant="contained"
                       sx={{ marginRight: 1 }}
                       onClick={() =>
-                        navigate(
-                          `/account/stalls/viewstall/${product.product_stall}`
-                        )
+                        navigate(`/stalls/viewstall/${product.product_stall}`)
                       }
                     >
                       View
