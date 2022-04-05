@@ -20,6 +20,7 @@ import DataContext from "../../context/DataContext";
 import Categories from "./Categories";
 import Support from "./Support";
 import Account from "./Account";
+import MenuShoppingCart from "../../components/ShoppingCart/MenuShoppingCart";
 
 const Navigation = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -49,7 +50,7 @@ const Navigation = () => {
         backgroundColor="#03a9f4"
       >
         {/* Logo  */}
-        <Grid item xs={4} sm={2} onClick={()=> navigate("/")}>
+        <Grid item xs={4} sm={2} onClick={() => navigate("/")}>
           <Box
             component="img"
             src={Logo}
@@ -94,10 +95,10 @@ const Navigation = () => {
                * START OF SHOPPING CART
                *
                *  */}
-
-              <ShoppingCartTwoToneIcon
+              <MenuShoppingCart />
+              {/* <ShoppingCartTwoToneIcon
                 style={{ fontSize: 45, color: "white" }}
-              />
+              /> */}
               <Typography variant="body2" color="white">
                 Shopping Cart
               </Typography>

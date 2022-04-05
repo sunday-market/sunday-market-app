@@ -104,7 +104,6 @@ export default function MyShoppingCartPage() {
     };
   }, [createNewCart, deleteCart, minutes, seconds, setError]);
 
-
   const handlePurchase = async () => {
     const config = {
       headers: {
@@ -114,7 +113,6 @@ export default function MyShoppingCartPage() {
     };
     let cart;
     let cartId;
-    console.log("Purchase Pressed");
     // check local storage id
     if (!localStorage.getItem("shoppingCartId")) {
       return setError("Your Cart doesn't appear to exist anymore.");
@@ -133,8 +131,6 @@ export default function MyShoppingCartPage() {
         "Your Cart ID doesn't Match any cart in the database try refreshing your page or add items to the cart, if the problem persists please contact the support team"
       );
     }
-    console.log(cart);
-
     // check cart length
     if (cart.products_selected.length === 0) {
       return setError("Your Cart doesn't have any items in it!");
@@ -217,25 +213,16 @@ export default function MyShoppingCartPage() {
             order_notes: orderNoteRef.current.value,
             total_order_price: orderTotal.toFixed(2),
           };
-          console.log(newOrder);
           let resNewOrder = await axios.post("/api/order/", newOrder, config);
           orders.push(resNewOrder.data.data);
         }
         // add orders to transaction
-        console.log({ transaction, orders });
-        const res = await axios.put(
+        await axios.put(
           `/api/transaction/update/${transaction_id}`,
           { transaction, orders },
           config
         );
-        console.log(res);
       } catch (error) {
-        console.log(error);
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          return navigate("/login");
-        }
-
         return setError([error]);
       }
       setShoppingCartId("");

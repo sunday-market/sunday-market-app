@@ -252,6 +252,7 @@ export const DataProvider = ({ children }) => {
         },
         signal,
       };
+      
       // if exists try and get cart, or create new one if cart no longer exists
       if (localStorage.getItem("shoppingCartId") && !cartLoaded) {
         try {
@@ -346,7 +347,6 @@ export const DataProvider = ({ children }) => {
 
   // is user logged in and has a shopping cart
   useEffect(() => {
-    console.log(loggedInUser);
     const controller = new AbortController();
     const signal = controller.signal;
     if (loggedInUser && cartLoaded) {

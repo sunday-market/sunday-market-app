@@ -15,129 +15,87 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-import MuiAlert from "@mui/material/Alert";
 import axios from "axios";
-import { useNavigate, NavLink, Outlet } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useEffect, useRef, useState, useContext } from "react";
+import { useCountdown } from "../../hooks/useCountdown";
+import DataContext from "../../context/DataContext";
 
-export default function MenuShoppingCart() {
-    const PF = process.env.REACT_APP_PUBLIC_FOLDER;
+const MenuShoppingCart = () => {
+  const {
+    setError,
+    shoppingCart,
+    shoppingCartPriceTotal,
+    selectedItems,
+    handleCartClear,
+    futureDate,
+    deleteCart,
+    createNewCart,
+    handleRefresh,
+  } = useContext(DataContext);
+  const [anchorShopping, setAnchorShopping] = useState(null);
+  const [minutes, seconds] = useCountdown(futureDate);
+  const PF = process.env.REACT_APP_PUBLIC_FOLDER;
+  // navigation
+  const navigate = useNavigate();
+  const timerRef = useRef(null);
 
-  const [categories, setCategories] = useState([]);
-  const [userToken, setUserToken] = useState(null);
-  const [shoppingCart, setShoppingCart] = useState();
-  const [shoppingCartPriceTotal, setShoppingCartPriceTotal] = useState();
-  const [selectedItems, setSelectedItems] = useState([]);
-  const [cartLoaded, setCartLoaded] = useState(false);
-
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // store shopping cart id in local storage for data preseverance,
-  // create one if not already assigned
+  // timer checks
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    const getShoppingCart = async () => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal,
-      };
-      // if exists try and get cart, or create new one if cart no longer exists
-      if (localStorage.getItem("shoppingCartId")) {
+    if (anchorShopping) {
+      const checkTimer = async () => {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          signal,
+        };
+        let cartId;
+        let cart;
         try {
-          const cartId = localStorage.getItem("shoppingCartId");
-          const cart = (await axios.get(`/api/cart/${cartId}`, config)).data[0];
-          // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
-          if (cart?.products_selected?.length === 0) {
-            await axios.delete(`/api/cart/${cartId}`);
-            const shoppingCartId = (await axios.post("/api/cart/", config)).data
-              .data._id;
-            localStorage.setItem("shoppingCartId", shoppingCartId);
-            const cart = (
-              await axios.get(`/api/cart/${shoppingCartId}`, config)
-            ).data[0];
-            setShoppingCart(cart);
-            setCartLoaded(true);
+          // check for cart still existing in the database
+          if (localStorage.getItem("shoppingCartId")) {
+            cartId = localStorage.getItem("shoppingCartId");
+            cart = await (
+              await axios.get(`/api/cart/${cartId}`, config)
+            )?.data[0];
           }
-          // Cart has items still that haven't been erased in timeout so set the cart equal to this
-          else {
-            setShoppingCart(cart);
-            setCartLoaded(true);
+          if (cart === undefined || cart === null) {
+            // if null or undefined the cart no longer exists
+            localStorage.removeItem("shoppingCartId");
+            createNewCart();
+          }
+          // timer check
+          if (
+            minutes + seconds <= 0 &&
+            localStorage.getItem("shoppingCartId")
+          ) {
+            deleteCart();
+          } else if (minutes >= 0 && minutes <= 10) {
+            timerRef.current.style.color = "red";
+          } else if (minutes >= 10) {
+            timerRef.current.style.color = "green";
+          } else if (minutes + seconds < 0) {
+            deleteCart();
           }
         } catch (error) {
-          // error has occured
-          return error;
-        }
-      }
-      // if shopping cart doesn't exist then create one
-      else {
-        try {
-          const shoppingCartId = (await axios.post("/api/cart/", config)).data
-            .data._id;
-          localStorage.setItem("shoppingCartId", shoppingCartId);
-          const cart = (await axios.get(`/api/cart/${shoppingCartId}`, config))
-            .data[0];
-          setShoppingCart(cart);
-          setCartLoaded(true);
-        } catch (error) {
-          return error;
-        }
-      }
-    };
-    getShoppingCart();
-    return () => {
-      controller.abort();
-    };
-  }, []);
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    if (cartLoaded) {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-        },
-        signal,
-      };
-      const setProductInfo = async (productID) => {
-        try {
-          const res = await axios.get("/api/product/" + productID, config);
-          setSelectedItems((prev) => [...prev, res.data[0]]);
-        } catch (error) {
-          return;
+          if (axios.isCancel(error)) {
+            return;
+          }
+          return setError([error]);
         }
       };
-      const loopThroughCart = () => {
-        shoppingCart?.products_selected?.forEach((product) => {
-          setProductInfo(product.product_id);
-        });
-      };
-      if (shoppingCart?.products_selected?.length > 0) {
-        loopThroughCart();
-      }
+      checkTimer();
     }
     return () => {
       controller.abort();
     };
-  }, [cartLoaded, shoppingCart]);
-
-  useEffect(() => {
-    if (shoppingCart) {
-      let total = 0;
-      shoppingCart?.products_selected?.forEach((product) => {
-        total += product.product_price * product.quantity;
-      });
-      setShoppingCartPriceTotal(total.toFixed(2));
-    }
-  }, [shoppingCart]);
-
-
-
+  }, [anchorShopping, createNewCart, deleteCart, minutes, seconds, setError]);
 
   // Shopping dropdown
-  const [anchorShopping, setAnchorShopping] = useState(null);
+
   const openShopping = Boolean(anchorShopping);
   const handleShoppingClick = (event) => {
     setAnchorShopping(event.currentTarget);
@@ -146,62 +104,24 @@ export default function MenuShoppingCart() {
     setAnchorShopping(null);
   };
 
-  // navigate to click handler functions
-  const navigate = useNavigate();
-
-
-  // Handle cart clear
-  const handleCartClear = async () => {
-    try {
-      console.log("clear cart");
-      await axios.put("/api/cart/clearcart/" + shoppingCart._id);
-      setCartLoaded(false);
-      setShoppingCart();
-      setShoppingCartPriceTotal();
-      setSelectedItems([]);
-    } catch (error) {
-      console.log(error);
-    }
-  };
   return (
     <>
       {/* Shopping Cart */}
-      <Grid
-        item
-        justifyContent={"center"}
-        alignContent={"center"}
-        sx={{
-          margin: 0,
-          bgcolor: "#0288d1",
-          borderRadius: 2,
-          maxHeight: 60,
-        }}
-      >
-        <IconButton
-          sx={{ margin: 1 }}
+      <Grid item xs={3}>
+        <ShoppingCartTwoToneIcon
           onClick={handleShoppingClick}
           aria-controls={openShopping ? "shopping-menu" : undefined}
           aria-haspopup="true"
           aria-expanded={openShopping ? "true" : undefined}
+          style={{ fontSize: 45, color: "white" }}
+        />
+        <Typography
+          variant="body2"
+          color="white"
+          display={{ xs: "none", sm: "none", md: "block" }}
         >
-          <Typography
-            sx={{
-              fontSize: "16px",
-              color: "white",
-              pr: 3.5,
-              margin: 0,
-            }}
-          >
-            ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
-          </Typography>
-          <ShoppingCartTwoToneIcon
-            sx={{
-              transform: "scale(1.6)",
-              color: "#eceff1",
-              margin: "auto",
-            }}
-          />
-        </IconButton>
+          ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
+        </Typography>
       </Grid>
       <Menu
         anchorEl={anchorShopping}
@@ -304,10 +224,14 @@ export default function MenuShoppingCart() {
               width: "100%",
             }}
           >
-            <IconButton sx={{ margin: "auto", marginRight: 0 }}>
+            <IconButton
+              sx={{ margin: "auto", marginRight: 0 }}
+              onClick={handleRefresh}
+            >
               <RefreshRoundedIcon />
             </IconButton>
             <Typography
+              ref={timerRef}
               sx={{
                 pl: 1,
                 color: "white",
@@ -315,7 +239,7 @@ export default function MenuShoppingCart() {
                 marginLeft: 0,
               }}
             >
-              00.00.00s
+              {minutes}min.{seconds}sec
             </Typography>
           </Box>
         </Box>
@@ -362,4 +286,6 @@ export default function MenuShoppingCart() {
       </Menu>
     </>
   );
-}
+};
+
+export default MenuShoppingCart;
