@@ -12,7 +12,7 @@ export const DataProvider = ({ children }) => {
   const [categories, setCategories] = useState();
   const [loggedInUser, setLoggedInUser] = useState(undefined);
   const [shoppingCart, setShoppingCart] = useState();
-  const [updateCart, setUpdateCart] = useState(false);
+  const [updateCart, setUpdateCart] = useState(false); // Note for future implementation. Name should be "refreshCart"
 
   // // Clear Error Messages
   useEffect(() => {

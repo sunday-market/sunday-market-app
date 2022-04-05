@@ -70,7 +70,7 @@ const ViewProduct = () => {
 
       <Grid container spacing={0} justifyContent="center">
         {/* Product Image  */}
-        <Grid item xs={12} sm={5} md={4}>
+        <Grid item xs={12} sm={5} md={4} p={2}>
           <Box
             component="img"
             width="100%"
@@ -80,6 +80,10 @@ const ViewProduct = () => {
                 : `${PUBLIC_FOLDER}products/noimage.jpg`
             }
             alt={product.product_name}
+            borderRadius={1}
+            sx={{
+              boxShadow: "1px 1px 10px 1px rgba(64,64,64,0.75);",
+            }}
           />
         </Grid>
 
@@ -139,9 +143,9 @@ const ViewProduct = () => {
                 <Typography variant="body2" align="center" pb={2}>
                   {stall.city_location}
                 </Typography>
-                
 
-                {loggedInUser?._id?.toString() !== product?.product_user?.toString() && (
+                {loggedInUser?._id?.toString() !==
+                  product?.product_user?.toString() && (
                   <Box display="flex" justifyContent="center" p={2}>
                     <Button
                       variant="contained"

@@ -14,6 +14,7 @@ import {
 import SendMesssageButton from "../../components/SendMessageButton";
 
 import { priceToCurrency } from "../../utils/currency";
+import { scrollToTop } from "../../utils/ux";
 
 import DataContext from "../../context/DataContext";
 
@@ -59,9 +60,10 @@ const Order = () => {
           setLoading(false);
           if (axios.isCancel(error)) return;
           setError([error]);
+          scrollToTop();
         });
     })();
-
+    scrollToTop();
     setLoading(false);
     return () => {
       controller.abort();

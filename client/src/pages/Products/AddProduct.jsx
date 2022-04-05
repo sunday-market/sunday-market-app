@@ -72,6 +72,7 @@ const AddProduct = () => {
           setLoading(false);
           if (axios.isCancel(error)) return;
           setError([error]);
+          scrollToTop();
         });
     })();
 
@@ -129,9 +130,11 @@ const AddProduct = () => {
   };
 
   const handleCurrencyOnBlur = (e) => {
+    const value = e.target.value || 0;
+
     return setProduct({
       ...product,
-      [e.target.name]: parseFloat(e.target.value).toFixed(2),
+      [e.target.name]: parseFloat(value).toFixed(2),
     });
   };
 
@@ -155,20 +158,24 @@ const AddProduct = () => {
 
     if (!product.product_stall) {
       setError("You must select a stall");
+      scrollToTop();
       return;
     }
     console.log("Stall passed");
 
     if (!product.product_name) {
+      scrollToTop();
       return setError("You must provide a name for the product");
     }
     console.log("Name passed");
 
     if (!product.product_subcategory) {
+      scrollToTop();
       return setError("You must provide a product category");
     }
 
     if (!product.product_price || product.product_price === 0) {
+      scrollToTop();
       return setError("You must specify a price to sell this product");
     }
 

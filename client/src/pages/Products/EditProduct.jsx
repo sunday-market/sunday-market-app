@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import { Link } from "react-router-dom";
 import axios from "axios";
@@ -24,13 +24,16 @@ import {
   Modal,
 } from "@mui/material";
 
+import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
+
 const EditProduct = () => {
   const [product, setProduct] = useState({
     product_name: "",
     product_description: "",
     product_subcategory: "",
     product_stall: "",
-    product_price: "",
+    product_price: 0,
     quantity_in_stock: "",
     image: "",
   });
@@ -40,7 +43,8 @@ const EditProduct = () => {
   const [originalImage, setOriginalImage] = useState();
   const [stalls, setStalls] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
-  const [error, setError] = useState("");
+
+  const { setError, setSuccess, setLoading } = useContext(DataContext);
 
   const [openModal, setOpenModal] = useState(false);
   const handleOpenModal = () => setOpenModal(true);
@@ -49,7 +53,6 @@ const EditProduct = () => {
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
 
   const subCategoryRef = useRef(null);
-  const errorRef = useRef(null);
 
   const navigate = useNavigate();
   const { productId } = useParams();
@@ -66,18 +69,10 @@ const EditProduct = () => {
     p: 4,
   };
 
-  // Check Authorisastion
-  useEffect(() => {
-    if (error.status === 401) {
-      localStorage.removeItem("authToken");
-      navigate("/login");
-    }
-  }, [error, navigate]);
-
   // Set the Existing Data
   useEffect(() => {
     const controller = new AbortController();
-    setRequest(true);
+    setLoading(true);
 
     (async () => {
       const config = {
@@ -95,28 +90,25 @@ const EditProduct = () => {
           setOriginalImage(result.data[0].image);
         })
         .catch((error) => {
-          if (axios.isCancel(error)) {
-            return "Request cancelled...";
-          }
-
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          return setError(error.response.data.error);
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
+          scrollToTop();
         });
     })();
 
-    setRequest(false);
+    scrollToTop();
+    setLoading(false);
 
     return () => {
       controller.abort();
     };
-  }, [productId]);
+  }, [productId, setError, setLoading]);
 
   // Set Product Categories for Stall
   useEffect(() => {
     const controller = new AbortController();
-    setRequest(true);
+    setLoading(true);
 
     if (product.product_stall) {
       (async () => {
@@ -135,26 +127,27 @@ const EditProduct = () => {
           )
           .then((result) => {
             setSubCategories(result.data[0].stall_subcategories);
-            controller.abort();
+            scrollToTop();
           })
           .catch((error) => {
-            if (axios.isCancel(error)) {
-              return "Request cancelled...";
-            }
+            setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
+            scrollToTop();
           });
       })();
     }
-    setRequest(false);
+    setLoading(false);
 
     return () => {
       controller.abort();
     };
-  }, [product.product_stall]);
+  }, [product.product_stall, setError, setLoading]);
 
   // Get User Stalls
   useEffect(() => {
     const controller = new AbortController();
-    setRequest(true);
+    setLoading(true);
 
     (async () => {
       if (stalls.length === 0) {
@@ -173,25 +166,20 @@ const EditProduct = () => {
             setStalls(result.data);
           })
           .catch((error) => {
-            if (axios.isCancel(error)) {
-              return "Request cancelled...";
-            }
-
-            setTimeout(() => {
-              setError("");
-            }, 5000);
-
-            return setError(error.response.data.error);
+            setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
+            scrollToTop();
           });
       }
     })();
 
-    setRequest(false);
-
+    setLoading(false);
+    scrollToTop();
     return () => {
       controller.abort();
     };
-  }, [stalls]);
+  }, [setError, setLoading, stalls]);
 
   const handleChange = (e) => {
     setProduct({ ...product, [e.target.name]: e.target.value });
@@ -209,9 +197,11 @@ const EditProduct = () => {
   };
 
   const handleCurrencyOnBlur = (e) => {
+    const value = e.target.value || 0;
+
     return setProduct({
       ...product,
-      [e.target.name]: parseFloat(e.target.value).toFixed(2),
+      [e.target.name]: parseFloat(value).toFixed(2),
     });
   };
 
@@ -251,7 +241,6 @@ const EditProduct = () => {
     e.preventDefault();
 
     const controller = new AbortController();
-    setRequest(true);
 
     const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
     const formData = new FormData();
@@ -271,49 +260,27 @@ const EditProduct = () => {
     }
 
     if (!product.product_stall) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setRequest(false);
-      controller.abort();
+      scrollToTop();
       return setError("You must select a stall");
     }
 
     if (!product.product_name) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setRequest(false);
-      controller.abort();
+      scrollToTop();
       return setError("You must provide a name for the product");
     }
 
     if (!product.product_subcategory) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setRequest(false);
-      controller.abort();
+      scrollToTop();
       return setError("You must provide a product category");
     }
 
     if (!product.product_price || product.product_price === 0) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-      setRequest(false);
-      controller.abort();
+      scrollToTop();
       return setError("You must specify a price to sell this product");
     }
 
     if (!product.quantity_in_stock) {
       setProduct({ ...product, quantity_in_stock: 0 });
-      setRequest(false);
-      controller.abort();
     }
 
     const config = {
@@ -321,30 +288,23 @@ const EditProduct = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
+      signal: controller.signal,
     };
 
+    setLoading(true);
     await axios
       .put(`/api/product/${productId}`, formData, config)
       .then(() => {
+        setLoading(false);
         navigate(`/products/${productId}`);
-        setRequest(false);
-        controller.abort();
       })
       .catch((error) => {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          return navigate("/login");
-        }
-
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        setError(error);
+        setError([error]);
         setRequest(false);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
-        controller.abort();
       });
 
+    scrollToTop();
+    setLoading(false);
     return () => {
       controller.abort();
     };
@@ -371,7 +331,11 @@ const EditProduct = () => {
                     : `${PUBLIC_FOLDER}products/noimage.jpg`
                 }
                 alt={product.product_name}
-                border="solid 1px #e0e0e0"
+                // border="solid 1px #e0e0e0"
+                borderRadius={1}
+                sx={{
+                  boxShadow: "1px 1px 10px 1px rgba(64,64,64,0.75);",
+                }}
               />
             </Box>
 
@@ -422,11 +386,6 @@ const EditProduct = () => {
 
             {/* Stall */}
             <Grid container direction="column" spacing={2}>
-              {/* Error Alert */}
-              <Grid item ref={errorRef}>
-                {error && <Alert severity="error">{error}</Alert>}
-              </Grid>
-
               <Grid item>
                 <InputLabel required>Stall</InputLabel>
                 {stalls.length > 0 && (
