@@ -97,7 +97,6 @@ const EditProduct = () => {
         });
     })();
 
-    scrollToTop();
     setLoading(false);
 
     return () => {
@@ -127,7 +126,6 @@ const EditProduct = () => {
           )
           .then((result) => {
             setSubCategories(result.data[0].stall_subcategories);
-            scrollToTop();
           })
           .catch((error) => {
             setLoading(false);
@@ -175,7 +173,6 @@ const EditProduct = () => {
     })();
 
     setLoading(false);
-    scrollToTop();
     return () => {
       controller.abort();
     };
@@ -211,30 +208,32 @@ const EditProduct = () => {
   };
 
   const handleDelete = async () => {
+    const controller = new AbortController();
+    setLoading(true);
+
     try {
       const config = {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${localStorage.getItem("authToken")}`,
         },
+        signal: controller.signal,
         data: {
           image: product.image,
         },
       };
 
       await axios.delete(`/api/product/${productId}`, config);
-      navigate("/account/products/myproducts");
     } catch (error) {
-      if (error.response.status === 401) {
-        localStorage.removeItem("authToken");
-        return navigate("/login");
-      }
-      setError(error.response.data.error);
-
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setLoading(false);
+      if (axios.isCancel(error)) return;
+      setError([error]);
+      scrollToTop();
     }
+
+    setLoading(false);
+    controller.abort();
+    return navigate("/account/products/myproducts");
   };
 
   const handleSubmit = async (e) => {

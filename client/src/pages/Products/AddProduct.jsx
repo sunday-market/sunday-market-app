@@ -47,8 +47,6 @@ const AddProduct = () => {
   // Get the User Stalls
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
-
     (async () => {
       const authToken = localStorage.getItem("authToken");
       if (!authToken) return;
@@ -63,6 +61,7 @@ const AddProduct = () => {
         signal: controller.signal,
       };
 
+      
       await axios
         .get(`../../api/mystalls/${decodedJWT.id}`, config)
         .then((result) => {
@@ -75,8 +74,8 @@ const AddProduct = () => {
           scrollToTop();
         });
     })();
-
     setLoading(false);
+
     return () => {
       controller.abort();
     };
@@ -85,7 +84,6 @@ const AddProduct = () => {
   // update the product category when the stall changes
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
 
     if (product.product_stall) {
       (async () => {
@@ -108,14 +106,12 @@ const AddProduct = () => {
             setSubCategories(result.data[0].stall_subcategories);
           })
           .catch((error) => {
-            setLoading(false);
             if (axios.isCancel(error)) return;
             setError([error]);
           });
       })();
     }
 
-    setLoading(false);
     return () => {
       controller.abort();
     };
@@ -216,6 +212,7 @@ const AddProduct = () => {
       });
 
     setLoading(false);
+    setSuccess(`${product.product_name} sucessfully added`);
     handleClearForm();
     scrollToTop();
     return controller.abort();

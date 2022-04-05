@@ -1,13 +1,6 @@
 import { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
-import {
-  Box,
-  Grid,
-  Container,
-  Pagination,
-  Typography,
-  Alert,
-} from "@mui/material";
+import { Box, Grid, Container, Typography } from "@mui/material";
 import ProductCard from "../../components/Products/ProductCard";
 import AddProductCard from "../../components/Products/AddProductCard";
 
@@ -15,6 +8,7 @@ import jwtDecode from "jwt-decode";
 import axios from "axios";
 
 import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
 
 const MyProducts = () => {
   const [products, setProducts] = useState([]);
@@ -42,8 +36,9 @@ const MyProducts = () => {
           setProducts(result.data);
         })
         .catch((error) => {
-          setError(error);
+          setError([error]);
           setLoading(false);
+          scrollToTop();
           controller.abort();
         });
     })();
@@ -94,7 +89,6 @@ const MyProducts = () => {
               ))}
             </Grid>
           </Box>
-
         </Container>
       </Box>
     </>

@@ -2,19 +2,19 @@ import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 
-import { Alert, Button, Typography, Divider, CardMedia } from "@mui/material";
+import { Button, Typography, Divider, CardMedia } from "@mui/material";
 import { Box, Grid } from "@mui/material";
 import AddToCartButton from "../../components/AddToCartButton";
 import SendMessageButton from "../../components/SendMessageButton";
 
 import { priceToCurrency } from "../../utils/currency";
 import DataContext from "../../context/DataContext";
-import ProductionQuantityLimitsOutlined from "@mui/icons-material/ProductionQuantityLimitsOutlined";
+
+import { scrollToTop } from "../../utils/ux";
 
 const ViewProduct = () => {
   const [product, setProduct] = useState([]);
   const [stall, setStall] = useState([]);
-  // const [error, setError] = useState("");
 
   const { setError, setLoading, loggedInUser } = useContext(DataContext);
 
@@ -22,13 +22,13 @@ const ViewProduct = () => {
   const { productId } = useParams();
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
-  console.log(loggedInUser);
   useEffect(() => {
     const controller = new AbortController();
-    setLoading(true);
 
     (async () => {
       try {
+        setLoading(true);
+
         const config = {
           headers: {
             "Content-Type": "application/json",
@@ -42,17 +42,18 @@ const ViewProduct = () => {
           config
         );
         setProduct(productData.data[0]);
-        console.log(productData.data[0]);
 
         // Get Stall Information
         const stallData = await axios.get(
           `/api/stalls/${productData.data[0].product_stall}`
         );
+
         setStall(stallData.data[0]);
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
-        setError(error.response.data.error);
+        setError([error]);
+        scrollToTop();
       }
     })();
 
