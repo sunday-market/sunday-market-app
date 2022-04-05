@@ -49,7 +49,7 @@ const Navigation = () => {
         backgroundColor="#03a9f4"
       >
         {/* Logo  */}
-        <Grid item xs={4} sm={2}>
+        <Grid item xs={4} sm={2} onClick={()=> navigate("/")}>
           <Box
             component="img"
             src={Logo}
