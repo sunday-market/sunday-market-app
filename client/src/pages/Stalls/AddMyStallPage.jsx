@@ -21,7 +21,6 @@ import {
   Save as SaveIcon,
   Delete as DeleteIcon,
 } from "@mui/icons-material";
-import jwtDecode from "jwt-decode";
 import axios from "axios";
 
 import DataContext from "../../context/DataContext";
@@ -35,23 +34,28 @@ export default function AddMyStallPage() {
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [location, setLocation] = useState("");
-  const [user, setCurrentUser] = useState(null);
   const [currentStalls, setCurrentStalls] = useState(null);
 
-  const { setError, setLoading } = useContext(DataContext);
+  const { setError, setLoading, loggedInUser } = useContext(DataContext);
 
   // navigation
   const navigate = useNavigate();
-  const errorRef = useRef(null);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      signal,
+    };
     setLoading(true);
 
     const getCurrentStalls = async () => {
       try {
-        setCurrentStalls((await axios.get("/api/stalls", signal)).data);
+        setCurrentStalls((await axios.get("/api/stalls", config)).data);
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
@@ -67,32 +71,19 @@ export default function AddMyStallPage() {
   }, [setError, setLoading]);
 
   useEffect(() => {
-    setLoading(true);
-
-    if (localStorage.getItem("authToken")) {
-      const getUser = async () => {
-        try {
-          setCurrentUser(jwtDecode(localStorage.getItem("authToken")));
-        } catch (error) {
-          setLoading(false);
-
-          return setError(error);
-        }
-      };
-      getUser();
-    }
-
-    setLoading(false);
-  }, [navigate, setError, setLoading]);
-
-  useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
     setLoading(true);
-
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+      },
+      signal,
+    };
     const getCategorys = async () => {
       try {
-        setCategoryList((await axios.get("/api/category/", signal)).data);
+        setCategoryList((await axios.get("/api/category/", config)).data);
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
@@ -127,10 +118,9 @@ export default function AddMyStallPage() {
     let userData;
 
     // Check user
-    if (user) {
+    if (loggedInUser) {
       try {
-        userData = await axios.get(`/api/user/${user.id}`, config);
-        userData = userData.data.data;
+        userData = loggedInUser;
         if (userData.length === 0) {
           // if length is 0 then user is not genuine and
           // must remove token and navigate to home
@@ -138,7 +128,7 @@ export default function AddMyStallPage() {
           setLoading(false);
           navigate("/login");
         } else {
-          stallData.append("user", user.id);
+          stallData.append("user", loggedInUser._id);
         }
       } catch (error) {
         setLoading(false);
@@ -232,8 +222,6 @@ export default function AddMyStallPage() {
       <Box p={2}>
         <Typography variant="h4">Create A Stall</Typography>
         <Grid container direction={"column"} spacing={1}>
-          {/* Error Alert */}
-
           <Grid item>
             <InputLabel required>Stall Name</InputLabel>
             <TextField

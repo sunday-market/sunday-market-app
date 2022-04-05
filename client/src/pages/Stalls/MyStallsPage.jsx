@@ -19,9 +19,7 @@ import DataContext from "../../context/DataContext";
 export default function MyStalls() {
   const navigate = useNavigate();
   const [myStalls, setMyStalls] = useState([]);
-  const [error, setError] = useState("");
-  const { categories } = useContext(DataContext);
-  const errorRef = useRef(null);
+  const { categories, setError } = useContext(DataContext);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -43,21 +41,10 @@ export default function MyStalls() {
           );
           setMyStalls(stalls.data);
         } catch (error) {
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            navigate("/login");
-          }
           if (axios.isCancel(error)) {
-            return console.log("Successfully Aborted");
+            return;
           }
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          return setError(error.response.data.error);
+          return setError([error]);
         }
       };
       FetchUsersStalls();
@@ -65,7 +52,7 @@ export default function MyStalls() {
     return () => {
       controller.abort();
     };
-  }, [navigate]);
+  }, [navigate, setError]);
 
   const getCategoryName = (catId) => {
     if (categories) {
@@ -91,13 +78,8 @@ export default function MyStalls() {
       >
         <Container maxWidth={false}>
           <Box sx={{ pt: 2 }}>
-            <Grid container spacing={3}>
-              {error && (
-                <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
-                  <Alert severity="error">{error}</Alert>
-                </Grid>
-              )}
-              <Grid item lg={3} md={4} xs={12}>
+            <Grid container spacing={0}>
+              <Grid item lg={3} md={4} xs={12} m={0} p={1}>
                 <Card
                   onClick={() => navigate("../addstall")}
                   sx={[
@@ -125,7 +107,7 @@ export default function MyStalls() {
                 </Card>
               </Grid>
               {myStalls?.map((stall, index) => (
-                <Grid item lg={3} md={4} xs={12} key={index}>
+                <Grid item lg={3} md={4} xs={12} key={index} m={0} p={1}>
                   <StallCard
                     cardId={stall._id}
                     cardTitle={stall.stallName}
@@ -139,15 +121,6 @@ export default function MyStalls() {
                 </Grid>
               ))}
             </Grid>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                pt: 3,
-              }}
-            >
-              <Pagination color="primary" count={3} size="small" />
-            </Box>
           </Box>
         </Container>
       </Box>

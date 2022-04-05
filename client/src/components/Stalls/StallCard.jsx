@@ -39,6 +39,7 @@ export default function StallCard({
         sx={{
           display: "flex",
           flexDirection: "column",
+          width: "100%",
           height: "100%",
           border: "solid 1px #eeeeee",
         }}
