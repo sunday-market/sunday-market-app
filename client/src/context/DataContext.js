@@ -269,11 +269,6 @@ export const DataProvider = ({ children }) => {
             return createNewCart();
           }
 
-          // if cart is length 0 then the cart either doesn't exist anymore or is empty either way safe to recreate
-          if (cart?.products_selected.length === 0 || !cart) {
-            await axios.delete(`/api/cart/${cartId}`);
-            return createNewCart();
-          }
           // Cart has items still that haven't been erased in timeout so set the cart equal to this
           else {
             setShoppingCart(cart);
