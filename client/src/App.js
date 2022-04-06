@@ -1,6 +1,7 @@
 import PrivateRoute from "./Routing/PrivateRoute";
 import LandingPage from "./pages/LandingPage/LandingPage";
 import Support from "./pages/Support";
+import Privacy from "./pages/Privacy";
 
 // Authentication Pages
 import RegisterPage from "./pages/Authentication/RegisterPage";
@@ -126,6 +127,10 @@ function App() {
             </Route>
 
             <Route path="/support" element={<Support />} />
+
+            <Route path="/privacy" element={<PageContainer />}>
+              <Route path="/privacy/" element={<Privacy />} />
+            </Route>
 
             <Route path="*" element={<Error404 />} />
           </Route>

@@ -65,7 +65,7 @@ export const DataProvider = ({ children }) => {
       })();
       setRefreshLoggedInUser(false);
     }
-
+    setLoading(false);
     return () => {
       controller.abort();
     };
@@ -92,6 +92,7 @@ export const DataProvider = ({ children }) => {
             setShoppingCart(result.data[0]);
           })
           .catch((error) => {
+            setLoading(false);
             if (axios.isCancel(error)) return;
             setError([error]);
             setUpdateCart(false);
@@ -131,7 +132,7 @@ export const DataProvider = ({ children }) => {
           controller.abort();
         });
     })();
-
+    setLoading(false);
     return () => {
       controller.abort();
     };
@@ -234,7 +235,7 @@ export const DataProvider = ({ children }) => {
       loopThroughCart();
       setLoading(false);
     }
-
+    setLoading(false);
     return () => {
       controller.abort();
     };
@@ -252,7 +253,7 @@ export const DataProvider = ({ children }) => {
         },
         signal,
       };
-      
+
       // if exists try and get cart, or create new one if cart no longer exists
       if (localStorage.getItem("shoppingCartId") && !cartLoaded) {
         try {
