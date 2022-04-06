@@ -62,6 +62,9 @@ const Navigation = () => {
             src={Logo}
             alt="Sunday Market Logo"
             width="90%"
+            sx={{
+              maxWidth: 200,
+            }}
           />
         </Grid>
 
@@ -103,7 +106,7 @@ const Navigation = () => {
       </Grid>
 
       {/* Bottom Navigation */}
-      <Grid container backgroundColor="#0388d1" p={2}></Grid>
+      <Grid container backgroundColor="#0388d1" p={{ xs: 2, sm: 3 }}></Grid>
     </>
   );
 };
