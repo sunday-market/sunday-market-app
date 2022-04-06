@@ -27,13 +27,16 @@ const AddToCartButton = ({ product }) => {
 
   useEffect(() => {
     if (shoppingCart?.products_selected.length > 0) {
-      shoppingCart.products_selected.forEach((prod) => {
+      shoppingCart?.products_selected?.forEach((prod) => {
         if (prod.product_id === product._id) {
           setCounter(prod.quantity);
         }
       });
+    } else {
+      setQuantityInStock(product.quantity_in_stock);
+      setCounter(0);
     }
-  }, [product._id, shoppingCart]);
+  }, [product._id, product.quantity_in_stock, shoppingCart]);
 
   const incrementQuantity = async () => {
     setRequest(true);

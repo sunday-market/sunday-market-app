@@ -191,6 +191,7 @@ export const DataProvider = ({ children }) => {
       if (axios.isCancel(error)) return;
       setError([error]);
     }
+    setUpdateCart(true);
     controller.abort();
   }, []);
 
@@ -227,7 +228,7 @@ export const DataProvider = ({ children }) => {
       }
     };
     const loopThroughCart = () => {
-      shoppingCart.products_selected.forEach((product) => {
+      shoppingCart?.products_selected?.forEach((product) => {
         setProductInfo(product.product_id);
       });
     };
@@ -344,6 +345,7 @@ export const DataProvider = ({ children }) => {
     } catch (error) {
       return setError([error]);
     }
+    setUpdateCart(true);
   };
 
   // is user logged in and has a shopping cart
