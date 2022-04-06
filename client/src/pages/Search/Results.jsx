@@ -55,7 +55,6 @@ const Results = () => {
 
   // initial set filters
   useEffect(() => {
-    console.log("this is being called");
     setAppliedFilters([]);
     categories?.forEach((category) => {
       setAppliedFilters((prev) => [...prev, category._id]);
@@ -64,29 +63,26 @@ const Results = () => {
 
   // handleCheckChange - purpose is to filter results
   const handleCheckChange = (e) => {
-    console.log("checkbox change");
-    console.log(e.target.value); // returns category id
-    // console.log(e.target.checked); // false when unchecked checked by default
+    setLoading(true);
     if (e.target.checked === false) {
-      console.log("check is false");
-      console.log(appliedFilters.filter((af) => af !== e.target.value));
       const newFilter = appliedFilters.filter((af) => af !== e.target.value);
       setAppliedFilters(newFilter);
     }
     if (e.target.checked === true) {
-      console.log("check is true");
       setAppliedFilters((prev) => [...prev, e.target.value]);
     }
+    setLoading(false);
   };
 
   // apply filter
   useEffect(() => {
-    console.log(products);
+    setLoading(true);
     const filterItems = products.filter((product) =>
       appliedFilters.includes(product.category_id)
     );
     setFilterProducts(filterItems);
-  }, [appliedFilters, products]);
+    setLoading(false);
+  }, [appliedFilters, products, setLoading]);
 
   return (
     <>
