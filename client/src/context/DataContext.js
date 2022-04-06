@@ -90,6 +90,7 @@ export const DataProvider = ({ children }) => {
           .get(`/api/cart/${localStorage.getItem("shoppingCartId")}`, config)
           .then((result) => {
             setShoppingCart(result.data[0]);
+            setCartLoaded(false);
           })
           .catch((error) => {
             setLoading(false);
@@ -243,7 +244,7 @@ export const DataProvider = ({ children }) => {
     };
   }, [setError, setSelectedItems, shoppingCart]);
 
-  // IMPORTANT USE EFFECT THIS IS WHERE THE CART IS DELETED UPDATEd AND CHECKED ON RENDERS
+  // IMPORTANT USE EFFECT THIS IS WHERE THE CART IS DELETED UPDATED AND CHECKED ON RENDERS
   useEffect(() => {
     let minutesToAdd = 30;
     const controller = new AbortController();
