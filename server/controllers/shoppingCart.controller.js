@@ -295,4 +295,4 @@ async function clearOldCarts() {
   });
 }
 // fires every 35mins
-setInterval(clearOldCarts, 2100000);
+setInterval(clearOldCarts, 900000);
