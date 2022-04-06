@@ -66,7 +66,8 @@ const RegisterPage = () => {
     } catch (error) {
       setLoading(false);
       if (axios.isCancel(error)) return;
-      setError([error]);    }
+      setError([error]);
+    }
 
     setLoading(false);
     return controller.abort();
@@ -170,9 +171,15 @@ const RegisterPage = () => {
                   </Box>
                 </Grid>
 
-                <Typography variant="body2" sx={{ mb: 4 }}>
-                  By signing up, you agree to the{" "}
-                  <Link to="/login">Terms and Conditions</Link>
+                <Typography variant="body2" textAlign="center" sx={{ mb: 4 }}>
+                  By signing up, you agree to the <br />
+                  <Button onClick={() => navigate("/terms")}>
+                    Terms and Conditions
+                  </Button>
+                  and the
+                  <Button onClick={() => navigate("/privacy")}>
+                    Privacy Policy
+                  </Button>
                 </Typography>
               </Grid>
             </form>
