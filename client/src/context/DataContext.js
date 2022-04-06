@@ -38,7 +38,7 @@ export const DataProvider = ({ children }) => {
     }, 5000);
   }, [success]);
 
-  // Get logged in user
+  // Get logged in user ___--BUG HERE GET 401 and does not LOG out thinking token expiry--____
   useEffect(() => {
     const controller = new AbortController();
     if (localStorage.getItem("authToken")) {

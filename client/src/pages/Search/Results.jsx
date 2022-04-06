@@ -79,11 +79,15 @@ const Results = () => {
     }
   };
 
-// apply filter
-useEffect(()=>{
-  //const filterItems = products.filter(product=>)
-})
-  
+  // apply filter
+  useEffect(() => {
+    console.log(products);
+    const filterItems = products.filter((product) =>
+      appliedFilters.includes(product.category_id)
+    );
+    setFilterProducts(filterItems);
+  }, [appliedFilters, products]);
+
   return (
     <>
       <Grid
@@ -137,7 +141,7 @@ useEffect(()=>{
       </Grid>
       <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
         <Typography variant="h4">
-          Showing <strong>{products.length}</strong> results for{" "}
+          Showing <strong>{filterProducts.length}</strong> results for{" "}
           <strong>{query.get("q")}</strong>
         </Typography>
 
