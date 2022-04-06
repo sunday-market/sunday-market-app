@@ -5,7 +5,6 @@ import axios from "axios";
 
 import {
   Typography,
-  Box,
   Grid,
   Button,
   TextField,
@@ -21,7 +20,8 @@ const AddToCartButton = ({ product }) => {
   const [counter, setCounter] = useState(0);
   const [quantityInStock, setQuantityInStock] = useState(0);
 
-  const { shoppingCart, setUpdateCart, setError } = useContext(DataContext);
+  const { shoppingCart, setUpdateCart, setError, createNewCart } =
+    useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -42,7 +42,7 @@ const AddToCartButton = ({ product }) => {
     setRequest(true);
 
     const controller = new AbortController();
-    const cartId = localStorage.getItem("shoppingCartId");
+    let cartId = localStorage.getItem("shoppingCartId");
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -50,6 +50,11 @@ const AddToCartButton = ({ product }) => {
       },
       signal: controller.signal,
     };
+
+    if (!cartId) {
+      await createNewCart();
+      cartId = localStorage.getItem("shoppingCartId");
+    }
 
     await axios
       .post(`/api/cart/additem/${cartId}`, product, config)
@@ -72,7 +77,7 @@ const AddToCartButton = ({ product }) => {
     setRequest(true);
     const controller = new AbortController();
 
-    const cartId = localStorage.getItem("shoppingCartId");
+    let cartId = localStorage.getItem("shoppingCartId");
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -83,6 +88,11 @@ const AddToCartButton = ({ product }) => {
         _id: product._id,
       },
     };
+
+    if (!cartId) {
+      await createNewCart();
+      cartId = localStorage.getItem("shoppingCartId");
+    }
 
     await axios
       .delete(`/api/cart/removeitem/${cartId}`, config)

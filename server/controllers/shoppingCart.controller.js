@@ -251,7 +251,6 @@ exports.returnCartWithFullProductAndStall = async (req, res, next) => {
           },
         },
       ]);
-      console.log(cartWithProductsAndStalls);
       return res.status(200).json({
         success: true,
         data: cartWithProductsAndStalls,
