@@ -215,6 +215,7 @@ export const DataProvider = ({ children }) => {
       },
       signal,
     };
+    setSelectedItems([]);
     const setProductInfo = async (productID) => {
       try {
         const res = await axios.get("/api/product/" + productID, config);
