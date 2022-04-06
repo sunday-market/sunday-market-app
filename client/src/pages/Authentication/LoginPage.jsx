@@ -19,8 +19,6 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [verifiedError, setVerifiedError] = useState(false);
-  const [verificationSuccess, setVerificationSuccess] = useState("");
-  const [verificationError, setVerificationError] = useState("");
 
   const { setError, setLoading, setSuccess, setRefreshLoggedInUser } =
     useContext(DataContext);
@@ -37,10 +35,7 @@ const LoginPage = () => {
     const controller = new AbortController();
 
     if (!email) {
-      setTimeout(() => {
-        setVerificationError("");
-      }, 5000);
-      return setVerificationError("Please provide an email address");
+      return setError("Please provide an email address");
     }
 
     try {
@@ -60,13 +55,12 @@ const LoginPage = () => {
       );
 
       setVerifiedError(false);
-      setVerificationSuccess(
-        "Verification email sent.  Please check your email."
-      );
+      setSuccess("Verification email sent.  Please check your email.");
     } catch (error) {
       setLoading(false);
       if (axios.isCancel(error)) return;
       setError([error]);
+      window.scrollTo(0, 0);
     }
     return controller.abort();
   };
@@ -76,7 +70,6 @@ const LoginPage = () => {
     const controller = new AbortController();
     setLoading(true);
 
-    // Set headers for Axios request
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -95,6 +88,7 @@ const LoginPage = () => {
 
       setRefreshLoggedInUser(true);
       setSuccess("Login Successful");
+      navigate("/");
     } catch (error) {
       setLoading(false);
       if (axios.isCancel(error)) return;
@@ -102,8 +96,7 @@ const LoginPage = () => {
     }
 
     setLoading(false);
-
-    navigate("/");
+    return controller.abort();
   };
 
   return (
@@ -119,11 +112,6 @@ const LoginPage = () => {
           <form onSubmit={loginHandler}>
             <Grid container direction="column" spacing={2} padding={2}>
               <Grid item>
-                {/* Verification Success Alert Message */}
-                {verificationSuccess && (
-                  <Alert severity="success">{verificationSuccess}</Alert>
-                )}
-
                 {/* Display Alert Message if user has not validated  */}
                 {verifiedError && (
                   <Alert severity="warning" align>
@@ -137,10 +125,6 @@ const LoginPage = () => {
                       Resend Verification
                     </Button>
                   </Alert>
-                )}
-
-                {verificationError && (
-                  <Alert severity="error">{verificationError}</Alert>
                 )}
               </Grid>
 

@@ -20,14 +20,9 @@ const Footer = () => {
       mt={3}
       sx={{ backgroundColor: "#737373", color: "white" }}
     >
-
-{/* 5f6368 */}
-{/* 535353 */}
-{/* 737373 */}
-
       <Grid container justifyContent="center" pt={1.5} textAlign="center">
         <Grid item xs={5} md={2} px={2} py={1}>
-          <Typography variant="body1" color="#323232" sx={{fontWeight: 700}}>
+          <Typography variant="body1" color="#323232" sx={{ fontWeight: 700 }}>
             Sample Categories
           </Typography>
 
@@ -46,7 +41,7 @@ const Footer = () => {
         </Grid>
 
         <Grid item xs={5} md={2} px={2} py={1}>
-          <Typography variant="body1" color="#323232" sx={{fontWeight: 700}}>
+          <Typography variant="body1" color="#323232" sx={{ fontWeight: 700 }}>
             Orders
           </Typography>
           <Typography
@@ -76,7 +71,7 @@ const Footer = () => {
         </Grid>
 
         <Grid item xs={5} md={2} px={2} py={1}>
-          <Typography variant="body1" color="#323232" sx={{fontWeight: 700}}>
+          <Typography variant="body1" color="#323232" sx={{ fontWeight: 700 }}>
             Account
           </Typography>
           <Typography
@@ -106,7 +101,7 @@ const Footer = () => {
         </Grid>
 
         <Grid item xs={5} md={2} px={2} py={1}>
-          <Typography variant="body1" color="#323232" sx={{fontWeight: 700}}>
+          <Typography variant="body1" color="#323232" sx={{ fontWeight: 700 }}>
             Customer Service
           </Typography>
           <Typography
@@ -136,7 +131,7 @@ const Footer = () => {
         </Grid>
 
         <Grid item xs={12} py={1} backgroundColor="#535353" mt={1}>
-          <Typography variant="body1" >
+          <Typography variant="body1">
             <small>Copyright &copy; 2022. Sunday Markets</small>
           </Typography>
         </Grid>
