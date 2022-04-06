@@ -19,7 +19,8 @@ import { scrollToTop } from "../../utils/ux";
 
 const Results = () => {
   const [products, setProducts] = useState([]);
-
+  const [filterProducts, setFilterProducts] = useState([]);
+  const [appliedFilters, setAppliedFilters] = useState([]);
   const { setError, setLoading, categories } = useContext(DataContext);
 
   const [query] = useSearchParams();
@@ -33,6 +34,7 @@ const Results = () => {
         .get(`/api/search/?q=${query.get("q")}`)
         .then((result) => {
           setProducts(result.data);
+          setFilterProducts(result.data);
         })
         .catch((error) => {
           setLoading(false);
@@ -51,13 +53,37 @@ const Results = () => {
     };
   }, [query, setError, setLoading]);
 
+  // initial set filters
+  useEffect(() => {
+    console.log("this is being called");
+    setAppliedFilters([]);
+    categories?.forEach((category) => {
+      setAppliedFilters((prev) => [...prev, category._id]);
+    });
+  }, [categories]);
+
   // handleCheckChange - purpose is to filter results
   const handleCheckChange = (e) => {
     console.log("checkbox change");
     console.log(e.target.value); // returns category id
-    console.log(e.target.checked); // false when unchecked checked by default
+    // console.log(e.target.checked); // false when unchecked checked by default
+    if (e.target.checked === false) {
+      console.log("check is false");
+      console.log(appliedFilters.filter((af) => af !== e.target.value));
+      const newFilter = appliedFilters.filter((af) => af !== e.target.value);
+      setAppliedFilters(newFilter);
+    }
+    if (e.target.checked === true) {
+      console.log("check is true");
+      setAppliedFilters((prev) => [...prev, e.target.value]);
+    }
   };
 
+// apply filter
+useEffect(()=>{
+  //const filterItems = products.filter(product=>)
+})
+  
   return (
     <>
       <Grid
@@ -115,8 +141,22 @@ const Results = () => {
           <strong>{query.get("q")}</strong>
         </Typography>
 
-        <Grid container>
+        {/* <Grid container>
           {products.map((product) => (
+            <Grid
+              item
+              key={product._id}
+              xs={12}
+              sm={4}
+              md={3}
+              p={{ xs: 2, sm: 1, md: 2 }}
+            >
+              <ProductCard product={product} />
+            </Grid>
+          ))}
+        </Grid> */}
+        <Grid container>
+          {filterProducts.map((product) => (
             <Grid
               item
               key={product._id}
