@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Grid,
@@ -25,19 +25,26 @@ import {
 } from "@mui/icons-material";
 import jwtDecode from "jwt-decode";
 import axios from "axios";
+
+import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
+
 export default function EditMyStallPage() {
   const [stallName, setStallName] = useState("");
   const [image, setImage] = useState("");
+  const [originalImage, setOriginalImage] = useState()
   const [categoryList, setCategoryList] = useState([]);
   const [activateStall, setActivateStall] = useState(false);
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [location, setLocation] = useState("");
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
   const [user, setCurrentUser] = useState(null);
   const [currentStalls, setCurrentStalls] = useState(null);
   const [openModal, setOpenModal] = useState(false);
+
+  const { setError, setSuccess, setLoading } = useContext(DataContext);
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
@@ -56,7 +63,6 @@ export default function EditMyStallPage() {
 
   // navigation
   const navigate = useNavigate();
-  const errorRef = useRef(null);
 
   // params
   const params = useParams();
@@ -72,14 +78,7 @@ export default function EditMyStallPage() {
         if (axios.isCancel(error)) {
           return console.log("Successfully Aborted");
         }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        return setError(error);
+        return setError([error]);
       }
     };
     getCategorys();
@@ -97,6 +96,7 @@ export default function EditMyStallPage() {
 
         setStallName(res.stallName);
         setImage(res.image_url);
+        setOriginalImage(res.image_url);
         setActivateStall(res.activated);
         setCategory(res.category);
         setDescription(res.description);
@@ -106,14 +106,7 @@ export default function EditMyStallPage() {
         if (axios.isCancel(error)) {
           return console.log("Successfully Aborted");
         }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
-        return setError(error);
+        return setError([error]);
       }
     };
     getStall();
@@ -132,13 +125,6 @@ export default function EditMyStallPage() {
         if (axios.isCancel(error)) {
           return console.log("Successfully Aborted");
         }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({
-          behavior: "smooth",
-          block: "start",
-        });
         return setError(error);
       }
     };
@@ -158,13 +144,6 @@ export default function EditMyStallPage() {
             localStorage.removeItem("authToken");
             navigate("/login");
           }
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
           return setError(error);
         }
       };
@@ -208,10 +187,6 @@ export default function EditMyStallPage() {
           localStorage.removeItem("authToken");
           navigate("/login");
         }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         sendPost = false;
         return setError(error);
       }
@@ -219,10 +194,6 @@ export default function EditMyStallPage() {
 
     // Check stall name for a value
     if (stallName === "" || stallName.trim() === "") {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You Need To Provide A Stall Name");
     } else {
@@ -233,10 +204,6 @@ export default function EditMyStallPage() {
         stallName === currentStall.stallName &&
         currentStall._id !== stallId
       ) {
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         sendPost = false;
         return setError(
           `The stall name ${stallName}, is already taken please try another.`
@@ -246,10 +213,6 @@ export default function EditMyStallPage() {
 
     // Check for Category selected
     if (!category) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You need to select a category to upload a store");
     } else {
@@ -264,10 +227,15 @@ export default function EditMyStallPage() {
     }
 
     // check if image set
-    if (image) {
-      stallData.append("image", image);
-    }
+    // if (image) {
+    //   stallData.append("image", image);
+    // }
 
+    if(originalImage !== image){
+      stallData.append("image", image);
+    } else if (image) {
+      stallData.append("sameimage", image)
+    }
     // check email
     if (!contactEmail) {
       stallData.append("email", userData.email);
@@ -277,10 +245,6 @@ export default function EditMyStallPage() {
 
     // check location
     if (!location) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       sendPost = false;
       return setError("You must provide a location for the stall");
     } else {
@@ -296,10 +260,6 @@ export default function EditMyStallPage() {
           localStorage.removeItem("authToken");
           return navigate("/login");
         }
-        setTimeout(() => {
-          setError("");
-        }, 5000);
-        errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
         return setError(error.response.data.error);
       }
     }
@@ -326,10 +286,6 @@ export default function EditMyStallPage() {
         localStorage.removeItem("authToken");
         return navigate("/login");
       }
-      setTimeout(() => {
-        setError("");
-      }, 5000);
-      errorRef.current.scrollIntoView({ behavior: "smooth", block: "start" });
       return setError(error.response.data.error);
     }
   };
@@ -340,10 +296,7 @@ export default function EditMyStallPage() {
           Update {stallName ? stallName : ""}
         </Typography>
         <Grid container direction={"column"} spacing={1}>
-          {/* Error Alert */}
-          <Grid item ref={errorRef}>
-            {error && <Alert severity="error">{error}</Alert>}
-          </Grid>
+
           <Grid item>
             <InputLabel required>Stall Name</InputLabel>
             <TextField

@@ -386,7 +386,6 @@ exports.addProduct = async (req, res, next) => {
 // PUT
 // Update Product
 exports.updateProduct = async (req, res, next) => {
-  console.log("updateProduct controller called");
   const product_name = req.body.product_name;
   const product_description = req.body.product_description;
   const product_subcategory = req.body.product_subcategory;
