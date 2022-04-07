@@ -24,6 +24,7 @@ import {
 import axios from "axios";
 
 import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
 
 export default function AddMyStallPage() {
   const [stallName, setStallName] = useState("");
@@ -59,6 +60,7 @@ export default function AddMyStallPage() {
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
+        scrollToTop();
         return setError([error]);
       }
     };
@@ -87,7 +89,7 @@ export default function AddMyStallPage() {
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
-
+        scrollToTop();
         return setError([error]);
       }
     };
@@ -132,6 +134,7 @@ export default function AddMyStallPage() {
         }
       } catch (error) {
         setLoading(false);
+        scrollToTop();
         sendPost = false;
         return setError([error]);
       }
@@ -140,6 +143,7 @@ export default function AddMyStallPage() {
     // Check stall name for a value
     if (stallName === "" || stallName.trim() === "") {
       setLoading(false);
+      scrollToTop();
       sendPost = false;
       return setError("You Need To Provide A Stall Name");
     } else {
@@ -149,6 +153,7 @@ export default function AddMyStallPage() {
     currentStalls.forEach((currentStall) => {
       if (stallName === currentStall.stallName) {
         setLoading(false);
+        scrollToTop();
         sendPost = false;
         return setError(
           `The stall name ${stallName}, is already taken please try another.`
@@ -159,6 +164,7 @@ export default function AddMyStallPage() {
     // Check for Category selected
     if (!category) {
       setLoading(false);
+      scrollToTop();
       sendPost = false;
       return setError("You need to select a category to upload a store");
     } else {
@@ -189,6 +195,7 @@ export default function AddMyStallPage() {
     if (!location) {
       setLoading(false);
       sendPost = false;
+      scrollToTop();
       return setError("You must provide a location for the stall");
     } else {
       stallData.append("city_location", location);
@@ -200,11 +207,12 @@ export default function AddMyStallPage() {
         await axios.post("/api/stalls/", stallData, config);
 
         setLoading(false);
-
+        scrollToTop();
         return navigate("/account/stalls/mystalls");
       } catch (error) {
         setLoading(false);
         if (axios.isCancel(error)) return;
+        scrollToTop();
         return setError([error]);
       }
     }
@@ -214,6 +222,7 @@ export default function AddMyStallPage() {
   };
 
   const handleCancel = () => {
+    scrollToTop();
     return navigate("/account/stalls/mystalls");
   };
 
