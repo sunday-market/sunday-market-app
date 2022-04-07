@@ -9,7 +9,7 @@ exports.getUserById = async (req, res, next) => {
     const user = await User.findOne({ _id: userId });
 
     if (!user) {
-      return next(new ErrorResponse("No user found with given id"));
+      return next(new ErrorResponse("No user found with given id", 404));
     }
 
     res.status(200).json({
