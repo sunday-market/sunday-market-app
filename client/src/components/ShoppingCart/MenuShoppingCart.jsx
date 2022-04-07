@@ -21,6 +21,15 @@ import { useEffect, useRef, useState, useContext } from "react";
 import { useCountdown } from "../../hooks/useCountdown";
 import DataContext from "../../context/DataContext";
 
+const styles = (theme) => ({
+  popoverPaper: {
+    width: "50%",
+    height: "80%",
+    maxHeight: "unset",
+    left: "5% !important",
+  },
+});
+
 const MenuShoppingCart = () => {
   const {
     setError,
@@ -154,6 +163,7 @@ const MenuShoppingCart = () => {
           ${shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
         </Typography>
       </Grid>
+
       <Menu
         anchorEl={anchorShopping}
         id="shopping-menu"
@@ -179,7 +189,7 @@ const MenuShoppingCart = () => {
               display: "block",
               position: "absolute",
               top: 0,
-              right: 14,
+              right: 10,
               width: 10,
               height: 10,
               bgcolor: "#03a9f4",
@@ -190,78 +200,172 @@ const MenuShoppingCart = () => {
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
+        //style={{ width: "80%" }}
       >
-        {selectedItems !== [] &&
-          selectedItems.length === shoppingCart?.products_selected?.length &&
-          shoppingCart?.products_selected?.map((product, index) => (
-            <Box
-              container
-              direction={"row"}
-              justifyContent="center"
-              alignContent={"center"}
-              width={"100%"}
-              key={index}
-            >
-              <MenuItem sx={{ color: "white" }} width={"100%"}>
-                <Box
-                  component={"img"}
-                  sx={{ maxHeight: 60, maxWidth: 80 }}
-                  alt={"This product image of the shopping cart"}
-                  src={`${PF}products/${selectedItems[index].image}`}
-                />
-                <Typography paddingLeft={2} sx={{ width: "100%" }}>
-                  {product.product_name
-                    ? product.product_name
-                    : "No name for this poduct can be found"}
-                </Typography>
-                <Typography paddingLeft={2}>QTY {product.quantity}</Typography>
-                <Typography paddingLeft={2}>
-                  ${(product.quantity * product.product_price).toFixed(2)}
-                </Typography>
-              </MenuItem>
-            </Box>
-          ))}
+        <Grid
+          container
+          alignContent={"center"}
+          justifyContent={"center"}
+          my={0.5}
+          spacing={0}
+          xs={12}
+          md={8}
+          sx={{ maxWidth: { xs: "100%", md: 400 } }}
+        >
+          {selectedItems !== [] &&
+            selectedItems.length === shoppingCart?.products_selected?.length &&
+            shoppingCart?.products_selected?.map((product, index) => (
+              <Grid
+                item
+                container
+                alignContent={"center"}
+                justifyContent={"center"}
+                xs={12}
+                spacing={0}
+                key={index}
+                my={0.5}
+              >
+                <Grid
+                  item
+                  container
+                  alignContent={"center"}
+                  justifyContent={"center"}
+                  xs={2}
+                  spacing={0}
+                >
+                  <Box
+                    component={"img"}
+                    ml={0.5}
+                    mr={1}
+                    sx={{ maxWidth: { xs: "100%" } }}
+                    alt={"This product image of the shopping cart"}
+                    src={`${PF}products/${selectedItems[index].image}`}
+                  />
+                </Grid>
+
+                <Grid
+                  item
+                  container
+                  alignContent={"center"}
+                  justifyContent={"center"}
+                  textAlign={"center"}
+                  justifySelf="center"
+                  xs={5}
+                  spacing={0}
+                >
+                  <Typography
+                    variant="body1"
+                    maxWidth={"100%"}
+                    style={{ overflowWrap: "break-word" }}
+                  >
+                    {product.product_name
+                      ? product.product_name
+                      : "No name for this poduct can be found"}
+                  </Typography>
+                </Grid>
+                <Grid
+                  item
+                  container
+                  alignContent={"center"}
+                  justifyContent={"center"}
+                  xs={2}
+                  spacing={0}
+                >
+                  <Typography variant="body2">
+                    QTY {product.quantity}
+                  </Typography>
+                </Grid>
+                <Grid
+                  item
+                  container
+                  alignContent={"center"}
+                  justifyContent={"center"}
+                  xs={2}
+                  spacing={0}
+                >
+                  <Typography variant="body2">
+                    ${(product.quantity * product.product_price).toFixed(2)}
+                  </Typography>
+                </Grid>
+              </Grid>
+            ))}
+        </Grid>
         <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
 
-        <Typography>
-          Estimated Total: $
-          {shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
-        </Typography>
-        <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
-        <Box
+        <Grid
           container
-          direction={"row"}
-          justifyContent="center"
           alignContent={"center"}
-          sx={{
-            width: "100%",
-          }}
+          justifyContent={"center"}
+          my={1}
+          spacing={0}
         >
-          <Typography
-            sx={{
-              color: "white",
-              margin: "auto",
-              textAlign: "center",
-            }}
-          >
-            Time Remaining:
-          </Typography>
-          <Box
-            justifyContent="center"
+          <Grid
+            item
+            container
             alignContent={"center"}
-            sx={{
-              display: "flex",
-              flexDirection: "row",
-              width: "100%",
-            }}
+            justifyContent={"center"}
+            xs={12}
+            spacing={0}
           >
-            <IconButton
-              sx={{ margin: "auto", marginRight: 0 }}
-              onClick={handleRefresh}
-            >
-              <RefreshRoundedIcon />
-            </IconButton>
+            <Typography variant="body1">
+              Estimated Total: $
+              {shoppingCartPriceTotal ? shoppingCartPriceTotal : "00.00"}
+            </Typography>
+          </Grid>
+        </Grid>
+
+        <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
+
+        <Grid
+          container
+          alignContent={"center"}
+          justifyContent={"center"}
+          my={1}
+          spacing={0}
+        >
+          <Grid
+            item
+            container
+            alignContent={"center"}
+            justifyContent={"center"}
+            xs={12}
+            spacing={0}
+          >
             <Typography
+              variant="body1"
+              sx={{
+                color: "white",
+                margin: "auto",
+                textAlign: "center",
+              }}
+            >
+              Time Remaining:
+            </Typography>
+          </Grid>
+          <Grid
+            item
+            container
+            alignContent={"center"}
+            justifyContent={"center"}
+            xs={2}
+            spacing={0}
+          >
+            <RefreshRoundedIcon
+              alignContent={"center"}
+              justifyContent={"center"}
+              sx={{ margin: "auto", marginRight: 0, cursor: "pointer" }}
+              onClick={handleRefresh}
+            />
+          </Grid>
+          <Grid
+            item
+            container
+            alignContent={"center"}
+            justifyContent={"center"}
+            xs={4}
+          >
+            <Typography
+              variant="body1"
               ref={timerRef}
               sx={{
                 pl: 1,
@@ -272,51 +376,107 @@ const MenuShoppingCart = () => {
             >
               {minutes}min.{seconds}sec
             </Typography>
-          </Box>
-        </Box>
-
+          </Grid>
+        </Grid>
         <Divider sx={{ bgcolor: "white", width: "80%", margin: "auto" }} />
-        <Box
-          justifyContent="center"
+        <Grid
+          container
           alignContent={"center"}
-          sx={{
-            display: "flex",
-            flexDirection: "row",
-            width: "100%",
-          }}
+          justifyContent={"center"}
+          spacing={0}
         >
-          <Button
-            variant="outlined"
-            sx={{
-              bgcolor: "white",
-              borderRadius: 1,
-              margin: 2,
-              marginBottom: 0.5,
-              border: 1,
-              boxShadow: 2,
-            }}
-            onClick={handleCartClear}
+          <Grid
+            item
+            container
+            alignContent={"center"}
+            justifyContent={"center"}
+            xs={5}
           >
-            Clear
-          </Button>
-          <Box width={"10%"} />
-          <Button
-            variant="contained"
-            sx={{
-              borderRadius: 1,
-              margin: 2,
-              marginBottom: 0.5,
-              border: 0,
-              boxShadow: 2,
-            }}
-            onClick={() => navigate("/shoppingcart/myshoppingcart")}
+            <Button
+              variant="outlined"
+              sx={{
+                bgcolor: "white",
+                borderRadius: 1,
+                margin: 2,
+                marginBottom: 0.5,
+                border: 1,
+                boxShadow: 2,
+              }}
+              onClick={handleCartClear}
+            >
+              Clear
+            </Button>
+          </Grid>
+          <Grid
+            item
+            container
+            alignContent={"center"}
+            justifyContent={"center"}
+            xs={7}
           >
-            View Cart
-          </Button>
-        </Box>
+            <Button
+              variant="contained"
+              sx={{
+                borderRadius: 1,
+                margin: 2,
+                marginBottom: 0.5,
+                border: 0,
+                boxShadow: 2,
+              }}
+              onClick={() => navigate("/shoppingcart/myshoppingcart")}
+            >
+              View Cart
+            </Button>
+          </Grid>
+        </Grid>
       </Menu>
     </>
   );
 };
 
 export default MenuShoppingCart;
+{
+  /* <Box
+          container
+          direction={"row"}
+          justifyContent="center"
+          alignContent={"center"}
+          width={"100%"}
+          p={0}
+        >
+          {selectedItems !== [] &&
+            selectedItems.length === shoppingCart?.products_selected?.length &&
+            shoppingCart?.products_selected?.map((product, index) => (
+              <MenuItem
+                sx={{ color: "white", padding: 0, ml: 1 }}
+                width={{ xs: "100%", lg: "30%" }}
+                p={0}
+                key={index}
+              >
+                <Box
+                  component={"img"}
+                  sx={{ maxWidth: 80 }}
+                  alt={"This product image of the shopping cart"}
+                  src={`${PF}products/${selectedItems[index].image}`}
+                />
+                <Typography
+                  variant="body1"
+                  style={{
+                    overflowWrap: "break-word",
+                    maxWidth: "60% !important",
+                  }}
+                >
+                  {product.product_name
+                    ? product.product_name
+                    : "No name for this poduct can be found"}
+                </Typography>
+                <Typography variant="body1" maxWidth={"100%"}>
+                  QTY {product.quantity}
+                </Typography>
+                <Typography variant="body1" maxWidth={"100%"}>
+                  ${(product.quantity * product.product_price).toFixed(2)}
+                </Typography>
+              </MenuItem>
+            ))}
+        </Box> */
+}
