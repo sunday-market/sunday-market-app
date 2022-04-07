@@ -42,7 +42,7 @@ export default function EditMyStallPage() {
   const [currentStalls, setCurrentStalls] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
-  const { setError, setSuccess, setLoading } = useContext(DataContext);
+  const { setError, setLoading } = useContext(DataContext);
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);

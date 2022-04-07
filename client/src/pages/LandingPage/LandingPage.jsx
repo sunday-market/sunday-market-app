@@ -8,7 +8,6 @@ import {
   Box,
   Typography,
   Grid,
-  CircularProgress,
   CardMedia,
 } from "@mui/material";
 

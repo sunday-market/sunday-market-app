@@ -2,7 +2,6 @@ import { useRef, useEffect, useState } from "react";
 import { Grid, Box, Typography, Alert, Button } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import MailIcon from "@mui/icons-material/Mail";
 import { useParams } from "react-router-dom";
 import BuildIcon from "@mui/icons-material/Build";
 import jwt from "jwt-decode";
