@@ -142,7 +142,7 @@ export default function StallCard({
                 justifyContent: "center",
               }}
             >
-              {stallOwner === loggedInUser._id ? (
+              {stallOwner === loggedInUser?._id ? (
                 <>
                   <Button
                     variant="contained"

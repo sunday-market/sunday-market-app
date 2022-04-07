@@ -1,29 +1,25 @@
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 
-import {
-  Typography,
-  Card,
-  Box,
-  Grid,
-  Container,
-  Pagination,
-  Alert,
-} from "@mui/material";
-import { useEffect, useState, useRef, useContext } from "react";
+import { Typography, Card, Box, Grid, Container } from "@mui/material";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import StallCard from "../../components/Stalls/StallCard";
 import axios from "axios";
 import jwt from "jwt-decode";
+
 import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
 
 export default function MyStalls() {
   const navigate = useNavigate();
   const [myStalls, setMyStalls] = useState([]);
-  const { categories, setError } = useContext(DataContext);
+  const { categories, setError, setLoading } = useContext(DataContext);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+
+    setLoading(true);
     if (localStorage.getItem("authToken")) {
       const FetchUsersStalls = async () => {
         try {
@@ -39,20 +35,23 @@ export default function MyStalls() {
             `/api/mystalls/${currentUserID.id}`,
             config
           );
+          setLoading(false);
           setMyStalls(stalls.data);
         } catch (error) {
-          if (axios.isCancel(error)) {
-            return;
-          }
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          scrollToTop();
           return setError([error]);
         }
       };
       FetchUsersStalls();
     }
+
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, [navigate, setError]);
+  }, [navigate, setError, setLoading]);
 
   const getCategoryName = (catId) => {
     if (categories) {
@@ -61,11 +60,7 @@ export default function MyStalls() {
           return category.category_name;
         }
       }
-    } else {
-      setTimeout(() => {
-        getCategoryName(catId);
-      }, 2000);
-    }
+    } 
   };
 
   return (
@@ -77,7 +72,7 @@ export default function MyStalls() {
         }}
       >
         <Container maxWidth={false}>
-          <Box sx={{ pt: 2 }}>
+          <Box sx={{ py: 2 }}>
             <Grid container spacing={0}>
               <Grid item lg={3} md={4} xs={12} m={0} p={1}>
                 <Card
