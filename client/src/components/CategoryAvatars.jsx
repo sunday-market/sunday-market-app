@@ -38,7 +38,10 @@ export default function CategoryAvatars({
       try {
         if (category_id) {
           const products = (
-            await axios.get(`/api/product/category/allproducts/${category_id}`)
+            await axios.get(
+              `/api/product/category/allproducts/${category_id}`,
+              config
+            )
           ).data.data;
           // check if products has length - if 0 needs a placeholder image
           if (products.length === 0) {
@@ -54,10 +57,14 @@ export default function CategoryAvatars({
           setImageSource(products[randomInt].image);
         }
       } catch (error) {
+        if (axios.isCancel(error)) return;
         return setError([error]);
       }
     };
     handleRandomImage();
+    return () => {
+      controller.abort();
+    };
   }, [category_id, setError, setLoading]);
 
   return (

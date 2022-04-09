@@ -68,32 +68,34 @@ const LandingPage = () => {
     // only run if random products is a length of 0
     if (randomProducts.length === 0) {
       // if goes here mobile
-      setLoading(true);
-      const getAllProducts = async () => {
-        try {
-          const products = await (
-            await axios.get("/api/product/", config)
-          ).data;
-          const numberOfRandomProducts = 5;
-          for (let i = 0; i < numberOfRandomProducts; i++) {
-            let randomIndex = genterateRandomIndex(products.length);
-            setRandomProducts((prev) => [...prev, products[randomIndex]]);
-            products.splice(randomIndex, 1);
+      if (!isMobileScreen) {
+        setLoading(true);
+        const getAllProducts = async () => {
+          try {
+            const products = await (
+              await axios.get("/api/product/", config)
+            ).data;
+            const numberOfRandomProducts = 5;
+            for (let i = 0; i < numberOfRandomProducts; i++) {
+              let randomIndex = genterateRandomIndex(products.length);
+              setRandomProducts((prev) => [...prev, products[randomIndex]]);
+              products.splice(randomIndex, 1);
+            }
+          } catch (error) {
+            setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
+            scrollToTop();
           }
-        } catch (error) {
-          setLoading(false);
-          if (axios.isCancel(error)) return;
-          setError([error]);
-          scrollToTop();
-        }
-      };
-      getAllProducts();
-      setLoading(false);
+        };
+        getAllProducts();
+        setLoading(false);
+      }
     }
     return () => {
       controller.abort();
     };
-  }, [randomProducts.length, setError, setLoading]);
+  }, [isMobileScreen, randomProducts.length, setError, setLoading]);
 
   return (
     <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
@@ -107,7 +109,7 @@ const LandingPage = () => {
       <Typography textAlign="center">Advertisment</Typography>
 
       {/* Carousel */}
-      <Carousel products={randomProducts} />
+      {!isMobileScreen && <Carousel products={randomProducts} />}
 
       {/* Recently Added Products */}
       <Grid container mt={4}>

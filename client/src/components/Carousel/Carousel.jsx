@@ -15,8 +15,8 @@ import CarouselCard from "./CarouselCard";
 import DataContext from "../../context/DataContext";
 
 const responsive = {
-  0: { items: 1 },
-  568: { items: 2 },
+  600: { items: 1 },
+  800: { items: 2 },
   1024: { items: 3 },
 };
 
@@ -26,14 +26,18 @@ export default function Carousel({ products }) {
 
   useEffect(() => {
     setItems([]);
-    setLoading(true);
-    products.forEach((product, index) => {
-      setItems((prev) => [
-        ...prev,
-        <CarouselCard product={product} index={index} />,
-      ]);
-    });
+    let allowedToRender = true;
+    if (allowedToRender) {
+      setLoading(true);
+      products.forEach((product, index) => {
+        setItems((prev) => [
+          ...prev,
+          <CarouselCard product={product} index={index} />,
+        ]);
+      });
+    }
     setLoading(false);
+    allowedToRender = false;
   }, [products, setLoading]);
 
   return (
