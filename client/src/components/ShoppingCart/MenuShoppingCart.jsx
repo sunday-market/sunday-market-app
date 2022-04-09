@@ -200,10 +200,10 @@ const MenuShoppingCart = () => {
         }}
         transformOrigin={{ horizontal: "right", vertical: "top" }}
         anchorOrigin={{ horizontal: "right", vertical: "bottom" }}
-        //style={{ width: "80%" }}
       >
         <Grid
           container
+          item
           alignContent={"center"}
           justifyContent={"center"}
           my={0.5}
@@ -351,8 +351,6 @@ const MenuShoppingCart = () => {
             spacing={0}
           >
             <RefreshRoundedIcon
-              alignContent={"center"}
-              justifyContent={"center"}
               sx={{ margin: "auto", marginRight: 0, cursor: "pointer" }}
               onClick={handleRefresh}
             />
