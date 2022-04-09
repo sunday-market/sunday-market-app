@@ -67,13 +67,13 @@ const LandingPage = () => {
     };
     // only run if random products is a length of 0
     if (randomProducts.length === 0) {
-      // if goes here
+      // if goes here mobile
+      setLoading(true);
       const getAllProducts = async () => {
         try {
           const products = await (
             await axios.get("/api/product/", config)
           ).data;
-          console.log(products);
           const numberOfRandomProducts = 5;
           for (let i = 0; i < numberOfRandomProducts; i++) {
             let randomIndex = genterateRandomIndex(products.length);
@@ -88,7 +88,11 @@ const LandingPage = () => {
         }
       };
       getAllProducts();
+      setLoading(false);
     }
+    return () => {
+      controller.abort();
+    };
   }, [randomProducts.length, setError, setLoading]);
 
   return (
@@ -103,7 +107,7 @@ const LandingPage = () => {
       <Typography textAlign="center">Advertisment</Typography>
 
       {/* Carousel */}
-      <Carousel />
+      <Carousel products={randomProducts} />
 
       {/* Recently Added Products */}
       <Grid container mt={4}>
