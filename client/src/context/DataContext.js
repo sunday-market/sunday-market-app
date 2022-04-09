@@ -143,8 +143,10 @@ export const DataProvider = ({ children }) => {
   const deleteCart = useCallback(async () => {
     let cartid = localStorage.getItem("shoppingCartId");
     try {
-      await axios.put("/api/cart/clearcart/" + cartid);
-      await axios.delete(`/api/cart/${cartid}`);
+      if (cartid) {
+        await axios.put("/api/cart/clearcart/" + cartid);
+        await axios.delete(`/api/cart/${cartid}`);
+      }
       setShoppingCartId("");
       setCartLoaded(false);
       setShoppingCart(null);
