@@ -1,23 +1,20 @@
 import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 
-//import Carousel from "../../components/Carousel";
+import "react-alice-carousel/lib/alice-carousel.css";
 import CategoryAvatars from "../../components/CategoryAvatars";
 
-import {
-  Box,
-  Typography,
-  Grid,
-  CardMedia,
-} from "@mui/material";
+import { Box, Typography, Grid, CardMedia } from "@mui/material";
 
 import ProductCard from "../../components/Products/ProductCard";
 import { useIsMobileScreen } from "../../hooks/useIsMobileScreen";
 import DataContext from "../../context/DataContext";
 import { scrollToTop } from "../../utils/ux";
+import Carousel from "../../components/Carousel/Carousel";
 
 const LandingPage = () => {
   const [recentProducts, setRecentProducts] = useState([]);
+  const [randomProducts, setRandomProducts] = useState([]);
   const { setError, setLoading, categories } = useContext(DataContext);
   const isMobileScreen = useIsMobileScreen();
 
@@ -53,11 +50,49 @@ const LandingPage = () => {
     };
   }, [setLoading, setError]);
 
+  const genterateRandomIndex = (numberOfProducts) => {
+    const randomInt = Math.floor(Math.random() * numberOfProducts);
+    return randomInt;
+  };
+
+  // need to add if check for when mobile screen as don't want to load products when mobile
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal,
+    };
+    // only run if random products is a length of 0
+    if (randomProducts.length === 0) {
+      // if goes here
+      const getAllProducts = async () => {
+        try {
+          const products = await (
+            await axios.get("/api/product/", config)
+          ).data;
+          console.log(products);
+          const numberOfRandomProducts = 5;
+          for (let i = 0; i < numberOfRandomProducts; i++) {
+            let randomIndex = genterateRandomIndex(products.length);
+            setRandomProducts((prev) => [...prev, products[randomIndex]]);
+            products.splice(randomIndex, 1);
+          }
+        } catch (error) {
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
+          scrollToTop();
+        }
+      };
+      getAllProducts();
+    }
+  }, [randomProducts.length, setError, setLoading]);
+
   return (
     <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
-      {/* Carousel */}
-      <Grid container>{/* <Carousel Cards={CardArray} /> */}</Grid>
-
       <CardMedia
         component="img"
         height="250px"
@@ -66,6 +101,9 @@ const LandingPage = () => {
         border="solid 1px #f0f0f0"
       />
       <Typography textAlign="center">Advertisment</Typography>
+
+      {/* Carousel */}
+      <Carousel />
 
       {/* Recently Added Products */}
       <Grid container mt={4}>

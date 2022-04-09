@@ -87,8 +87,10 @@ const MenuShoppingCart = () => {
             timerRef.current.style.color = "red";
             cartRef.current.style.color = "red";
             setTimeout(() => {
-              cartRef.current.style.color = "white";
-              timerRef.current.style.color = "white";
+              if (cartRef && timerRef) {
+                cartRef.current.style.color = "white";
+                timerRef.current.style.color = "white";
+              }
             }, 500);
           } else if (minutes >= 10) {
             timerRef.current.style.color = "green";
