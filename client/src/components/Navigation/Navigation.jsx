@@ -1,11 +1,9 @@
 import { Grid } from "@mui/material";
-import { useContext } from "react";
+import { useState, useContext } from "react";
 import { useNavigate } from "react-router";
 
 // Navigation Icons
-import AccountCircleRoundedIcon from "@mui/icons-material/AccountCircleRounded";
-import FilterAltRoundedIcon from "@mui/icons-material/FilterAltRounded";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import ShoppingCartTwoToneIcon from "@mui/icons-material/ShoppingCartTwoTone";
 
 // Search Adordment Icon
 import SearchIcon from "@mui/icons-material/Search";
@@ -19,40 +17,68 @@ import { Box } from "@mui/system";
 
 import DataContext from "../../context/DataContext";
 
+import Categories from "./Categories";
+import Support from "./Support";
+import Account from "./Account";
+import MenuShoppingCart from "../../components/ShoppingCart/MenuShoppingCart";
+
 const Navigation = () => {
-  const { categories, loggedInUser, shoppingCart } = useContext(DataContext);
+  const [searchQuery, setSearchQuery] = useState("");
+  const { setError, loggedInUser, shoppingCart } = useContext(DataContext);
   const navigate = useNavigate();
+
+  // Search submit
+  const onSearchSubmit = async (e) => {
+    if (e.key === "Enter") {
+      if (searchQuery.trim().length < 2) {
+        setError("Search term must be at least 2 characters");
+        return setSearchQuery(searchQuery.trim());
+      }
+
+      navigate(`/search/results/?q=${searchQuery.trim()}`);
+    }
+  };
 
   return (
     <>
       {/* Top Navigation  */}
       <Grid
         container
-        backgroundColor="#03a9f4"
-        p={1}
-        color="white"
         alignItems="center"
-        align="center"
+        p={1}
+        px={2}
+        backgroundColor="#03a9f4"
       >
         {/* Logo  */}
-        <Grid item xs={2}>
+        <Grid
+          item
+          xs={4}
+          sm={2}
+          onClick={() => navigate("/")}
+          sx={{ cursor: "pointer" }}
+        >
           <Box
             component="img"
             src={Logo}
             alt="Sunday Market Logo"
-            display="block"
-            width="70%"
-            p={1}
+            width="90%"
+            sx={{
+              maxWidth: 200,
+            }}
           />
         </Grid>
 
         {/* Search  */}
-        <Grid item flexGrow={1} xs={6} px={2}>
+        <Grid item xs={12} sm={6} order={{ xs: 2, sm: 1 }}>
           <TextField
             variant="outlined"
+            size="small"
             autoFocus
             placeholder="Search..."
             fullWidth
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={onSearchSubmit}
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
@@ -64,48 +90,23 @@ const Navigation = () => {
           />
         </Grid>
 
-        {/* Categories */}
-        <Grid item xs={1}>
-          <FilterAltRoundedIcon
-            style={{ fontSize: 45, color: "white" }}
-            onClick={() => navigate("/support")}
-          />
-          <Typography variant="body2" color="white">
-            Categories
-          </Typography>
-        </Grid>
+        {/* Menu Items  */}
+        <Grid item xs={8} sm={4} order={{ xs: 1, sm: 2 }}>
+          <Grid container alignItems="center" align="center">
+            <Categories />
+            <Support />
+            <Account />
 
-        {/* Account */}
-        <Grid item xs={1}>
-          <AccountCircleRoundedIcon style={{ fontSize: 45, color: "white" }} />
-          <Typography variant="body2" color="white">
-            {loggedInUser ? loggedInUser.username : "Account"}
-            <br />
-            {loggedInUser && loggedInUser.fullname}
-          </Typography>
-        </Grid>
-
-        {/* Help */}
-        <Grid item xs={1}>
-          <HelpOutlineIcon style={{ fontSize: 45, color: "white" }} />
-          <Typography variant="body2" color="white">
-            Support
-          </Typography>
-        </Grid>
-
-        {/* Categories */}
-        <Grid item xs={1}>
-          <Typography variant="body2" color="white">
-            Shopping Cart
-          </Typography>
-          <Typography variant="body2" color="white">
-            Total Items: {shoppingCart?.products_selected.length}
-          </Typography>
+            {/* Shopping Cart  */}
+            <Grid item xs={3}>
+              <MenuShoppingCart />
+            </Grid>
+          </Grid>
         </Grid>
       </Grid>
 
       {/* Bottom Navigation */}
-      <Grid container backgroundColor="#0388d1" p={2}></Grid>
+      <Grid container backgroundColor="#0388d1" p={{ xs: 2, sm: 3 }}></Grid>
     </>
   );
 };

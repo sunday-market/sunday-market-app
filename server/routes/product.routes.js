@@ -38,6 +38,7 @@ const {
   updateProduct,
   deleteProduct,
   getProductsByCategory,
+  getAllProductsByMainCategory,
 } = require("../controllers/product.contollers");
 
 router
@@ -52,6 +53,10 @@ router.route("/stall/:stallid").get(protect, getStallProducts);
 router.route("/recent").get(getRecentlyAddedProducts);
 
 router.route("/category/:categoryId").get(getProductsByCategory);
+
+router
+  .route("/category/allproducts/:categoryId")
+  .get(getAllProductsByMainCategory);
 
 router.route("/user/:userid").get(protect, getUserProducts);
 router

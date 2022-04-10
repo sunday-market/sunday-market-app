@@ -1,63 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
 import axios from "axios";
 
-import Carousel from "../../components/Carousel";
+import "react-alice-carousel/lib/alice-carousel.css";
 import CategoryAvatars from "../../components/CategoryAvatars";
 
-import {
-  Box,
-  Typography,
-  Grid,
-  CircularProgress,
-  Alert,
-  CardMedia,
-} from "@mui/material";
+import { Box, Typography, Grid, CardMedia } from "@mui/material";
 
 import ProductCard from "../../components/Products/ProductCard";
 import { useIsMobileScreen } from "../../hooks/useIsMobileScreen";
+import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
+import Carousel from "../../components/Carousel/Carousel";
 
 const LandingPage = () => {
   const [recentProducts, setRecentProducts] = useState([]);
-
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  const CardArray = [
-    {
-      textId: "Card 1",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 2",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 3",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 4",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-    {
-      textId: "Card 5",
-      text: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.Lorem ipsum dolor sit amet consectetur adipisicing elit. Harum dicta et hic dignissimos? Accusamus consectetur ducimus quae voluptates nam officia omnis aut sint. Tenetur culpa incidunt quam. Dicta, veritatis ad.",
-    },
-  ];
-  const product = {
-    id: 1,
-    product_name: "Strawberries 500g Punnet",
-    product_image:
-      "https://images.unsplash.com/photo-1623227866882-c005c26dfe41?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=765&q=80",
-    product_description:
-      "This is a test product.  This is dummy data to see what the contents of the title will contain",
-    product_category: "Fruits and Vegetables",
-    qty: 3,
-    product_price: "2.99",
-  };
-
-  // this will adjust the screen size accordingly
-  // const windowSize = useIsMobileScreen();
+  const [randomProducts, setRandomProducts] = useState([]);
+  const { setError, setLoading, categories } = useContext(DataContext);
+  const isMobileScreen = useIsMobileScreen();
 
   // Get Recently Added Products
   useEffect(() => {
@@ -78,98 +37,142 @@ const LandingPage = () => {
           setRecentProducts(result.data);
         })
         .catch((error) => {
-          if (axios.isCancel(error)) {
-            return "Request Cancelled...";
-          }
-          setError(error.message);
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
+          scrollToTop();
         });
     })();
-    setLoading(false);
 
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, []);
+  }, [setLoading, setError]);
+
+  const genterateRandomIndex = (numberOfProducts) => {
+    const randomInt = Math.floor(Math.random() * numberOfProducts);
+    return randomInt;
+  };
+
+  // need to add if check for when mobile screen as don't want to load products when mobile
+  useEffect(() => {
+    const controller = new AbortController();
+    const signal = controller.signal;
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+      signal,
+    };
+    // only run if random products is a length of 0
+    if (randomProducts.length === 0) {
+      // if goes here mobile
+      if (!isMobileScreen) {
+        setLoading(true);
+        const getAllProducts = async () => {
+          try {
+            const products = await (
+              await axios.get("/api/product/", config)
+            ).data;
+            const numberOfRandomProducts = 5;
+            for (let i = 0; i < numberOfRandomProducts; i++) {
+              let randomIndex = genterateRandomIndex(products.length);
+              setRandomProducts((prev) => [...prev, products[randomIndex]]);
+              products.splice(randomIndex, 1);
+            }
+          } catch (error) {
+            setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
+            scrollToTop();
+          }
+        };
+        getAllProducts();
+        setLoading(false);
+      }
+    }
+    return () => {
+      controller.abort();
+    };
+  }, [isMobileScreen, randomProducts.length, setError, setLoading]);
 
   return (
     <Box px={{ xs: 2, sm: 4, md: 8, lg: 20 }} py={2}>
-      {loading ? (
-        <>
-          <Box
-            display="flex"
-            direction="row"
-            justifyContent="center"
-            alignItems="center"
-            height="100vh"
-            width="100%"
+      <CardMedia
+        component="img"
+        height="250px"
+        image="https://media-assets-05.thedrum.com/cache/images/thedrum-prod/s3-news-tmp-77017-image-placeholder-title--default--1200.jpg"
+        src="Advertisment for eating vegetables"
+        border="solid 1px #f0f0f0"
+      />
+      <Typography textAlign="center">Advertisment</Typography>
+
+      {/* Carousel */}
+      {!isMobileScreen && <Carousel products={randomProducts} />}
+
+      {/* Recently Added Products */}
+      <Grid container mt={4}>
+        <Grid item xs={12}>
+          <Typography
+            variant="h5"
+            px={2}
+            sx={{
+              fontWeight: "bold",
+            }}
           >
-            <CircularProgress />
-          </Box>
-        </>
-      ) : (
-        <>
-          {error && <Alert severity="error">{error}</Alert>}
-
-          {/* Carousel */}
-          <Grid container>{/* <Carousel Cards={CardArray} /> */}</Grid>
-
-          <CardMedia
-            component="img"
-            height="250px"
-            image="https://media-assets-05.thedrum.com/cache/images/thedrum-prod/s3-news-tmp-77017-image-placeholder-title--default--1200.jpg"
-            src="Advertisment for eating vegetables"
-            border="solid 1px #f0f0f0"
-          />
-          <Typography textAlign="center">Advertisment</Typography>
-
-          {/* Recently Added Products */}
-          <Grid container mt={4}>
-            <Grid item xs={12}>
-              <Typography
-                variant="h5"
-                px={2}
-                sx={{
-                  fontWeight: "bold",
-                }}
-              >
-                Recently Added
-              </Typography>
-            </Grid>
-            {recentProducts.map((product) => (
-              <Grid
-                item
-                key={product._id}
-                xs={12}
-                sm={4}
-                md={3}
-                p={{ xs: 2, sm: 1, md: 2 }}
-              >
-                <ProductCard product={product} />
-              </Grid>
-            ))}
+            Recently Added
+          </Typography>
+        </Grid>
+        {recentProducts.map((product) => (
+          <Grid
+            item
+            key={product._id}
+            xs={12}
+            sm={4}
+            md={3}
+            p={{ xs: 2, sm: 1, md: 2 }}
+          >
+            <ProductCard product={product} />
           </Grid>
-
-          {/* Product Categories  */}
-          <Grid container mt={4} display={{ xs: "none", sm: "flex" }}>
-            <Grid item xs={12}>
-              <Typography
-                variant="h5"
-                px={2}
-                sx={{
-                  fontWeight: "bold",
-                }}
-              >
-                Product Categories
-              </Typography>
-            </Grid>
-
-            {Array.from(Array(12)).map((_, index) => (
-              <Grid item sm={4} md={3} lg={2} p={3} key={index}>
-                <CategoryAvatars />
-              </Grid>
-            ))}
+        ))}
+      </Grid>
+      {/* Product Categories  */}
+      {!isMobileScreen && (
+        <Grid container mt={4} spacing={0}>
+          <Grid item xs={12}>
+            <Typography
+              variant="h5"
+              px={2}
+              sx={{
+                fontWeight: "bold",
+              }}
+            >
+              Product Categories
+            </Typography>
           </Grid>
-        </>
+          {categories?.map((category, index) => (
+            <Grid
+              container
+              item
+              sm={3}
+              md={2}
+              p={1}
+              key={index}
+              justifyContent="center"
+              alignContent={"center"}
+              spacing={0}
+            >
+              <Grid item margin={1} sx={{ aspectRatio: "1 / 1" }}>
+                <CategoryAvatars
+                  categoryTitle={category.category_name}
+                  categoryLink={`/search/category/${category._id}`}
+                  category_id={category._id}
+                />
+              </Grid>
+            </Grid>
+          ))}
+        </Grid>
       )}
     </Box>
   );

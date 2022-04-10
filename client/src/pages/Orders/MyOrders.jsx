@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router-dom";
@@ -6,14 +6,19 @@ import { useNavigate } from "react-router-dom";
 import { Box, Grid, Alert, Typography } from "@mui/material";
 
 import OrderCard from "../../components/Orders/OrderCard";
+import DataContext from "../../context/DataContext";
 
 const MyOrders = () => {
   const [orders, setOrders] = useState([]);
-  const [error, setError] = useState("");
+  // const [error, setError] = useState("");
 
   const navigate = useNavigate();
+  const { setError, setLoading } = useContext(DataContext);
 
   useEffect(() => {
+    const controller = new AbortController();
+    setLoading(true);
+
     (async () => {
       try {
         const config = {
@@ -21,6 +26,7 @@ const MyOrders = () => {
             "Content-Type": "application/json",
             Authorization: `Bearer ${localStorage.getItem("authToken")}`,
           },
+          signal: controller.signal,
         };
 
         const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
@@ -31,19 +37,17 @@ const MyOrders = () => {
 
         setOrders(orders.data);
       } catch (error) {
-        if (error.response.status === 401) {
-          localStorage.removeItem("authToken");
-          navigate("/login");
-        }
-
-        setError(error.response.data.error);
-
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
+        if (axios.isCancel(error)) return;
+        setError([error]);
       }
     })();
-  }, [navigate]);
+
+    setLoading(false);
+    return () => {
+      controller.abort();
+    };
+  }, [navigate, setLoading, setError]);
 
   return (
     <Box
@@ -53,8 +57,6 @@ const MyOrders = () => {
         flexGrow: 1,
       }}
     >
-      {error && <Alert severity="error">{error}</Alert>}
-
       <Typography variant="h5">My Orders</Typography>
       <Typography variant="body1" mb={2}>
         View your past orders here.

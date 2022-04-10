@@ -1,7 +1,7 @@
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 
-import { Alert, AlertTitle, Box } from "@mui/material";
+import { Alert, AlertTitle, Box, Snackbar } from "@mui/material";
 
 import PageLoading from "../components/PageLoading";
 import Navigation from "../components/Navigation/Navigation";
@@ -10,43 +10,40 @@ import Footer from "../components/Footer";
 
 import DataContext from "../context/DataContext";
 
+import FeedbackAlert from "../components/FeedbackAlert";
+
 const Site = () => {
   const { loading, error, success } = useContext(DataContext);
 
   return (
-    <Box display="flex" flexDirection="column" height="100vh">
-      {/* Navigation Bar  */}
-      <Nav />
+    <>
+      <Box display="flex" flexDirection="column" height="100vh">
+        <FeedbackAlert
+          severity="error"
+          message={error[0]?.response?.data?.error || error}
+        />
 
-      {/* Outlet  */}
-      <Box flex={1}>
-        {error && (
-          <Alert severity="error">
-            <AlertTitle>Error</AlertTitle>
-            {error?.response?.data.error || error}
-          </Alert>
-        )}
+        <FeedbackAlert severity="success" message={success} />
 
-        {success && (
-          <Alert severity="success">
-            <AlertTitle>Success</AlertTitle>
-            {success}
-          </Alert>
-        )}
+        {/* Navigation Bar  */}
+        <Navigation />
 
-        {loading ? (
-          <PageLoading />
-        ) : (
-          <>
-            <Outlet />
-          </>
-        )}
+        {/* Outlet  */}
+        <Box flex={1}>
+          {loading ? (
+            <PageLoading />
+          ) : (
+            <>
+              <Outlet />
+            </>
+          )}
+        </Box>
+
+        {/* Footer  */}
+
+        <Footer />
       </Box>
-
-      {/* Footer  */}
-
-      <Footer />
-    </Box>
+    </>
   );
 };
 

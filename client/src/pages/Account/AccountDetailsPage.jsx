@@ -86,10 +86,9 @@ const AccountsPage = () => {
           setAddressLine3(user?.address_line3);
         })
         .catch((error) => {
-          setError(error);
-          if (axios.isCancel(error)) {
-            return "Request Cancelled";
-          }
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          setError([error]);
         });
     })();
 
@@ -167,13 +166,10 @@ const AccountsPage = () => {
         setLoading(false);
       })
       .catch((error) => {
-        setError(error.response.data.error);
         setLoading(false);
+        if (axios.isCancel(error)) return;
+        setError([error]);
         setEditAccount(!editAccount);
-
-        if (axios.isCancel(error)) {
-          return "Request Cancelled";
-        }
       });
 
     return controller.abort();
@@ -185,13 +181,11 @@ const AccountsPage = () => {
 
     if (!currentPassword) {
       setLoading(false);
-      controller.abort();
       return setError("Please enter your current (existing) password");
     }
 
     if (!newPassword) {
       setLoading(false);
-      controller.abort();
       return setError("Please enter your new password");
     }
 
@@ -200,7 +194,6 @@ const AccountsPage = () => {
       setNewPassword("");
       setConfirmPassword("");
       setLoading(false);
-      controller.abort();
       return setError("Passwords do not match");
     }
 
@@ -230,12 +223,9 @@ const AccountsPage = () => {
         localStorage.removeItem("authToken");
       })
       .catch((error) => {
-        setError(error);
         setLoading(false);
-        if (axios.isCancel(error)) {
-          return "Request Cancelled";
-        }
-        controller.abort();
+        if (axios.isCancel(error)) return;
+        setError([error]);
       });
 
     setLoading(false);
@@ -243,7 +233,6 @@ const AccountsPage = () => {
   };
 
   const deleteAccountHandler = async () => {
-    const controller = new AbortController();
     setLoading(true);
 
     const config = {
@@ -251,7 +240,6 @@ const AccountsPage = () => {
         "Content-Type": "application/json",
         Authorization: `Bearer ${localStorage.getItem("authToken")}`,
       },
-      signal: controller.abort,
     };
 
     const decodedJWT = await jwtDecode(localStorage.getItem("authToken"));
@@ -261,14 +249,11 @@ const AccountsPage = () => {
         localStorage.removeItem("authToken");
       })
       .catch((error) => {
-        setError(error);
         setLoading(false);
-        controller.abort();
+        setError([error]);
       });
 
     setLoading(false);
-
-    controller.abort();
 
     return navigate("/accountdeleted");
   };

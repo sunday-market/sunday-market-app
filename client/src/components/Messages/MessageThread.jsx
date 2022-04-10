@@ -1,16 +1,22 @@
 import { Box, Typography } from "@mui/material";
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useContext } from "react";
+
+import DataContext from "../../context/DataContext";
 
 export default function MessageThread({ messageThread, currentUser }) {
   const [user, setUser] = useState(null);
+  const [otherUserId] = useState(
+    messageThread.message_members.find((m) => m !== currentUser)
+  );
+  const { setError, setLoading } = useContext(DataContext);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-    const otherUserId = messageThread.message_members.find(
-      (m) => m !== currentUser
-    );
+
+    setLoading(true);
+
     const getUser = async () => {
       try {
         const config = {
@@ -23,16 +29,19 @@ export default function MessageThread({ messageThread, currentUser }) {
         const res = await axios(`/api/user/${otherUserId}`, config);
         setUser(res.data.data);
       } catch (error) {
-        if (axios.isCancel(error)) {
-          return "Successfully Aborted";
-        }
+        if (axios.isCancel(error)) return;
+        setError([error]);
       }
     };
     getUser();
+
+    setLoading(false);
+
     return () => {
       controller.abort();
     };
-  }, [currentUser, messageThread]);
+  }, [setError, otherUserId, setLoading]);
+
   return (
     <>
       <Box>

@@ -8,9 +8,9 @@ import {
   CardMedia,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
-import axios from "axios";
-import jwt from "jwt-decode";
+import { useContext } from "react";
+
+import DataContext from "../../context/DataContext";
 
 export default function StallCard({
   cardId,
@@ -22,7 +22,8 @@ export default function StallCard({
   cardCategory,
   cardDescription,
 }) {
-  const [currentUserId, setCurrentUserId] = useState(null);
+  const { loggedInUser } = useContext(DataContext);
+
   const navigate = useNavigate();
   const UpdateCard = async (e) => {
     navigate(`/account/stalls/editstall/${cardId}`);
@@ -31,43 +32,14 @@ export default function StallCard({
     navigate(`/stalls/viewstall/${cardId}`);
   };
   const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
-  // get current user
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const getCurrentUserId = async () => {
-      if (localStorage.getItem("authToken")) {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          signal,
-        };
-        try {
-          const decodedJWT = jwt(localStorage.getItem("authToken"));
-          const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
-          setCurrentUserId(user.data.data._id);
-        } catch (error) {
-          if (axios.isCancel(error)) {
-            return console.log("Successfully Aborted");
-          }
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            return navigate("/login");
-          }
-        }
-      }
-    };
-    getCurrentUserId();
-    return () => controller.abort();
-  }, [navigate]);
+
   return (
     <>
       <Card
         sx={{
           display: "flex",
           flexDirection: "column",
+          width: "100%",
           height: "100%",
           border: "solid 1px #eeeeee",
         }}
@@ -170,7 +142,7 @@ export default function StallCard({
                 justifyContent: "center",
               }}
             >
-              {stallOwner === currentUserId ? (
+              {stallOwner === loggedInUser?._id ? (
                 <>
                   <Button
                     variant="contained"

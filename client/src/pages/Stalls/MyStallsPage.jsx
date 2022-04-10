@@ -1,31 +1,25 @@
 import AddCircleOutlineRoundedIcon from "@mui/icons-material/AddCircleOutlineRounded";
 
-import {
-  Typography,
-  Card,
-  Box,
-  Grid,
-  Container,
-  Pagination,
-  Alert,
-} from "@mui/material";
-import { useEffect, useState, useRef, useContext } from "react";
+import { Typography, Card, Box, Grid, Container } from "@mui/material";
+import { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import StallCard from "../../components/Stalls/StallCard";
 import axios from "axios";
 import jwt from "jwt-decode";
+
 import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
 
 export default function MyStalls() {
   const navigate = useNavigate();
   const [myStalls, setMyStalls] = useState([]);
-  const [error, setError] = useState("");
-  const { categories } = useContext(DataContext);
-  const errorRef = useRef(null);
+  const { categories, setError, setLoading } = useContext(DataContext);
 
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
+
+    setLoading(true);
     if (localStorage.getItem("authToken")) {
       const FetchUsersStalls = async () => {
         try {
@@ -41,31 +35,23 @@ export default function MyStalls() {
             `/api/mystalls/${currentUserID.id}`,
             config
           );
+          setLoading(false);
           setMyStalls(stalls.data);
         } catch (error) {
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            navigate("/login");
-          }
-          if (axios.isCancel(error)) {
-            return console.log("Successfully Aborted");
-          }
-          setTimeout(() => {
-            setError("");
-          }, 5000);
-          errorRef.current.scrollIntoView({
-            behavior: "smooth",
-            block: "start",
-          });
-          return setError(error.response.data.error);
+          setLoading(false);
+          if (axios.isCancel(error)) return;
+          scrollToTop();
+          return setError([error]);
         }
       };
       FetchUsersStalls();
     }
+
+    setLoading(false);
     return () => {
       controller.abort();
     };
-  }, [navigate]);
+  }, [navigate, setError, setLoading]);
 
   const getCategoryName = (catId) => {
     if (categories) {
@@ -74,11 +60,7 @@ export default function MyStalls() {
           return category.category_name;
         }
       }
-    } else {
-      setTimeout(() => {
-        getCategoryName(catId);
-      }, 2000);
-    }
+    } 
   };
 
   return (
@@ -90,14 +72,9 @@ export default function MyStalls() {
         }}
       >
         <Container maxWidth={false}>
-          <Box sx={{ pt: 2 }}>
-            <Grid container spacing={3}>
-              {error && (
-                <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
-                  <Alert severity="error">{error}</Alert>
-                </Grid>
-              )}
-              <Grid item lg={3} md={4} xs={12}>
+          <Box sx={{ py: 2 }}>
+            <Grid container spacing={0}>
+              <Grid item lg={3} md={4} xs={12} m={0} p={1}>
                 <Card
                   onClick={() => navigate("../addstall")}
                   sx={[
@@ -125,7 +102,7 @@ export default function MyStalls() {
                 </Card>
               </Grid>
               {myStalls?.map((stall, index) => (
-                <Grid item lg={3} md={4} xs={12} key={index}>
+                <Grid item lg={3} md={4} xs={12} key={index} m={0} p={1}>
                   <StallCard
                     cardId={stall._id}
                     cardTitle={stall.stallName}
@@ -139,15 +116,6 @@ export default function MyStalls() {
                 </Grid>
               ))}
             </Grid>
-            <Box
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                pt: 3,
-              }}
-            >
-              <Pagination color="primary" count={3} size="small" />
-            </Box>
           </Box>
         </Container>
       </Box>

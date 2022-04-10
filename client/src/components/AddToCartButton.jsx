@@ -5,7 +5,6 @@ import axios from "axios";
 
 import {
   Typography,
-  Box,
   Grid,
   Button,
   TextField,
@@ -21,33 +20,29 @@ const AddToCartButton = ({ product }) => {
   const [counter, setCounter] = useState(0);
   const [quantityInStock, setQuantityInStock] = useState(0);
 
-  const { shoppingCart, setUpdateCart, setError } = useContext(DataContext);
+  const { shoppingCart, setUpdateCart, setError, createNewCart } =
+    useContext(DataContext);
 
   const navigate = useNavigate();
 
-  const [inCart, setInCart] = useState(false);
-
   useEffect(() => {
-    if (shoppingCart) {
-      // console.log("The cart has: ", shoppingCart.products_selected);
-      //      console.log("Product Card: ", product.product_name);
-      //      shoppingCart.products_selected.forEach((p) => {
-      //     console.log("Ordered a ", p.product_name);
-      //     console.log("The product I ordered has an Id of ", p.product_id);
-      //     console.log("The product im comparing has an Id of ", product._id);
-      //     console.log(p.product_id === product._id);
-      //     if (p.product_id === product._id) {
-      //       setCounter(p.quantity);
-      //     }
-      //   });
+    if (shoppingCart?.products_selected.length > 0) {
+      shoppingCart?.products_selected?.forEach((prod) => {
+        if (prod.product_id === product._id) {
+          setCounter(prod.quantity);
+        }
+      });
+    } else {
+      setQuantityInStock(product.quantity_in_stock);
+      setCounter(0);
     }
-  }, [shoppingCart]);
+  }, [product._id, product.quantity_in_stock, shoppingCart]);
 
   const incrementQuantity = async () => {
     setRequest(true);
 
     const controller = new AbortController();
-    const cartId = localStorage.getItem("shoppingCartId");
+    let cartId = localStorage.getItem("shoppingCartId");
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -56,32 +51,33 @@ const AddToCartButton = ({ product }) => {
       signal: controller.signal,
     };
 
+    if (!cartId) {
+      await createNewCart();
+      cartId = localStorage.getItem("shoppingCartId");
+    }
+
     await axios
       .post(`/api/cart/additem/${cartId}`, product, config)
       .then(() => {
         setCounter(counter + 1);
         setQuantityInStock(quantityInStock - 1);
         setUpdateCart(true);
-        controller.abort();
       })
       .catch((error) => {
-        if (axios.isCancel(error)) {
-          return "axios request cancelled...";
-        }
-        setError(error);
+        if (axios.isCancel(error)) return;
+        setRequest(false);
+        setError([error]);
       });
 
     setRequest(false);
-    return () => {
-      controller.abort();
-    };
+    return controller.abort();
   };
 
   const decrementQuantity = async () => {
     setRequest(true);
     const controller = new AbortController();
 
-    const cartId = localStorage.getItem("shoppingCartId");
+    let cartId = localStorage.getItem("shoppingCartId");
     const config = {
       headers: {
         "Content-Type": "application/json",
@@ -93,26 +89,27 @@ const AddToCartButton = ({ product }) => {
       },
     };
 
+    if (!cartId) {
+      await createNewCart();
+      cartId = localStorage.getItem("shoppingCartId");
+    }
+
     await axios
       .delete(`/api/cart/removeitem/${cartId}`, config)
       .then(() => {
         setCounter(counter - 1);
         setQuantityInStock(quantityInStock + 1);
         setUpdateCart(true);
-        controller.abort();
       })
       .catch((error) => {
-        if (axios.isCancel(error)) {
-          return "axios request cancelled...";
-        }
-        setError(error);
+        if (axios.isCancel(error)) return;
+        setRequest(false);
+        setError([error]);
       });
 
     setRequest(false);
 
-    return () => {
-      controller.abort();
-    };
+    return controller.abort();
   };
 
   // Populate Product Qty
@@ -122,12 +119,10 @@ const AddToCartButton = ({ product }) => {
 
   // Check if the current user is selling this product
   useEffect(() => {
-    (async () => {
-      if (localStorage.getItem("authToken")) {
-        const authToken = jwtDecode(localStorage.getItem("authToken"));
-        setIsUserProduct(authToken.id === product.product_user);
-      }
-    })();
+    if (localStorage.getItem("authToken")) {
+      const authToken = jwtDecode(localStorage.getItem("authToken"));
+      setIsUserProduct(authToken.id === product.product_user);
+    }
   }, [product.product_user]);
 
   return (

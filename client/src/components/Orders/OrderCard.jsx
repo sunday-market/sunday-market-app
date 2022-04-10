@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { useNavigate } from "react-router";
 import {
   Typography,
@@ -10,12 +10,13 @@ import {
 } from "@mui/material";
 
 import { Article as ArticleIcon } from "@mui/icons-material";
-
+import DataContext from "../../context/DataContext";
 import SendMessageButton from "../SendMessageButton";
 
 const OrderCard = ({ order }) => {
   const [user, setUser] = useState({});
   const [stall, setStall] = useState({});
+  const { setError } = useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -24,15 +25,19 @@ const OrderCard = ({ order }) => {
   // Set User and Stall data to correct format
   // for SendMessageButton component
   useEffect(() => {
-    setUser({
-      _id: order.customer.id,
-    });
+    try {
+      setUser({
+        _id: order.customer.id,
+      });
 
-    setStall({
-      _id: order.stall.id,
-      stallName: order.stall.name,
-    });
-  }, [order]);
+      setStall({
+        _id: order.stall.id,
+        stallName: order.stall.name,
+      });
+    } catch (error) {
+      setError([error]);
+    }
+  }, [order, setError]);
 
   return (
     <Card
@@ -62,10 +67,10 @@ const OrderCard = ({ order }) => {
           }}
         >
           <Typography variant="h6">{order.stall.name}</Typography>
-          <Typography variant="body2">
+          {/* <Typography variant="body2">
             <strong>Phone: </strong>
             {order.stall.phone}
-          </Typography>
+          </Typography> */}
           <Typography variant="body2" mb={2}>
             <strong>Email: </strong>
             {order.stall.email}

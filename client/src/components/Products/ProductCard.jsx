@@ -1,33 +1,12 @@
-import { useEffect, useState } from "react";
-import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router";
-import {
-  Typography,
-  Grid,
-  Card,
-  CardContent,
-  CardMedia,
-  Box,
-  Divider,
-  Button,
-} from "@mui/material";
+import { Typography, Grid, Card, CardMedia, Box, Divider } from "@mui/material";
 
 import { priceToCurrency } from "../../utils/currency";
 import AddToCartButton from "../../components/AddToCartButton";
 
 const ProductCard = ({ product }) => {
-  const [isUserProduct, setIsUserProduct] = useState(false);
-
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
   const navigate = useNavigate();
-
-  useEffect(() => {
-    const authToken = localStorage.getItem("authToken");
-    if (authToken) {
-      const jwt = jwtDecode(localStorage.getItem("authToken"));
-      setIsUserProduct(jwt.id === product.product_user);
-    }
-  }, [product.product_user]);
 
   return (
     <>
@@ -36,87 +15,95 @@ const ProductCard = ({ product }) => {
           display: "flex",
           flexDirection: "column",
           height: "100%",
-          border: "solid 1px #eeeeee",
+          // boxShadow: "0px 0px 5px 0px rgba(64,64,64,0.35);",
+          border: "solid 1px #c3c3c3",
         }}
       >
-        <CardContent>
-          <Box
+        <Box position="relative">
+          <CardMedia
+            onClick={() => navigate(`/products/${product._id}`)}
+            component="img"
+            height="175"
+            image={
+              product.image
+                ? `${PUBLIC_FOLDER}products/${product.image}`
+                : `${PUBLIC_FOLDER}products/noimage.jpg`
+            }
+            alt={product.product_name}
             sx={{
-              display: "flex",
-              flexDirection: "column",
-              justifyContent: "center",
-              pb: 1,
+              boxShadow: "0px 5px 20px 2px rgba(64,64,64,0.35);",
+              cursor: "pointer",
+              // border: "solid 1px grey"
             }}
-          >
-            <CardMedia
-              component="img"
-              height="175"
-              image={
-                product.image
-                  ? `${PUBLIC_FOLDER}products/${product.image}`
-                  : `${PUBLIC_FOLDER}products/noimage.jpg`
-              }
-              alt={product.product_name}
-            />
-
-            <Typography
-              gutterBottom
-              align="center"
-              variant="body2"
-              sx={{ backgroundColor: "#eeeeee" }}
-            >
-              {product.subcategory || ""}
-            </Typography>
-
-            <Typography variant="body1" align="center">
-              <b>{product.product_name}</b>
-            </Typography>
-          </Box>
-
+          />
           <Typography
+            position="absolute"
+            bottom="0"
+            m={1}
             align="center"
-            color="textPrimary"
             variant="body2"
-            sx={{
-              textOverflow: "ellipsis",
-              overflow: "hidden",
-              display: "-webkit-box !important",
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: "vertical",
-            }}
+            width="inherit"
+            color="white"
+            fontStyle="italic"
+            backgroundColor="#39B8FF"
+            border="solid 1px white"
+            borderRadius={2}
+            px={1}
           >
-            {product.product_description}
+            {product.subcategory || ""}
           </Typography>
-        </CardContent>
+        </Box>
+
+        <Typography mt={2} variant="body1" align="center" gutterBottom>
+          <b>{product.product_name}</b>
+        </Typography>
+
+        <Typography
+          align="center"
+          color="grey.500"
+          variant="body2"
+          gutterBottom
+          onClick={() => navigate(`/products/${product._id}`)}
+          pb={3}
+          px={1}
+          sx={{
+            textOverflow: "ellipsis",
+            overflow: "hidden",
+            display: "-webkit-box !important",
+            WebkitLineClamp: 3,
+            WebkitBoxOrient: "vertical",
+            cursor: "pointer",
+          }}
+        >
+          {product.product_description || "No description"}
+        </Typography>
+
         <Box sx={{ flexGrow: 1 }} />
         <Divider margin={1} />
 
-        <Grid
-          container
-          direction="column"
-          // spacing={2}
-          sx={{ justifyContent: "center" }}
-        >
+        <Grid container direction="column" sx={{ justifyContent: "center" }}>
           <Grid
             item
+            p={2}
             sx={{
               alignItems: "center",
               display: "flex",
-              justifyContent: "space-between",
+              justifyContent: "center",
             }}
           >
             <Typography
-              color="grey.800"
-              sx={{ p: 1, ml: 2, fontFamily: "Tahoma" }}
+              color="blue.800"
+              sx={{ fontFamily: "Tahoma", fontWeight: "bold" }}
               variant="h5"
+              align="center"
             >
               {priceToCurrency(product.product_price)}
             </Typography>
-            {!isUserProduct && (
+            {/* {!isUserProduct && (
               <Button onClick={() => navigate(`/products/${product._id}`)}>
                 View
               </Button>
-            )}
+            )} */}
           </Grid>
 
           <Grid

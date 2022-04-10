@@ -1,37 +1,27 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate } from "react-router";
 import jwtDecode from "jwt-decode";
 import axios from "axios";
 
 import { Button } from "@mui/material";
 
+import DataContext from "../context/DataContext";
+
 const SendMessageButton = (props) => {
   const { children, variant, user, stall } = props;
-  const [currentUser, setCurrentUser] = useState(undefined);
+
+  const { loggedInUser, setError, setLoading } = useContext(DataContext);
 
   const navigate = useNavigate();
-
-  // Set Current User
-  useEffect(() => {
-    const controller = new AbortController();
-
-    const authToken = localStorage.getItem("authToken");
-    if (authToken) {
-      const decodedJWT = jwtDecode(authToken);
-      setCurrentUser(decodedJWT.id);
-    }
-    return () => {
-      controller.abort();
-    };
-  }, [currentUser]);
 
   const handleOnClick = async (e) => {
     e.preventDefault();
     const controller = new AbortController();
+    setLoading(true);
 
     let messageThread = {
       stall_name: undefined,
-      send_user: currentUser,
+      send_user: loggedInUser._id,
       recieve_user: undefined, // Spelling mistake intentional
     };
 
@@ -44,7 +34,7 @@ const SendMessageButton = (props) => {
     }
 
     // Logged out users send message through their email client
-    if (!currentUser) {
+    if (!loggedInUser) {
       if (stall) {
         return (window.location.href = `mailto:${stall.email}`);
       } else {
@@ -82,7 +72,7 @@ const SendMessageButton = (props) => {
 
       // Get Message Threads for the Current User
       await axios
-        .get(`/api/messagethreads/${currentUser}`, config)
+        .get(`/api/messagethreads/${loggedInUser._id}`, config)
         .then((result) => {
           const threads = result.data;
           stalls = threads.filter((thread) => {
@@ -90,9 +80,9 @@ const SendMessageButton = (props) => {
           });
         })
         .catch((error) => {
-          console.error(error.message);
-          controller.abort();
-          return new Error(error.message);
+          if (axios.isCancel(error)) return;
+          setLoading(false);
+          setError([error]);
         });
 
       if (stalls.length === 0) {
@@ -101,33 +91,40 @@ const SendMessageButton = (props) => {
         await axios
           .post("/api/messagethreads/", messageThread, config)
           .then((result) => {
+            setLoading(false);
             return navigate("/account/messages", { state: result.data });
           })
           .catch((error) => {
-            console.error(error.message);
-            controller.abort();
-            return new Error(error.message);
+            if (axios.isCancel(error)) return;
+            setLoading(false);
+            setError([error]);
           });
       } else {
         // User has messaged the stall previsouly
         // Get the previous thread
         const threads = stalls.filter((thread) => {
-          return thread.message_members.includes(currentUser);
+          return thread.message_members.includes(loggedInUser._id);
         });
+        setLoading(false);
 
         if (threads.length > 0) {
+          setLoading(false);
           return navigate("/account/messages", { state: threads[0] });
         } else {
+          setLoading(false);
           return navigate("/account/messages", { state: messageThread });
         }
       }
+      setLoading(false);
     }
 
     // Send message to a User
     else if (user) {
+      setLoading(false);
       return navigate("/account/messages", { state: messageThread });
     }
 
+    setLoading(false);
     return () => {
       controller.abort();
     };

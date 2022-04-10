@@ -1,29 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useContext } from "react";
 import axios from "axios";
-import {
-  Paper,
-  Box,
-  Typography,
-  Button,
-  TextField,
-  Grid,
-  Alert,
-} from "@mui/material";
+import { Paper, Box, Typography, Button, TextField, Grid } from "@mui/material";
 
+import DataContext from "../../context/DataContext";
 import ForgotPasswordImage from "../../assets/forgotpassword.svg";
 
 const ForgotPasswordPage = () => {
   const [email, setEmail] = useState("");
-  const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const { setError, setSuccess } = useContext(DataContext);
 
   const forgotPasswordHandler = async () => {
+    const controller = new AbortController();
+
     setError("");
     setSuccess("");
     if (!email) {
-      setTimeout(() => {
-        setError("");
-      }, 5000);
       return setError("Email address must be provided");
     }
 
@@ -32,14 +23,17 @@ const ForgotPasswordPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
       };
 
       await axios.post("/api/auth/forgotpassword", { email }, config);
 
       setSuccess(`Password reset instructions have been sent to ${email}.`);
     } catch (error) {
-      setError(error.response.data.error);
+      if (axios.isCancel(error)) return;
+      setError([error]);
     }
+    return controller.abort();
   };
 
   return (
@@ -77,18 +71,6 @@ const ForgotPasswordPage = () => {
                   sx={{ background: "white", width: "30ch" }}
                 />
               </Grid>
-
-              {error && (
-                <Grid item>
-                  <Alert severity="error">{error}</Alert>
-                </Grid>
-              )}
-
-              {success && (
-                <Grid item>
-                  <Alert severity="success">{success}</Alert>
-                </Grid>
-              )}
 
               <Grid item>
                 <Button variant="contained" onClick={forgotPasswordHandler}>

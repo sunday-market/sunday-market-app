@@ -9,9 +9,11 @@ let users = [];
 
 // add user
 const addUser = (userId, socketId) => {
-  console.log(`This is socket ID: ${socketId}`);
+  //console.log(`This is socket ID: ${socketId}`);
   !users.some((user) => user.userId === userId) &&
     users.push({ userId, socketId });
+
+  //console.log(users);
 };
 
 // remove user
@@ -21,6 +23,7 @@ const removeUser = (socketId) => {
 
 // get user
 const getUser = (userId) => {
+  //console.log(users);
   return users.find((user) => user.userId === userId);
 };
 
@@ -36,10 +39,20 @@ io.on("connection", (socket) => {
   });
 
   // send and get message
-  socket.on("sendMessage", ({ senderId, recieverId, sentMessage }) => {
-    const user = getUser(recieverId);
-    io.to(user.socketId).emit("getMessage", { senderId, sentMessage });
-  });
+  socket.on(
+    "sendMessage",
+    ({ senderId, recieverId, sentMessage, message_thread_id }) => {
+      //console.log(recieverId);
+      const user = getUser(recieverId);
+      //console.log(user);
+      io.to(user?.socketId).emit("getMessage", {
+        senderId,
+        sentMessage,
+        message_thread_id,
+      });
+      //console.log("SENT MESSAGE");
+    }
+  );
 
   // user has disconnected from the instant messaging service
   socket.on("disconnect", () => {

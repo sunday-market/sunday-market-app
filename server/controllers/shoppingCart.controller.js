@@ -48,7 +48,7 @@ exports.addItemToCart = async (req, res, next) => {
   const cart = await ShoppingCart.findById(req.params.cartid);
   //Check if product already exists
   let exists = false;
-  for (i = 0; i < cart.products_selected.length; i++) {
+  for (i = 0; i < cart?.products_selected?.length; i++) {
     let product = cart.products_selected[i];
     if (product.product_id.toString() === req.body._id) {
       exists = true;
@@ -251,7 +251,6 @@ exports.returnCartWithFullProductAndStall = async (req, res, next) => {
           },
         },
       ]);
-      console.log(cartWithProductsAndStalls);
       return res.status(200).json({
         success: true,
         data: cartWithProductsAndStalls,
@@ -296,4 +295,4 @@ async function clearOldCarts() {
   });
 }
 // fires every 35mins
-setInterval(clearOldCarts, 2100000);
+setInterval(clearOldCarts, 900000);

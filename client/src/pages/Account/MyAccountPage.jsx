@@ -41,6 +41,10 @@ const AccountPage = () => {
     );
   }, [currentPage]);
 
+  useEffect(() => {
+    setCurrentPage(window.location.href.split("http://localhost:3000")[1]);
+  }, []);
+
   return (
     <>
       {/* Account Controls  */}

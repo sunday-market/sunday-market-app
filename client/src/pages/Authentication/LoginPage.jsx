@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useContext } from "react";
 import axios from "axios";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -13,13 +13,15 @@ import {
   InputLabel,
 } from "@mui/material";
 
+import DataContext from "../../context/DataContext";
+
 const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [verifiedError, setVerifiedError] = useState(false);
-  const [verificationSuccess, setVerificationSuccess] = useState("");
-  const [verificationError, setVerificationError] = useState("");
-  const [error, setError] = useState("");
+
+  const { setError, setLoading, setSuccess, setRefreshLoggedInUser } =
+    useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -30,11 +32,10 @@ const LoginPage = () => {
   }, [navigate]);
 
   const resendVerification = async () => {
+    const controller = new AbortController();
+
     if (!email) {
-      setTimeout(() => {
-        setVerificationError("");
-      }, 5000);
-      return setVerificationError("Please provide an email address");
+      return setError("Please provide an email address");
     }
 
     try {
@@ -42,6 +43,7 @@ const LoginPage = () => {
         headers: {
           "Content-Type": "application/json",
         },
+        signal: controller.signal,
       };
 
       await axios.post(
@@ -53,48 +55,48 @@ const LoginPage = () => {
       );
 
       setVerifiedError(false);
-      setVerificationSuccess(
-        "Verification email sent.  Please check your email."
-      );
+      setSuccess("Verification email sent.  Please check your email.");
     } catch (error) {
-      setError(error.response.data.error);
+      setLoading(false);
+      if (axios.isCancel(error)) return;
+      setError([error]);
+      window.scrollTo(0, 0);
     }
+    return controller.abort();
   };
 
   const loginHandler = async (e) => {
     e.preventDefault();
+    const controller = new AbortController();
+    setLoading(true);
 
-    // Set headers for Axios request
     const config = {
       headers: {
         "Content-Type": "application/json",
       },
+      signal: controller.signal,
     };
 
     try {
       const { data } = await axios.post(
         "/api/auth/login",
-        {
-          email,
-          password,
-        },
+        { email, password },
         config
       );
 
       localStorage.setItem("authToken", data.token);
 
+      setRefreshLoggedInUser(true);
+      setSuccess("Login Successful");
       navigate("/");
     } catch (error) {
-      if (error.response.data.error === "User is not verified") {
-        setVerifiedError(true);
-      } else {
-        setError(error.response.data.error);
-      }
-
-      setTimeout(() => {
-        setError("");
-      }, 5000);
+      setLoading(false);
+      if (axios.isCancel(error)) return;
+      setError([error]);
     }
+
+    setLoading(false);
+    return controller.abort();
   };
 
   return (
@@ -110,14 +112,6 @@ const LoginPage = () => {
           <form onSubmit={loginHandler}>
             <Grid container direction="column" spacing={2} padding={2}>
               <Grid item>
-                {/* Error Alert Message */}
-                {error && <Alert severity="error">{error}</Alert>}
-
-                {/* Verification Success Alert Message */}
-                {verificationSuccess && (
-                  <Alert severity="success">{verificationSuccess}</Alert>
-                )}
-
                 {/* Display Alert Message if user has not validated  */}
                 {verifiedError && (
                   <Alert severity="warning" align>
@@ -131,10 +125,6 @@ const LoginPage = () => {
                       Resend Verification
                     </Button>
                   </Alert>
-                )}
-
-                {verificationError && (
-                  <Alert severity="error">{verificationError}</Alert>
                 )}
               </Grid>
 

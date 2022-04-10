@@ -80,13 +80,22 @@ exports.addNewStall = async (req, res, next) => {
 // PUT
 exports.updateStall = async (req, res, next) => {
   const stallID = req.params.stallid;
+
+  let image = "noimage.png";
+
+  if (req.file){
+    image = req.file.filename;
+  } else if (req.body.sameimage) {
+    image = req.body.sameimage
+  }
+
   const stallData = {
     user: req.body.user,
     stallName: req.body.stallName,
     category: req.body.category,
     activated: req.body.activated,
     description: req.body.description ? req.body.description : "",
-    image_url: req.file ? req.file.filename : "noimage.png",
+    image_url: image,
     email: req.body.email ? req.body.email : "",
     city_location: req.body.city_location,
   };
@@ -108,7 +117,7 @@ exports.updateStall = async (req, res, next) => {
 exports.deleteStallByID = async (req, res, next) => {
   try {
     await Stall.deleteOne({ _id: req.params.stallid });
-    if (req.body.image !== "noimage.jpg") {
+    if (req.body.image !== "noimage.png") {
       await fs.unlink(
         path.resolve(`../server/public/images/stalls/${req.body.image}`),
         (err) => {

@@ -1,31 +1,39 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext } from "react";
 import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 
-import { Alert, Button, Typography, Divider, CardMedia } from "@mui/material";
+import { Button, Typography, Divider, CardMedia } from "@mui/material";
 import { Box, Grid } from "@mui/material";
 import AddToCartButton from "../../components/AddToCartButton";
 import SendMessageButton from "../../components/SendMessageButton";
 
 import { priceToCurrency } from "../../utils/currency";
+import DataContext from "../../context/DataContext";
+
+import { scrollToTop } from "../../utils/ux";
 
 const ViewProduct = () => {
   const [product, setProduct] = useState([]);
   const [stall, setStall] = useState([]);
-  const [error, setError] = useState("");
+
+  const { setError, setLoading, loggedInUser } = useContext(DataContext);
 
   const navigate = useNavigate();
   const { productId } = useParams();
 
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
-
   useEffect(() => {
+    const controller = new AbortController();
+
     (async () => {
       try {
+        setLoading(true);
+
         const config = {
           headers: {
             "Content-Type": "application/json",
           },
+          signal: controller.signal,
         };
 
         // Get Product Information
@@ -39,28 +47,31 @@ const ViewProduct = () => {
         const stallData = await axios.get(
           `/api/stalls/${productData.data[0].product_stall}`
         );
+
         setStall(stallData.data[0]);
       } catch (error) {
-        setError(error.response.data.error);
-
-        setTimeout(() => {
-          setError("");
-        }, 5000);
+        setLoading(false);
+        if (axios.isCancel(error)) return;
+        setError([error]);
+        scrollToTop();
       }
     })();
-  }, [navigate, productId]);
+
+    setLoading(false);
+    return () => {
+      controller.abort();
+    };
+  }, [navigate, productId, setError, setLoading]);
 
   return (
     <Box p={2}>
-      {error && <Alert severity="error">{error}</Alert>}
-
       <Typography variant="h4" textAlign="center" gutterBottom>
         {product.product_name}
       </Typography>
 
       <Grid container spacing={0} justifyContent="center">
         {/* Product Image  */}
-        <Grid item xs={12} sm={5} md={4}>
+        <Grid item xs={12} sm={5} md={4} p={2}>
           <Box
             component="img"
             width="100%"
@@ -70,6 +81,10 @@ const ViewProduct = () => {
                 : `${PUBLIC_FOLDER}products/noimage.jpg`
             }
             alt={product.product_name}
+            borderRadius={1}
+            sx={{
+              boxShadow: "1px 1px 10px 1px rgba(64,64,64,0.75);",
+            }}
           />
         </Grid>
 
@@ -130,22 +145,22 @@ const ViewProduct = () => {
                   {stall.city_location}
                 </Typography>
 
-                <Box display="flex" justifyContent="center" p={2}>
-                  <Button
-                    variant="contained"
-                    sx={{ marginRight: 1 }}
-                    onClick={() =>
-                      navigate(
-                        `/account/stalls/viewstall/${product.product_stall}`
-                      )
-                    }
-                  >
-                    View
-                  </Button>
-                  <SendMessageButton stall={stall} />
-                </Box>
+                {loggedInUser?._id?.toString() !==
+                  product?.product_user?.toString() && (
+                  <Box display="flex" justifyContent="center" p={2}>
+                    <Button
+                      variant="contained"
+                      sx={{ marginRight: 1 }}
+                      onClick={() =>
+                        navigate(`/stalls/viewstall/${product.product_stall}`)
+                      }
+                    >
+                      View
+                    </Button>
+                    <SendMessageButton stall={stall} />
+                  </Box>
+                )}
               </Box>
-
               <Box
                 mt={{ xs: 1, md: 3 }}
                 mb={{ xs: 4, md: 0 }}
