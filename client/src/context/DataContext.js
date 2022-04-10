@@ -45,6 +45,12 @@ export const DataProvider = ({ children }) => {
       (async () => {
         const decodedJWT = jwtDecode(localStorage.getItem("authToken"));
 
+        // Check JWT expiry then delete token
+        if (Date.now() >= decodedJWT.exp * 1000) {
+          setLoggedInUser(null);
+          return localStorage.removeItem("authToken");
+        }
+
         const config = {
           headers: {
             "Content-Type": "application/json",

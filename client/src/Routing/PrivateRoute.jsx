@@ -5,7 +5,7 @@ import { Navigate, Outlet, useNavigate } from "react-router-dom";
 import DataContext from "../context/DataContext";
 
 const PrivateRoute = () => {
-  const { error, setError } = useContext(DataContext);
+  const { error, setError, setLoggedInUser } = useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -20,7 +20,9 @@ const PrivateRoute = () => {
   useEffect(() => {
     if (error[0]?.response?.status === 401) {
       setError("You are not authorised to access this page");
+      console.log("Private Route has recognised unauthorised access");
       localStorage.removeItem("authToken");
+      setLoggedInUser(null);
     }
 
     if (!localStorage.getItem("authToken")) {
@@ -28,7 +30,7 @@ const PrivateRoute = () => {
       setTimeout(() => {}, 500);
       navigate("/login");
     }
-  }, [error, setError, navigate]);
+  }, [error, setError, navigate, setLoggedInUser]);
 
   return <Outlet />;
 };
