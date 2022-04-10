@@ -37,24 +37,28 @@ export default function MessagePage(props) {
   // SOCKET IO
   useEffect(() => {
     socket.current = io("ws://localhost:8900");
-    if (loggedInUser) {
-      socket.current.emit("addUser", loggedInUser._id);
-      socket.current.on("getUsers", (users) => {});
-    }
-  }, [loggedInUser]);
-
-  useEffect(() => {
     socket.current.on("getMessage", (data) => {
       setArrivalMessage({
         send_user: data.senderId,
         message: data.sentMessage,
+        message_thread_id: data.message_thread_id,
         createdAt: Date.now(),
       });
     });
   }, []);
 
   useEffect(() => {
+    if (loggedInUser) {
+      socket.current.emit("addUser", loggedInUser._id);
+      socket.current.on("getUsers", (users) => {
+        //console.log(users);
+      });
+    }
+  }, [loggedInUser]);
+
+  useEffect(() => {
     arrivalMessage &&
+      currentMessage._id === arrivalMessage.message_thread_id &&
       currentMessage?.message_members.includes(arrivalMessage.send_user) &&
       setMessages((prev) => [...prev, arrivalMessage]);
   }, [arrivalMessage, currentMessage]);
@@ -176,6 +180,7 @@ export default function MessagePage(props) {
       senderId: loggedInUser._id,
       recieverId,
       sentMessage: newMessage,
+      message_thread_id: currentMessage._id,
     });
 
     try {
@@ -315,8 +320,8 @@ export default function MessagePage(props) {
                     sx={{ overflowY: "scroll" }}
                   >
                     {messages.length !== 0 ? (
-                      messages.map((m) => (
-                        <Box margin={"auto"} ref={scrollRef} key={m._id}>
+                      messages.map((m, index) => (
+                        <Box margin={"auto"} ref={scrollRef} key={index}>
                           <Message
                             message={m}
                             own={m.send_user === loggedInUser._id}
