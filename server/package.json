@@ -8,6 +8,12 @@
     "dev": "nodemon server.js",
     "test": "jest"
   },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": [
+      "./tests/setup.js"
+    ]
+  },
   "author": "Nicholas Harding & Daniel Tibbotts",
   "license": "ISC",
   "dependencies": {

@@ -47,9 +47,10 @@ exports.register = async (req, res, next) => {
       text: message,
     });
 
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       data: "Email Sent",
+      user: user,
     });
 
     sendToken(user, 201, res);
