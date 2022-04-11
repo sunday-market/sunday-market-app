@@ -37,7 +37,6 @@ export default function EditMyStallPage() {
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [location, setLocation] = useState("");
-  const [user, setCurrentUser] = useState(null);
   const [currentStalls, setCurrentStalls] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
@@ -130,22 +129,6 @@ export default function EditMyStallPage() {
   }, [setError, setLoading]);
 
   useEffect(() => {
-    if (localStorage.getItem("authToken")) {
-      const getUser = async () => {
-        try {
-          setCurrentUser(jwtDecode(localStorage.getItem("authToken")));
-        } catch (error) {
-          setLoading(false);
-          scrollToTop();
-          return setError([error]);
-        }
-      };
-      getUser();
-      setLoading(false);
-    }
-  }, [navigate, setError, setLoading]);
-
-  useEffect(() => {
     if (!localStorage.getItem("authToken")) {
       navigate("/");
     }
@@ -169,8 +152,8 @@ export default function EditMyStallPage() {
     let userData;
 
     // Check user
-    if (user) {
-      stallData.append("user", user.id);
+    if (loggedInUser) {
+      stallData.append("user", loggedInUser._id);
     } else {
       sendPost = false;
       scrollToTop();
