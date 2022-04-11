@@ -121,6 +121,7 @@ exports.forgotPassword = async (req, res, next) => {
       res.status(200).json({
         success: true,
         data: "Email Sent",
+        resetToken: resetToken,
       });
     } catch (error) {
       user.resetPasswordToken = undefined;
@@ -133,7 +134,7 @@ exports.forgotPassword = async (req, res, next) => {
   } catch (error) {
     return next(error);
   }
-};
+};  
 
 exports.changePassword = async (req, res, next) => {
   const { userId, existingPassword, newPassword } = req.body;
@@ -202,8 +203,6 @@ exports.resetPassword = async (req, res, next) => {
   try {
     const user = await User.findOne({
       resetPasswordToken,
-      // TODO: Find out why the expiry is not working
-      // resetPasswordExpire: { $gt: Date.now() },
     });
 
     if (!user) {
@@ -293,7 +292,7 @@ exports.verifyUser = async (req, res, next) => {
     next(error);
   }
 };
-// TODO: Confirm this is still in use Possibilty needs deleteing?
+
 exports.updateUserCredentials = async (req, res, next) => {
   const { userId } = req.params;
   const data = req.body;
