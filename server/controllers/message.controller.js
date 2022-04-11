@@ -24,3 +24,16 @@ exports.addNewMessage = async (req, res, next) => {
     next(error);
   }
 };
+
+// DELETE
+// Delete Message Created for testing purposes
+exports.deleteMessage = async (req, res, next) => {
+  try {
+    await Message.deleteOne({ _id: req.params.messageThreadId });
+    res
+      .status(200)
+      .json({ success: true, message: "Successfully Deleted Message" });
+  } catch (error) {
+    next(error);
+  }
+};

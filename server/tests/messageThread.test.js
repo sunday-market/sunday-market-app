@@ -19,7 +19,6 @@ test("Create New Message Thread With a Stall Name and then delete it", async () 
     .send(newStallThread)
     .expect(200)
     .then((data) => {
-      console.log(data.body);
       threadId = data.body._id;
     });
 
@@ -52,7 +51,6 @@ test("Get All threads of user 6227deea74ee78aeeaec70c1", async () => {
     .expect("Content-Type", /json/)
     .expect(200)
     .then((data) => {
-      console.log(data.body);
       expect(data.body.length).toBe(0);
     });
 });
