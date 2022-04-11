@@ -44,7 +44,8 @@ const EditProduct = () => {
   const [stalls, setStalls] = useState([]);
   const [subCategories, setSubCategories] = useState([]);
 
-  const { setError, setSuccess, setLoading } = useContext(DataContext);
+  const { setError, setSuccess, setLoading, loggedInUser } =
+    useContext(DataContext);
 
   const [openModal, setOpenModal] = useState(false);
   const handleOpenModal = () => setOpenModal(true);
@@ -73,36 +74,43 @@ const EditProduct = () => {
   useEffect(() => {
     const controller = new AbortController();
     setLoading(true);
+    if (loggedInUser) {
+      (async () => {
+        const config = {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
+          },
+          signal: controller.signal,
+        };
 
-    (async () => {
-      const config = {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-        },
-        signal: controller.signal,
-      };
-
-      await axios
-        .get(`/api/product/${productId}`, config)
-        .then((result) => {
-          setProduct(result.data[0]);
-          setOriginalImage(result.data[0].image);
-        })
-        .catch((error) => {
-          setLoading(false);
-          if (axios.isCancel(error)) return;
-          setError([error]);
-          scrollToTop();
-        });
-    })();
-
+        await axios
+          .get(`/api/product/${productId}`, config)
+          .then((result) => {
+            // check if product belongs to user
+            console.log(result.data[0]);
+            if (result.data[0].product_user !== loggedInUser._id) {
+              setLoading(false);
+              setError("You are not authorized to edit this product!");
+              return navigate("/");
+            }
+            setProduct(result.data[0]);
+            setOriginalImage(result.data[0].image);
+          })
+          .catch((error) => {
+            setLoading(false);
+            if (axios.isCancel(error)) return;
+            setError([error]);
+            scrollToTop();
+          });
+      })();
+    }
     setLoading(false);
 
     return () => {
       controller.abort();
     };
-  }, [productId, setError, setLoading]);
+  }, [loggedInUser, navigate, productId, setError, setLoading]);
 
   // Set Product Categories for Stall
   useEffect(() => {
