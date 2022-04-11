@@ -263,10 +263,10 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
   await Product.aggregate([
     {
       $lookup: {
-        from: "subcategories",
-        localField: "product_subcategory",
+        from: "stalls",
+        localField: "product_stall",
         foreignField: "_id",
-        as: "scategory",
+        as: "stall",
       },
     },
     {
@@ -274,7 +274,7 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
         newRoot: {
           $mergeObjects: [
             {
-              $arrayElemAt: ["$scategory", 0],
+              $arrayElemAt: ["$stall", 0],
             },
             "$$ROOT",
           ],
@@ -283,10 +283,10 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
     },
     {
       $lookup: {
-        from: "categories",
-        localField: "category_id",
+        from: "subcategories",
+        localField: "product_subcategory",
         foreignField: "_id",
-        as: "main_category",
+        as: "sub_category",
       },
     },
     {
@@ -294,7 +294,7 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
         newRoot: {
           $mergeObjects: [
             {
-              $arrayElemAt: ["$main_category", 0],
+              $arrayElemAt: ["$sub_category", 0],
             },
             "$$ROOT",
           ],
@@ -302,11 +302,43 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
       },
     },
     {
+      $match: {
+        activated: true,
+      },
+    },
+    {
+      $project: {
+        product_name: "$product_name",
+        product_description: "$product_description",
+        product_user: "$product_user",
+        product_subcategory: "$product_subcategory",
+        subcategory: "$subcategory",
+        product_price: "$product_price",
+        quantity_in_stock: "$quantity_in_stock",
+        image: "$image",
+        product_stall: {
+          _id: "$product_stall",
+          user: "$user",
+          stallName: "$stallName",
+          category: "$category",
+          activated: "$activated",
+          description: "$description",
+          image_url: "$image_url",
+          email: "$email",
+          city_location: "$city_location",
+        },
+        createdAt: "$createdAt",
+        updatedAt: "$updatedAt",
+      },
+    },
+    {
       $sort: {
         createdAt: -1,
       },
     },
-    { $limit: 8 },
+    {
+      $limit: 8,
+    },
   ])
     .then((result) => {
       res.status(200).json(result);
