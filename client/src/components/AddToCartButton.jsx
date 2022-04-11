@@ -2,7 +2,7 @@ import { useEffect, useState, useContext } from "react";
 import jwtDecode from "jwt-decode";
 import { useNavigate } from "react-router";
 import axios from "axios";
-
+import { scrollToTop } from "../utils/ux";
 import {
   Typography,
   Grid,
@@ -125,6 +125,14 @@ const AddToCartButton = ({ product }) => {
     }
   }, [product.product_user]);
 
+  const handleEditClick = () => {
+    scrollToTop();
+    return navigate(`/account/products/edit/${product._id}`);
+  };
+  const handleViewClick = () => {
+    scrollToTop();
+    return navigate(`/products/${product._id}`);
+  };
   return (
     <>
       <Grid
@@ -141,17 +149,12 @@ const AddToCartButton = ({ product }) => {
             <Grid item>
               <Button
                 variant="contained"
-                onClick={() => navigate(`/products/${product._id}`)}
+                onClick={handleViewClick}
                 sx={{ marginRight: 1 }}
               >
                 View
               </Button>
-              <Button
-                variant="outlined"
-                onClick={() =>
-                  navigate(`/account/products/edit/${product._id}`)
-                }
-              >
+              <Button variant="outlined" onClick={handleEditClick}>
                 Edit
               </Button>
             </Grid>
