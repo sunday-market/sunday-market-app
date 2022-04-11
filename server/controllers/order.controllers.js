@@ -24,7 +24,7 @@ exports.getOrderById = async (req, res, next) => {
     const order = await Order.findOne({ _id: req.params.orderId });
 
     if (!order) {
-      return next(new ErrorResponse("No order found", 400));
+      return next(new ErrorResponse("No order found", 404));
     }
 
     res.status(200).json(order);
@@ -37,6 +37,10 @@ exports.getUserOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({ "customer.id": req.params.userId });
 
+    if(orders.length === 0) {
+      return next(new ErrorResponse("No orders found for that user", 404));
+    }
+
     res.status(200).json(orders);
   } catch (error) {
     return next(error);
@@ -46,6 +50,10 @@ exports.getUserOrders = async (req, res, next) => {
 exports.getStallOrders = async (req, res, next) => {
   try {
     const orders = await Order.find({ "stall.id": req.params.stallId });
+
+    if(orders.length === 0){
+      return next(new ErrorResponse("No orders found for that stall", 404));
+    }
 
     res.status(200).json(orders);
   } catch (error) {
@@ -71,14 +79,16 @@ exports.getReceivedOrders = async (req, res, next) => {
     },
   ])
     .then((result) => {
+      if(result.length === 0) {
+        return next(new ErrorResponse("No received orders found for that user", 404));
+
+      }
       res.status(200).json(result);
     })
     .catch((error) => {
       return next(error);
     });
 };
-
-
 
 // POST: Create a new Order
 exports.createOrder = async (req, res, next) => {
@@ -376,4 +386,24 @@ const emailOrderCustomerMessage = (order) => {
     </tfoot>
   </table>
   `;
+};
+
+exports.deleteOrderById = async (req, res, next) => {
+  if (!req.params.orderId) {
+    return next(new ErrorResponse("Order id not provided", 400));
+  }
+
+  const order = await Order.findById(req.params.orderId).then((result) => {
+    if (!result) {
+      return next(new ErrorResponse("Order not found", 404));
+    }
+  });
+
+  await Order.findByIdAndDelete(req.params.orderId).then(() => {
+    res.status(200).json({
+      success: true,
+      data: "Order Successfully deleted",
+      order: order,
+    });
+  });
 };
