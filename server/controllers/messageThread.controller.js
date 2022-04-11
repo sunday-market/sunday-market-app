@@ -24,7 +24,18 @@ exports.addMessageThread = async (req, res, next) => {
     const savedMessageThread = await newMessageThread.save();
     res.status(200).json(savedMessageThread);
   } catch (error) {
-    console.log(error);
+    return next(error);
+  }
+};
+
+// DELETE - created for Unit Tests
+exports.deleteMessageThread = async (req, res, next) => {
+  try {
+    await MessageThread.deleteOne({ _id: req.params.threadId });
+    res
+      .status(200)
+      .json({ success: true, message: "Successully Deleted Message Thread" });
+  } catch (error) {
     return next(error);
   }
 };
