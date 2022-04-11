@@ -23,6 +23,12 @@ exports.getStallSubCategories = async (req, res, next) => {
     return next(new ErrorResponse("No stall id provided", 400));
   }
 
+  await Stall.findById(req.params.stallId).then((result) => {
+    if (!result) {
+      return next(new ErrorResponse("Stall not found", 404));
+    }
+  });
+
   await Stall.aggregate([
     {
       $match: {
@@ -62,6 +68,14 @@ exports.getAllSubCategories = async (req, res, next) => {
 };
 
 exports.getSubCategoriesByCategoryId = async (req, res, next) => {
+  const catId = await Category.findById(req.params.categoryId).then(
+    (result) => {
+      if (!result) {
+        return next(new ErrorResponse("Category Id does not exist.", 404));
+      }
+    }
+  );
+
   await SubCategory.aggregate([
     {
       $match: {
@@ -78,6 +92,7 @@ exports.getSubCategoriesByCategoryId = async (req, res, next) => {
 };
 
 exports.getAllCategoriesWithSubCategories = async (req, res, next) => {
+  console.log("Called the getAllCategoriesWithSubCategories controller ");
   await Category.aggregate([
     {
       $lookup: {
@@ -89,6 +104,7 @@ exports.getAllCategoriesWithSubCategories = async (req, res, next) => {
     },
   ])
     .then((result) => {
+      console.log("got a result");
       res.status(200).json(result);
     })
     .catch((error) => {
@@ -99,7 +115,11 @@ exports.getAllCategoriesWithSubCategories = async (req, res, next) => {
 exports.getCategoryName = async (req, res, next) => {
   await Category.findOne({ _id: req.params.categoryId })
     .then((result) => {
-      res.status(200).send(result.category_name);
+      if (!result) {
+        res.status(404).send("Category not found");
+      } else {
+        res.status(200).send(result.category_name);
+      }
     })
     .catch((error) => {
       return next(error);

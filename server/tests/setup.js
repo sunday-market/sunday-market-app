@@ -1,4 +1,4 @@
-jest.setTimeout(300000);
+jest.setTimeout(500000);
 
 const request = require("supertest");
 const server = "http://localhost:5000";
