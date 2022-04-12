@@ -213,11 +213,11 @@ exports.removeItemInCart = async (req, res, next) => {
 };
 
 exports.returnCartWithFullProductAndStall = async (req, res, next) => {
-  if (!req.body || !req.params.cartId) {
+  if (!req.params.cartId) {
     // check if params and body has been passed
     return next(
       new ErrorResponse(
-        "You Must Provide A Cart ID or Cart Contents to use this route",
+        "You Must Provide A Cart ID to use this route",
         400
       )
     );
