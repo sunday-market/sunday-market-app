@@ -216,10 +216,7 @@ exports.returnCartWithFullProductAndStall = async (req, res, next) => {
   if (!req.params.cartId) {
     // check if params and body has been passed
     return next(
-      new ErrorResponse(
-        "You Must Provide A Cart ID to use this route",
-        400
-      )
+      new ErrorResponse("You Must Provide A Cart ID to use this route", 400)
     );
   }
   // check cart exists and allocate to memory for aggregation

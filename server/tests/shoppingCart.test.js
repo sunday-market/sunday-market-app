@@ -173,3 +173,55 @@ test("Create a new shopping cart, add product, clear cart and delete cart", asyn
     });
   await request(server).delete(`/api/cart/${shoppingcart._id}`).expect(200);
 });
+
+test("Create a new shopping cart, add product and return full product and stall details and error test", async () => {
+  let shoppingcart;
+  await request(server)
+    .post("/api/cart/")
+    .expect(200)
+    .then((data) => {
+      shoppingcart = data.body.data;
+    });
+
+  await request(server)
+    .post(`/api/cart/additem/${shoppingcart._id}`)
+    .send(shoppingProduct)
+    .expect(200)
+    .then((data) => {
+      shoppingcart = data.body.data;
+      expect(shoppingcart.products_selected[0].product_id).toBe(
+        shoppingProduct._id
+      );
+      return expect(shoppingcart.products_selected.length).toBe(1);
+    });
+
+  // supply incorrect cart id
+  await request(server)
+    .post(`/api/cart/processpurchase/62392944e19f8bbe842ce3a6`)
+    .set("Authorization", authToken)
+    .expect(404);
+
+  // supply no auth token
+  await request(server)
+    .post(`/api/cart/processpurchase/${shoppingcart._id}`)
+    .expect(401);
+
+  await request(server)
+    .post(`/api/cart/processpurchase/${shoppingcart._id}`)
+    .set("Authorization", authToken)
+    .expect(200)
+    .then((data) => {
+      let cart = data.body.data[0];
+      expect(cart.products_selected.length).toBe(1);
+      expect(cart.products[0].product_name).toBe(shoppingProduct.product_name);
+      expect(cart.stalls[0].stallName).toBe("Christian Books");
+    });
+
+  await request(server)
+    .put(`/api/cart/clearcart/${shoppingcart._id}`)
+    .expect(200)
+    .then((data) => {
+      return expect(data.body.products_selected.length).toBe(0);
+    });
+  await request(server).delete(`/api/cart/${shoppingcart._id}`).expect(200);
+});
