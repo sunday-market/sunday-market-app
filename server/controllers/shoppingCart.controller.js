@@ -32,7 +32,7 @@ exports.createNewShoppingCart = async (req, res, next) => {
 };
 
 exports.addItemToCart = async (req, res, next) => {
-  if (!req.body) {
+  if (!req.body._id) {
     return next(new ErrorResponse("No product supplied", 400));
   }
 
@@ -90,7 +90,8 @@ exports.updateShoppingCart = async (req, res, next) => {
   } else {
     return next(
       new ErrorResponse(
-        "You haven't passed a cart id so unable to update shopping cart!"
+        "You haven't passed a cart id so unable to update shopping cart!",
+        400
       )
     );
   }
@@ -143,7 +144,8 @@ exports.deleteShoppingCart = async (req, res, next) => {
   } else {
     return next(
       new ErrorResponse(
-        "You haven't passed a cart id so unable to update shopping cart!"
+        "You haven't passed a cart id so unable to update shopping cart!",
+        400
       )
     );
   }
@@ -159,7 +161,7 @@ exports.deleteShoppingCart = async (req, res, next) => {
 };
 
 exports.removeItemInCart = async (req, res, next) => {
-  if (!req.body) {
+  if (!req.body._id) {
     return next(new ErrorResponse("No product supplied", 400));
   }
 
@@ -215,7 +217,8 @@ exports.returnCartWithFullProductAndStall = async (req, res, next) => {
     // check if params and body has been passed
     return next(
       new ErrorResponse(
-        "You Must Provide A Cart ID or Cart Contents to use this route"
+        "You Must Provide A Cart ID or Cart Contents to use this route",
+        400
       )
     );
   }
@@ -223,7 +226,7 @@ exports.returnCartWithFullProductAndStall = async (req, res, next) => {
   try {
     let cart = await ShoppingCart.findById(req.params.cartId);
     if (!cart) {
-      return next(new ErrorResponse("Cart Doesn't Exist? Try Again"));
+      return next(new ErrorResponse("Cart Doesn't Exist? Try Again", 404));
     }
 
     try {

@@ -38,7 +38,6 @@ test("Create new Message Thread with stall and Message then delete them", async 
       threadId = data.body._id;
     });
   testMessage = { ...testMessage, message_thread_id: threadId };
-  console.log(testMessage);
   let message_id;
   await request(server)
     .post("/api/messages/")
@@ -46,7 +45,6 @@ test("Create new Message Thread with stall and Message then delete them", async 
     .send(testMessage)
     .expect(200)
     .then((data) => {
-      console.log(data);
       message_id = data.body._id;
     });
 
