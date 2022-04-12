@@ -50,7 +50,7 @@ exports.addItemToCart = async (req, res, next) => {
   let exists = false;
   for (i = 0; i < cart?.products_selected?.length; i++) {
     let product = cart.products_selected[i];
-    if (product.product_id.toString() === req.body._id) {
+    if (product?.product_id?.toString() === req.body._id) {
       exists = true;
       product.quantity++;
       break;
@@ -120,7 +120,7 @@ exports.clearShoppingCart = async (req, res, next) => {
     if (products_selected.length !== 0) {
       // loop through each product and take quantity and id append new quantity to the product
       products_selected.forEach(async (product) => {
-        let productId = product.product_id.toString();
+        let productId = product?.product_id?.toString();
         let qty = product.quantity;
         const updateProduct = await Product.findById({ _id: productId });
         updateProduct.quantity_in_stock += qty;
@@ -182,7 +182,7 @@ exports.removeItemInCart = async (req, res, next) => {
   for (; i < cart.products_selected.length; i++) {
     let product = cart.products_selected[i];
 
-    if (product.product_id.toString() === req.body._id) {
+    if (product?.product_id?.toString() === req.body._id) {
       qty = product.quantity;
       break;
     }
@@ -286,7 +286,7 @@ async function clearOldCarts() {
     if (products_selected.length !== 0) {
       // loop through each product and take quantity and id append new quantity to the product
       products_selected.forEach(async (product) => {
-        let productId = product.product_id.toString();
+        let productId = product?.product_id?.toString();
         let qty = product.quantity;
         const updateProduct = await Product.findById({ _id: productId });
         updateProduct.quantity_in_stock += qty;
