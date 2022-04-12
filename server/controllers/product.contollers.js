@@ -408,7 +408,7 @@ exports.addProduct = async (req, res, next) => {
   try {
     await newProduct
       .save()
-      .then(() => res.json({ success: true, data: productData }))
+      .then(() => res.status(201).json({ success: true, data: newProduct }))
       .catch((err) => res.status(400).json("Error: " + err));
   } catch (error) {
     return next(error);
