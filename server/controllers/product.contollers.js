@@ -1,5 +1,6 @@
 const { Product } = require("../models/Product");
 const { SubCategory } = require("../models/SubCategory");
+const Category = require("../models/Category")
 
 const ErrorResponse = require("../utils/errorResponse");
 const fs = require("fs");
@@ -164,7 +165,7 @@ exports.getProductById = async (req, res, next) => {
       },
     ]);
 
-    if (!product) {
+    if (product.length === 0) {
       return next(
         new ErrorResponse("No product exists with that product id", 404)
       );
@@ -176,6 +177,13 @@ exports.getProductById = async (req, res, next) => {
 };
 
 exports.getProductsByCategory = async (req, res, next) => {
+
+  await Category.findById(req.params.categoryId).then(result => {
+    if (!result) {
+      return next(new ErrorResponse("Invalid category id", 404));
+    }
+  })
+
   await SubCategory.aggregate([
     {
       $lookup: {
@@ -351,8 +359,15 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
 // Get all products by main category
 exports.getAllProductsByMainCategory = async (req, res, next) => {
   if (!req.params.categoryId) {
-    return next(new ErrorResponse("You must provide a category id"));
+    return next(new ErrorResponse("You must provide a category id", 400));
   }
+
+  await Category.findById(req.params.categoryId).then(result => {
+    if (!result) {
+      return next(new ErrorResponse("Invalid category id", 404));
+    }
+  })
+
   try {
     const products = await Product.aggregate([
       {
