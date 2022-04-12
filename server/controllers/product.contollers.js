@@ -1,3 +1,4 @@
+// Product Controller
 const { Product } = require("../models/Product");
 const { SubCategory } = require("../models/SubCategory");
 const Category = require("../models/Category")
