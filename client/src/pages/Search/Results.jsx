@@ -126,11 +126,6 @@ const Results = () => {
                 label={category.category_name}
                 value={category._id}
               />
-              {/* <FormControlLabel
-                disabled
-                control={<Checkbox />}
-                label="Disabled"
-              /> */}
             </FormGroup>
           </Box>
         ))}
@@ -141,20 +136,6 @@ const Results = () => {
           <strong>{query.get("q")}</strong>
         </Typography>
 
-        {/* <Grid container>
-          {products.map((product) => (
-            <Grid
-              item
-              key={product._id}
-              xs={12}
-              sm={4}
-              md={3}
-              p={{ xs: 2, sm: 1, md: 2 }}
-            >
-              <ProductCard product={product} />
-            </Grid>
-          ))}
-        </Grid> */}
         <Grid container>
           {filterProducts.map((product) => (
             <Grid
