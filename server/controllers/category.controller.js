@@ -27,29 +27,36 @@ exports.getStallSubCategories = async (req, res, next) => {
     if (!result) {
       return next(new ErrorResponse("Stall not found", 404));
     }
-  });
 
-  await Stall.aggregate([
-    {
-      $match: {
-        _id: mongoose.Types.ObjectId(req.params.stallId),
+    Stall.aggregate([
+      {
+        $match: {
+          _id: mongoose.Types.ObjectId(req.params.stallId),
+        },
       },
-    },
-    {
-      $lookup: {
-        from: "subcategories",
-        localField: "category",
-        foreignField: "category_id",
-        as: "stall_subcategories",
+      {
+        $match: {
+          activated: true,
+        },
       },
-    },
-  ])
-    .then((result) => {
-      res.status(200).json(result);
-    })
-    .catch((error) => {
-      return next(error);
-    });
+      {
+        $lookup: {
+          from: "subcategories",
+          localField: "category",
+          foreignField: "category_id",
+          as: "stall_subcategories",
+        },
+      },
+    ])
+      .then((result) => {
+        res.status(200).json(result);
+      })
+      .catch((error) => {
+        return next(error);
+      });
+  }).catch(error => {
+    return next(error);
+  });
 };
 
 // Get All Sub Categories
@@ -82,6 +89,7 @@ exports.getSubCategoriesByCategoryId = async (req, res, next) => {
         category_id: mongoose.Types.ObjectId(req.params.categoryId),
       },
     },
+
   ])
     .then((response) => {
       res.status(200).json(response);
