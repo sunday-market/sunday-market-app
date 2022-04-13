@@ -278,17 +278,19 @@ async function clearOldCarts() {
     },
   ]);
   expiredCarts.forEach(async (cart) => {
-    const products_selected = cart.products_selected;
-    // check length for products
-    if (products_selected.length !== 0) {
-      // loop through each product and take quantity and id append new quantity to the product
-      products_selected.forEach(async (product) => {
-        let productId = product?.product_id?.toString();
-        let qty = product.quantity;
-        const updateProduct = await Product.findById({ _id: productId });
-        updateProduct.quantity_in_stock += qty;
-        updateProduct.save();
-      });
+    if (cart.products_selected) {
+      const products_selected = cart.products_selected;
+      // check length for products
+      if (products_selected.length !== 0) {
+        // loop through each product and take quantity and id append new quantity to the product
+        products_selected.forEach(async (product) => {
+          let productId = product?.product_id?.toString();
+          let qty = product.quantity;
+          const updateProduct = await Product.findById({ _id: productId });
+          updateProduct.quantity_in_stock += qty;
+          updateProduct.save();
+        });
+      }
     }
     // delete cart
     await ShoppingCart.deleteOne({ _id: cart._id });

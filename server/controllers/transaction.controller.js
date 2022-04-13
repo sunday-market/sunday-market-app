@@ -7,7 +7,7 @@ exports.getAllTransactions = async (req, res, next) => {
   try {
     const transactions = await Transaction.find({});
     if (transactions?.length === 0) {
-      return next(new ErrorResponse("No Transactions Exist"));
+      return next(new ErrorResponse("No Transactions Exist", 404));
     }
     res.status(200).json(transactions);
   } catch (error) {
@@ -17,19 +17,13 @@ exports.getAllTransactions = async (req, res, next) => {
 
 // Get transaction by transaction ID
 exports.getTransactionById = async (req, res, next) => {
-  if (!req.params.transactionId) {
-    return next(
-      new ErrorResponse(
-        "No Transaction ID has been provided! You must supply a transaction ID for this route"
-      )
-    );
-  }
   try {
     const transaction = await Transaction.findById(req.params.transactionId);
     if (!transaction) {
       return next(
         new ErrorResponse(
-          `No Transaction Exists with the ID: ${req.params.transactionId}`
+          `No Transaction Exists with the ID: ${req.params.transactionId}`,
+          404
         )
       );
     }
@@ -44,7 +38,8 @@ exports.getTransactionsByUserId = async (req, res, next) => {
   if (!req.params.userId) {
     return next(
       new ErrorResponse(
-        "No User ID has been provided! You must supply a User ID for this route"
+        "No User ID has been provided! You must supply a User ID for this route",
+        400
       )
     );
   }
@@ -52,8 +47,10 @@ exports.getTransactionsByUserId = async (req, res, next) => {
     const transactions = await Transaction.find({
       customer_id: req.params.userId,
     });
-    if (!transactions) {
-      return next(new ErrorResponse(`No Transactions Exists for this user `));
+    if (transactions.length === 0) {
+      return next(
+        new ErrorResponse(`No Transactions Exists for this user `, 404)
+      );
     }
     res.status(200).json(transactions);
   } catch (error) {
@@ -83,7 +80,9 @@ exports.updateTransaction = async (req, res, next) => {
   if (req.params.transactionId) {
     transactionId = req.params.transactionId;
   } else {
-    return next(new ErrorResponse("You haven't provided a transaction ID"));
+    return next(
+      new ErrorResponse("You haven't provided a transaction ID", 400)
+    );
   }
 
   try {
@@ -94,6 +93,19 @@ exports.updateTransaction = async (req, res, next) => {
       data: updatedTransaction,
       message: "Transaction Successfully Updated",
     });
+  } catch (error) {
+    return next(error);
+  }
+};
+
+// DELETE
+// delete control for testing purposes
+exports.deleteTransaction = async (req, res, next) => {
+  try {
+    await Transaction.deleteOne({ _id: req.params.transactionId });
+    res
+      .status(200)
+      .json({ success: true, message: "Successfully Delete Transaction" });
   } catch (error) {
     return next(error);
   }
