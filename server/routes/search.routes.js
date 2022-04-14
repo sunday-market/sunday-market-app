@@ -20,19 +20,18 @@ router.route("/").get(async (req, res, next) => {
   ];
 
   const search = (data) => {
-    return data.filter((item) => 
+    return data.filter((item) =>
       keys.some((key) => item[key].toLowerCase().includes(q))
     );
   };
 
-
-  await Product.aggregate([ 
+  await Product.aggregate([
     {
       $lookup: {
-        from: "subcategories",
-        localField: "product_subcategory",
+        from: "stalls",
+        localField: "product_stall",
         foreignField: "_id",
-        as: "subcategories",
+        as: "stall",
       },
     },
     {
@@ -40,7 +39,7 @@ router.route("/").get(async (req, res, next) => {
         newRoot: {
           $mergeObjects: [
             {
-              $arrayElemAt: ["$subcategories", 0],
+              $arrayElemAt: ["$stall", 0],
             },
             "$$ROOT",
           ],
@@ -49,8 +48,33 @@ router.route("/").get(async (req, res, next) => {
     },
     {
       $lookup: {
+        from: "subcategories",
+        localField: "product_subcategory",
+        foreignField: "_id",
+        as: "sub_category",
+      },
+    },
+    {
+      $replaceRoot: {
+        newRoot: {
+          $mergeObjects: [
+            {
+              $arrayElemAt: ["$sub_category", 0],
+            },
+            "$$ROOT",
+          ],
+        },
+      },
+    },
+    {
+      $match: {
+        activated: true,
+      },
+    },
+    {
+      $lookup: {
         from: "categories",
-        localField: "category_id",
+        localField: "category",
         foreignField: "_id",
         as: "categories",
       },
@@ -68,9 +92,7 @@ router.route("/").get(async (req, res, next) => {
       },
     },
   ]).then((results) => {
-
     res.json(search(results));
-  
   });
 });
 

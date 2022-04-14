@@ -1,5 +1,7 @@
+// Product Controller
 const { Product } = require("../models/Product");
 const { SubCategory } = require("../models/SubCategory");
+const Category = require("../models/Category")
 
 const ErrorResponse = require("../utils/errorResponse");
 const fs = require("fs");
@@ -164,7 +166,7 @@ exports.getProductById = async (req, res, next) => {
       },
     ]);
 
-    if (!product) {
+    if (product.length === 0) {
       return next(
         new ErrorResponse("No product exists with that product id", 404)
       );
@@ -176,6 +178,13 @@ exports.getProductById = async (req, res, next) => {
 };
 
 exports.getProductsByCategory = async (req, res, next) => {
+
+  await Category.findById(req.params.categoryId).then(result => {
+    if (!result) {
+      return next(new ErrorResponse("Invalid category id", 404));
+    }
+  })
+
   await SubCategory.aggregate([
     {
       $lookup: {
@@ -263,10 +272,10 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
   await Product.aggregate([
     {
       $lookup: {
-        from: "subcategories",
-        localField: "product_subcategory",
+        from: "stalls",
+        localField: "product_stall",
         foreignField: "_id",
-        as: "scategory",
+        as: "stall",
       },
     },
     {
@@ -274,7 +283,7 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
         newRoot: {
           $mergeObjects: [
             {
-              $arrayElemAt: ["$scategory", 0],
+              $arrayElemAt: ["$stall", 0],
             },
             "$$ROOT",
           ],
@@ -283,10 +292,10 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
     },
     {
       $lookup: {
-        from: "categories",
-        localField: "category_id",
+        from: "subcategories",
+        localField: "product_subcategory",
         foreignField: "_id",
-        as: "main_category",
+        as: "sub_category",
       },
     },
     {
@@ -294,7 +303,7 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
         newRoot: {
           $mergeObjects: [
             {
-              $arrayElemAt: ["$main_category", 0],
+              $arrayElemAt: ["$sub_category", 0],
             },
             "$$ROOT",
           ],
@@ -302,11 +311,43 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
       },
     },
     {
+      $match: {
+        activated: true,
+      },
+    },
+    {
+      $project: {
+        product_name: "$product_name",
+        product_description: "$product_description",
+        product_user: "$product_user",
+        product_subcategory: "$product_subcategory",
+        subcategory: "$subcategory",
+        product_price: "$product_price",
+        quantity_in_stock: "$quantity_in_stock",
+        image: "$image",
+        product_stall: {
+          _id: "$product_stall",
+          user: "$user",
+          stallName: "$stallName",
+          category: "$category",
+          activated: "$activated",
+          description: "$description",
+          image_url: "$image_url",
+          email: "$email",
+          city_location: "$city_location",
+        },
+        createdAt: "$createdAt",
+        updatedAt: "$updatedAt",
+      },
+    },
+    {
       $sort: {
         createdAt: -1,
       },
     },
-    { $limit: 8 },
+    {
+      $limit: 8,
+    },
   ])
     .then((result) => {
       res.status(200).json(result);
@@ -319,8 +360,15 @@ exports.getRecentlyAddedProducts = async (req, res, next) => {
 // Get all products by main category
 exports.getAllProductsByMainCategory = async (req, res, next) => {
   if (!req.params.categoryId) {
-    return next(new ErrorResponse("You must provide a category id"));
+    return next(new ErrorResponse("You must provide a category id", 400));
   }
+
+  await Category.findById(req.params.categoryId).then(result => {
+    if (!result) {
+      return next(new ErrorResponse("Invalid category id", 404));
+    }
+  })
+
   try {
     const products = await Product.aggregate([
       {
@@ -376,7 +424,7 @@ exports.addProduct = async (req, res, next) => {
   try {
     await newProduct
       .save()
-      .then(() => res.json({ success: true, data: productData }))
+      .then(() => res.status(201).json({ success: true, data: newProduct }))
       .catch((err) => res.status(400).json("Error: " + err));
   } catch (error) {
     return next(error);

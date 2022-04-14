@@ -1,4 +1,4 @@
-import { useRef, useEffect, useState } from "react";
+import { useRef, useEffect, useState, useContext } from "react";
 import { Grid, Box, Typography, Alert, Button } from "@mui/material";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -6,14 +6,15 @@ import { useParams } from "react-router-dom";
 import BuildIcon from "@mui/icons-material/Build";
 import jwt from "jwt-decode";
 import SendMessageButton from "../../components/SendMessageButton";
+import DataContext from "../../context/DataContext";
+import { scrollToTop } from "../../utils/ux";
 
 export default function ViewStallPage() {
-  const [currentUser, setCurrentUser] = useState(null);
   const [stall, setStall] = useState([]);
   const [user, setUser] = useState([]);
-  const [error, setError] = useState("");
   const [date, setDate] = useState("");
   const [isOwnStall, setIsOwnStall] = useState(false);
+  const { setError, setLoading, loggedInUser } = useContext(DataContext);
 
   const PF = process.env.REACT_APP_PUBLIC_FOLDER + "stalls/";
 
@@ -27,9 +28,6 @@ export default function ViewStallPage() {
     navigate(`/account/stalls/editstall/${stallid}`);
   };
 
-  // error ref for scrolling
-  const errorRef = useRef(null);
-
   // image ref for resizing
   const imgRef = useRef(null);
 
@@ -37,7 +35,7 @@ export default function ViewStallPage() {
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
-
+    setLoading(true);
     if (stallid) {
       const getStall = async () => {
         try {
@@ -50,60 +48,27 @@ export default function ViewStallPage() {
           };
           const stallData = await axios.get(`/api/stalls/${stallid}`, config);
           setStall(stallData.data);
-        } catch (err) {
-          if (axios.isCancel(err)) {
-            return console.log("Successfully Aborted");
+          setLoading(false);
+        } catch (error) {
+          setLoading(false);
+          if (axios.isCancel(error)) {
+            return;
           }
-          setError("No Stall Exists with that ID");
-          setTimeout(() => {
-            setError("");
-          }, 15000);
+          setError([error]);
         }
       };
       getStall();
     }
+    setLoading(false);
     return () => controller.abort();
-  }, [stallid]);
-
-  // get current user
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-    const getCurrentUser = async () => {
-      if (localStorage.getItem("authToken")) {
-        const config = {
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${localStorage.getItem("authToken")}`,
-          },
-          signal,
-        };
-        try {
-          const decodedJWT = jwt(localStorage.getItem("authToken"));
-          const user = await axios.get(`/api/user/${decodedJWT.id}`, config);
-          setCurrentUser(user.data.data);
-        } catch (error) {
-          if (axios.isCancel(error)) {
-            return console.log("Successfully Aborted");
-          }
-          if (error.response.status === 401) {
-            localStorage.removeItem("authToken");
-            return navigate("/login");
-          }
-        }
-      } else {
-        setCurrentUser(null);
-      }
-    };
-    getCurrentUser();
-    return () => controller.abort();
-  }, [navigate]);
+  }, [setError, setLoading, stallid]);
 
   // Get stall user from stall info
   useEffect(() => {
     const controller = new AbortController();
     const signal = controller.signal;
     let isApiSubscribed = true;
+    setLoading(true);
     if (stall.length !== 0) {
       const months = [
         "01",
@@ -140,37 +105,36 @@ export default function ViewStallPage() {
             if (isApiSubscribed) {
               setUser(userData.data.data);
             }
-          } catch (err) {
-            if (axios.isCancel(err)) {
-              return console.log("Successfully Aborted");
+            setLoading(false);
+          } catch (error) {
+            setLoading(false);
+            if (axios.isCancel(error)) {
+              return;
             }
             setError(
               "User of this Stall can't be found can be found, please contact management"
             );
-            errorRef.current.scrollIntoView({
-              behavior: "smooth",
-              block: "start",
-            });
           }
         }
       };
 
       getUser();
     }
+    setLoading(false);
     return () => {
       controller.abort();
       isApiSubscribed = false;
     };
-  }, [stall]);
+  }, [setError, setLoading, stall]);
 
   useEffect(() => {
     const checkIfOwner = () => {
-      if (user && currentUser) {
-        setIsOwnStall(currentUser.id === user.id);
+      if (user && loggedInUser) {
+        setIsOwnStall(loggedInUser._id === user.id);
       }
     };
     checkIfOwner();
-  }, [user, currentUser]);
+  }, [loggedInUser, user]);
 
   const stallLengthBool = stall.length > 0;
   return (
@@ -183,11 +147,6 @@ export default function ViewStallPage() {
         }}
       >
         <Grid container spacing={0} justifyContent="center">
-          {error && (
-            <Grid item ref={errorRef} lg={12} md={12} sm={12} xs={12}>
-              <Alert severity="error">{error}</Alert>
-            </Grid>
-          )}
           <Grid
             justifyContent="center"
             alignItems={"center"}

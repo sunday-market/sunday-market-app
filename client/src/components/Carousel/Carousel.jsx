@@ -21,7 +21,7 @@ const responsive = {
 };
 
 export default function Carousel({ products }) {
-  const { setLoading, error } = useContext(DataContext);
+  const { setLoading } = useContext(DataContext);
   const [items, setItems] = useState([]);
 
   useEffect(() => {

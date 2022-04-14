@@ -1,6 +1,6 @@
 import { useNavigate } from "react-router";
 import { Typography, Grid, Card, CardMedia, Box, Divider } from "@mui/material";
-
+import { scrollToTop } from "../../utils/ux";
 import { priceToCurrency } from "../../utils/currency";
 import AddToCartButton from "../../components/AddToCartButton";
 
@@ -8,6 +8,10 @@ const ProductCard = ({ product }) => {
   const PUBLIC_FOLDER = process.env.REACT_APP_PUBLIC_FOLDER;
   const navigate = useNavigate();
 
+  const handleNavigate = () => {
+    scrollToTop();
+    return navigate(`/products/${product._id}`);
+  };
   return (
     <>
       <Card
@@ -21,7 +25,7 @@ const ProductCard = ({ product }) => {
       >
         <Box position="relative">
           <CardMedia
-            onClick={() => navigate(`/products/${product._id}`)}
+            onClick={handleNavigate}
             component="img"
             height="175"
             image={
@@ -63,7 +67,7 @@ const ProductCard = ({ product }) => {
           color="grey.500"
           variant="body2"
           gutterBottom
-          onClick={() => navigate(`/products/${product._id}`)}
+          onClick={handleNavigate}
           pb={3}
           px={1}
           sx={{

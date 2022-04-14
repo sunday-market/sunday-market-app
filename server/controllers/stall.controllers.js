@@ -2,6 +2,7 @@ const Stall = require("../models/Stall");
 const ErrorResponse = require("../utils/errorResponse");
 const fs = require("fs");
 const path = require("path");
+const { User } = require("../models/User");
 
 // GETS
 // Get All Stalls
@@ -19,10 +20,18 @@ exports.getAllStalls = async (req, res, next) => {
 
 // Get all Stalls ascosiated to user
 exports.getMyStalls = async (req, res, next) => {
+
+  await User.findById(req.params.userid).then(result => {
+    if(!result){
+      return next(new ErrorResponse("User does not exist", 404));
+ 
+    }
+  })
+
   try {
     const stall = await Stall.find({ user: req.params.userid });
     if (stall.length === 0) {
-      return next(new ErrorResponse("No stalls exist for that user."));
+      return next(new ErrorResponse("No stalls exist for that user.", 404));
     }
     res.status(200).json(stall);
   } catch (error) {
@@ -35,7 +44,7 @@ exports.getStallByID = async (req, res, next) => {
   try {
     const stall = await Stall.find({ _id: req.params.stallid });
     if (stall.length === 0) {
-      return next(new ErrorResponse("No stall exists with that stall id."));
+      return next(new ErrorResponse("No stall exists with that stall id.", 404));
     }
     res.status(200).json(stall);
   } catch (error) {
@@ -67,7 +76,7 @@ exports.addNewStall = async (req, res, next) => {
     };
 
     const newStall = await Stall.create(stallData);
-    res.status(200).json({
+    res.status(201).json({
       success: true,
       message: "Stall successfully added.",
       data: newStall,

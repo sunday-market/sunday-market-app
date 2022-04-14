@@ -32,17 +32,16 @@ export default function EditMyStallPage() {
   const [stallName, setStallName] = useState("");
   const [image, setImage] = useState("");
   const [originalImage, setOriginalImage] = useState();
-  const [categoryList, setCategoryList] = useState([]);
   const [activateStall, setActivateStall] = useState(false);
   const [category, setCategory] = useState("");
   const [description, setDescription] = useState("");
   const [contactEmail, setContactEmail] = useState("");
   const [location, setLocation] = useState("");
-  const [user, setCurrentUser] = useState(null);
   const [currentStalls, setCurrentStalls] = useState(null);
   const [openModal, setOpenModal] = useState(false);
 
-  const { setError, setLoading } = useContext(DataContext);
+  const { setError, setLoading, loggedInUser, categories } =
+    useContext(DataContext);
 
   const handleOpenModal = () => setOpenModal(true);
   const handleCloseModal = () => setOpenModal(false);
@@ -71,33 +70,17 @@ export default function EditMyStallPage() {
     const signal = controller.signal;
 
     setLoading(true);
-    const getCategorys = async () => {
-      try {
-        setCategoryList((await axios.get("/api/category/", signal)).data);
-      } catch (error) {
-        setLoading(false);
-        if (axios.isCancel(error)) return;
-        setError([error]);
-        scrollToTop();
-      }
-    };
-    getCategorys();
-    setLoading(false);
-    return () => {
-      controller.abort();
-    };
-  }, [setError, setLoading]);
-
-  useEffect(() => {
-    const controller = new AbortController();
-    const signal = controller.signal;
-
-    setLoading(true);
 
     const getStall = async () => {
       try {
         const res = (await axios.get(`/api/stalls/${stallId}`, signal)).data[0];
-
+        // Check Stall user against user if not the same then navigate back to home
+        if (res.user !== loggedInUser._id) {
+          setError("You are not authorized to edit this stall.");
+          scrollToTop();
+          setLoading(false);
+          return navigate("/");
+        }
         setStallName(res.stallName);
         setImage(res.image_url);
         setOriginalImage(res.image_url);
@@ -113,12 +96,14 @@ export default function EditMyStallPage() {
         scrollToTop();
       }
     };
-    getStall();
+    if (loggedInUser) {
+      getStall();
+    }
     setLoading(false);
     return () => {
       controller.abort();
     };
-  }, [setError, setLoading, stallId]);
+  }, [loggedInUser, navigate, setError, setLoading, stallId]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -144,22 +129,6 @@ export default function EditMyStallPage() {
   }, [setError, setLoading]);
 
   useEffect(() => {
-    if (localStorage.getItem("authToken")) {
-      const getUser = async () => {
-        try {
-          setCurrentUser(jwtDecode(localStorage.getItem("authToken")));
-        } catch (error) {
-          setLoading(false);
-          scrollToTop();
-          return setError([error]);
-        }
-      };
-      getUser();
-      setLoading(false);
-    }
-  }, [navigate, setError, setLoading]);
-
-  useEffect(() => {
     if (!localStorage.getItem("authToken")) {
       navigate("/");
     }
@@ -183,8 +152,8 @@ export default function EditMyStallPage() {
     let userData;
 
     // Check user
-    if (user) {
-      stallData.append("user", user.id);
+    if (loggedInUser) {
+      stallData.append("user", loggedInUser._id);
     } else {
       sendPost = false;
       scrollToTop();
@@ -383,7 +352,7 @@ export default function EditMyStallPage() {
           <Grid item>
             <InputLabel required>Category</InputLabel>
             <Select
-              disabled={categoryList.length === 0}
+              disabled={categories?.length === 0}
               variant="outlined"
               size="small"
               fullWidth
@@ -392,7 +361,7 @@ export default function EditMyStallPage() {
               onChange={(e) => setCategory(e.target.value)}
               sx={{ background: "white" }}
             >
-              {categoryList.map((c) => (
+              {categories?.map((c) => (
                 <MenuItem key={c._id} value={c._id}>
                   {c.category_name}
                 </MenuItem>

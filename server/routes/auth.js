@@ -24,7 +24,6 @@ router.route("/changepassword").put(changePassword);
 router.route("/verify/:verifyToken").put(verifyUser);
 router.route("/resetverificationtoken").post(resetToken);
 
-//TODO: Confirm this route, may need deleting as not being used.
 router.route("/user/:userId").put(updateUserCredentials);
 
 module.exports = router;

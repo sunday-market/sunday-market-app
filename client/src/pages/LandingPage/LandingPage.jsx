@@ -73,7 +73,7 @@ const LandingPage = () => {
         const getAllProducts = async () => {
           try {
             const products = await (
-              await axios.get("/api/product/", config)
+              await axios.get("/api/product/active", config)
             ).data;
             const numberOfRandomProducts = 5;
             for (let i = 0; i < numberOfRandomProducts; i++) {
