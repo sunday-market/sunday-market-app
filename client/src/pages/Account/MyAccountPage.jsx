@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { Outlet, useNavigate } from "react-router";
 
 import { Grid, Button } from "@mui/material";
@@ -12,6 +12,7 @@ import {
 } from "@mui/icons-material";
 
 import PageContainer from "../../components/PageContainer";
+import DataContext from "../../context/DataContext";
 
 const AccountPage = () => {
   const navigate = useNavigate();
@@ -21,7 +22,7 @@ const AccountPage = () => {
   const [myProductsButton, setMyProductsButton] = useState("outlined");
   const [myOrdersButton, setMyOrdersButton] = useState("outlined");
   const [ordersReceivedButton, setOrdersReceivedButton] = useState("outlined");
-  const [currentPage, setCurrentPage] = useState("");
+  const { currentPage, setCurrentPage } = useContext(DataContext);
 
   useEffect(() => {
     setDetailsButton(
@@ -43,7 +44,7 @@ const AccountPage = () => {
 
   useEffect(() => {
     setCurrentPage(window.location.href.split("http://localhost:3000")[1]);
-  }, []);
+  }, [setCurrentPage]);
 
   return (
     <>

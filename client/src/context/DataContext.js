@@ -23,6 +23,7 @@ export const DataProvider = ({ children }) => {
   const [futureDate, setFutureDate] = useState(
     new Date().getTime() + 30 * 60000
   );
+  const [currentPage, setCurrentPage] = useState("");
 
   // // Clear Error Messages
   useEffect(() => {
@@ -428,6 +429,8 @@ export const DataProvider = ({ children }) => {
         createNewCart,
         handleRefresh,
         handleCartClear,
+        currentPage,
+        setCurrentPage,
       }}
     >
       {children}

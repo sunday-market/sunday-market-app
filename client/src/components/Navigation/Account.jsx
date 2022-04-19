@@ -17,7 +17,8 @@ import { Grid, Typography, Menu, MenuItem, Divider } from "@mui/material";
 import DataContext from "../../context/DataContext";
 
 const Account = () => {
-  const { loggedInUser, setLoggedInUser, setSuccess } = useContext(DataContext);
+  const { loggedInUser, setLoggedInUser, setSuccess, setCurrentPage } =
+    useContext(DataContext);
 
   const navigate = useNavigate();
 
@@ -102,7 +103,10 @@ const Account = () => {
           {/* My Account  */}
           <MenuItem
             sx={{ color: "white" }}
-            onClick={() => navigate("/account")}
+            onClick={() => {
+              setCurrentPage("/account/myaccount");
+              navigate("/account/myaccount");
+            }}
           >
             <PersonIcon sx={{ pr: 1.5, scale: 2, margin: 0 }} />
             My Account
@@ -122,7 +126,10 @@ const Account = () => {
           {/* My Products  */}
           <MenuItem
             sx={{ color: "white" }}
-            onClick={() => navigate("/account/products/myproducts")}
+            onClick={() => {
+              setCurrentPage("/account/products/myproducts");
+              navigate("/account/products/myproducts");
+            }}
           >
             <Inventory2TwoToneIcon sx={{ pr: 1.5 }} />
             My Products
@@ -131,7 +138,10 @@ const Account = () => {
           {/* My Stalls  */}
           <MenuItem
             sx={{ color: "white" }}
-            onClick={() => navigate("/account/stalls/mystalls")}
+            onClick={() => {
+              setCurrentPage("/account/stalls/mystalls");
+              navigate("/account/stalls/mystalls");
+            }}
           >
             <StorefrontTwoToneIcon sx={{ pr: 1.5 }} />
             My Stalls
@@ -140,7 +150,10 @@ const Account = () => {
           {/* My Orders  */}
           <MenuItem
             sx={{ color: "white" }}
-            onClick={() => navigate("/account/orders/myorders")}
+            onClick={() => {
+              setCurrentPage("/account/orders/myorders");
+              navigate("/account/orders/myorders");
+            }}
           >
             <ReceiptLongTwoToneIcon sx={{ pr: 1.5 }} />
             My Orders
@@ -149,7 +162,10 @@ const Account = () => {
           {/* Orders Received  */}
           <MenuItem
             sx={{ color: "white" }}
-            onClick={() => navigate("/account/orders/received")}
+            onClick={() => {
+              setCurrentPage("/account/orders/received");
+              navigate("/account/orders/received");
+            }}
           >
             <ReceiptIcon sx={{ pr: 1.5 }} />
             Orders Recieved
